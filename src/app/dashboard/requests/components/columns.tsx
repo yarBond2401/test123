@@ -1,0 +1,82 @@
+import { ColumnDef } from "@tanstack/react-table";
+import { ServiceRequest, ServiceRequestWithUsers } from "../schema";
+import { UsersActions } from "@/components/UsersActions";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RequestActions } from "./request-actions";
+
+export const columns: ColumnDef<ServiceRequestWithUsers>[] = [
+  {
+    id: "createdBy",
+    header: () => <>Created By</>,
+    cell: ({ row }) => (
+      <>
+        <div className="flex items-center gap-1">
+          {
+            row.original?.userDetails?.photoURL ?
+              <>
+                <Image
+                  src={row.original.userDetails.photoURL}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  alt={`${row.original.userDetails.displayName} profile picture`}
+                />
+                <p>
+                  {row.original.userDetails.displayName}
+                </p>
+              </> :
+              <>
+                <Skeleton className="w-8 h-8 rounded-full" />
+                <Skeleton className="w-20 h-4" />
+              </>
+          }
+        </div>
+      </>
+    ),
+  },
+  {
+    id: "createdAt",
+    header: () => <>Created At</>,
+    cell: ({ row }) => (
+      <>
+        <div className="flex items-center gap-1">
+          <p>
+            {format(row.original.createdAt.toDate(), "dd/MM/yyyy")}
+          </p>
+        </div>
+      </>
+    ),
+  },
+  {
+    id: "status",
+    header: () => <>Status</>,
+    cell: ({ row }) => (
+      <div className="flex gap-2 items-center">
+        <Badge>
+          {row.original.status}
+        </Badge>
+      </div>
+    ),
+  },
+  {
+    id: "services_number",
+    header: () => <>Number of services</>,
+    cell: ({ row }) => (
+      <p>
+        {row.original.services.length}
+      </p>
+    ),
+  },
+  {
+    id: "actions",
+    header: () => <>Actions</>,
+    cell: ({ row }) => (
+      <>
+        <RequestActions row={row} />
+      </>
+    ),
+  },
+];
