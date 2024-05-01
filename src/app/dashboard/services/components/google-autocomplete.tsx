@@ -14,6 +14,7 @@ const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({ placeholder, onPl
 
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: 'AIzaSyAul_Yd7Vqd35uBuWMrUz-f1cF52b2WSJ8',
+        // @ts-ignore
         libraries,
     });
 
