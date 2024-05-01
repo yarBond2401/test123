@@ -97,24 +97,49 @@ export const AvailabilityPicker: React.FC<AvailabilityPickerProps> = ({
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
-                        <FormField
-                          control={form.control}
-                          name={`generic_availability.${day}.closed`}
-                          render={({ field: subfield }) => (
-                            <FormItem className="flex flex-col gap-2 items-center">
-                              <FormLabel>Closed</FormLabel>
-                              <FormControl>
-                                <Checkbox
-                                  checked={subfield.value}
-                                  onCheckedChange={subfield.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        {!form.watch(
+                          <div style={{display: "flex", justifyContent: "space-between", width: '100px', margin: '0 auto'}}>
+                              <FormField
+                                  control={form.control}
+                                  name={`generic_availability.${day}.closed`}
+                                  render={({ field: subfield }) => (
+                                      <FormItem className="flex flex-col gap-2 items-center">
+                                          <FormLabel>Closed</FormLabel>
+                                          <FormControl>
+                                              <Checkbox
+                                                  disabled={form.watch(`generic_availability.${day}.is24hours`) as const}
+                                                  checked={subfield.value}
+                                                  onCheckedChange={subfield.onChange}
+                                              />
+                                          </FormControl>
+                                      </FormItem>
+                                  )}
+                              />
+                              <FormField
+                                  control={form.control}
+                                  name={`generic_availability.${day}.is24hours`}
+                                  render={({ field: subfield }) => (
+                                      <FormItem className="flex flex-col gap-2 items-center">
+                                          <FormLabel>24h</FormLabel>
+                                          <FormControl>
+                                              <Checkbox
+                                                  disabled={form.watch(`generic_availability.${day}.closed`) as const}
+                                                  checked={subfield.value}
+                                                  onCheckedChange={(isChecked) => {
+                                                      subfield.onChange(isChecked);
+                                                      if (isChecked) {
+                                                          form.setValue(`generic_availability.${day}.open`,  new Date(new Date().setHours(0, 0, 0, 0)));
+                                                          form.setValue(`generic_availability.${day}.close`, new Date(new Date().setHours(23, 59, 59, 59)));
+                                                      }
+                                                  }}
+                                              />
+                                          </FormControl>
+                                      </FormItem>
+                                  )}
+                              />
+                          </div>
+                        {(!form.watch(
                           `generic_availability.${day}.closed` as const
-                        ) && (
+                        ) && !form.watch(`generic_availability.${day}.is24hours` as const)) && (
                             <>
                               <FormField
                                 control={form.control}
