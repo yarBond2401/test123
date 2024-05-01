@@ -4,7 +4,12 @@ import {CommandInput} from "@/components/ui/command";
 
 const libraries = ["places"];
 
-const AutoCompleteInput = ({ placeholder, onPlaceSelected }) => {
+interface AutoCompleteInputProps {
+    placeholder: string;
+    onPlaceSelected: any;
+}
+
+const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({ placeholder, onPlaceSelected }) => {
     const ref = useRef(null);
 
     const { isLoaded } = useLoadScript({
