@@ -42,7 +42,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
-import { parse } from "date-fns";
+import {parse} from "date-fns";
 import { useRouter } from "next/navigation";
 import { AvailabilityPicker } from "./components/availability-picker";
 import { RegionPicker } from "./components/region-picker";
@@ -63,11 +63,13 @@ const DynamicGeoPicker = dynamic(() => import("./components/geo-picker").then(mo
 const generateDayAvailability = (
   open: number,
   close: number,
-  closed: boolean = false
+  closed: boolean = false,
+  is24hours: boolean = false
 ) => ({
   open: parse(open.toString(), "H", new Date()),
   close: parse(close.toString(), "H", new Date()),
   closed,
+  is24hours
 });
 
 const Services = () => {
@@ -82,6 +84,24 @@ const Services = () => {
     ["services"]
   );
 
+  const checkAndSet24Hours = (availability) => {
+    Object.keys(availability).forEach(day => {
+      if (availability[day].open && availability[day].close) {
+        const openTime = new Date(availability[day].open);
+        const closeTime = new Date(availability[day].close);
+
+        const opensAtMidnight = openTime.getHours() === 0 && openTime.getMinutes() === 0 && openTime.getSeconds() === 0;
+        const closesAtEndOfDay = closeTime.getHours() === 23 && closeTime.getMinutes() === 59 && closeTime.getSeconds() === 0;
+        availability[day].is24hours = opensAtMidnight && closesAtEndOfDay;
+      } else {
+        availability[day].is24hours = false;
+      }
+    });
+
+    return availability;
+  };
+
+
   // set fields with the data retrieved from the database
   useEffect(() => {
     if (!retrievedFromDB) return;
@@ -91,7 +111,8 @@ const Services = () => {
 
     form.setValue("description", r.description);
     if (Object.keys(r.generic_availability).length > 0) {
-      form.setValue("generic_availability", r.generic_availability);
+      const updatedAvailability = checkAndSet24Hours(r.generic_availability);
+      form.setValue("generic_availability", updatedAvailability);
     }
     form.setValue("serviceSelect", r.serviceSelect);
     form.setValue("serviceDetails", r.serviceDetails);
