@@ -25,6 +25,7 @@ const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({ placeholder, onPl
     const handleChange = useCallback(() => {
         console.log('place', ref.current);
         if (ref.current && onPlaceSelected) {
+            // @ts-ignore
             const place = ref.current.getPlace();
             onPlaceSelected(place);
         }
