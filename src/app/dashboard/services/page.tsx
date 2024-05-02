@@ -84,7 +84,7 @@ const Services = () => {
     ["services"]
   );
 
-  const checkAndSet24Hours = (availability) => {
+  const checkAndSet24Hours = (availability: any) => {
     Object.keys(availability).forEach(day => {
       if (availability[day].open && availability[day].close) {
         const openTime = new Date(availability[day].open);
