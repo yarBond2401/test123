@@ -45,7 +45,7 @@ type Unpacked<T> = T extends (infer U)[] ? U : T;
 // TODO: Isolate this into a separate file and use
 const headers = {
   "Content-Type": "application/json",
-  "X-Goog-Api-Key": process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string,
+  "X-Goog-Api-Key": 'AIzaSyD524tP59AM7saqTbA33HvU4IU98bdxy90',
 };
 
 const URL_MAPS = "https://places.googleapis.com/v1/places:autocomplete";
@@ -195,12 +195,12 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
                   style={{ width: bounds.width }}
                 >
                   <Command shouldFilter={false}>
-                    <AutoCompleteInput placeholder="Search for a city" onPlaceSelected={setQuery}/>
-                    {/*<CommandInput
+                    {/*<AutoCompleteInput placeholder="Search for a city" onPlaceSelected={setQuery}/>*/}
+                    <CommandInput
                       placeholder="Search for a city"
                       value={query}
                       onValueChange={setQuery}
-                    />*/}
+                    />
                     <CommandEmpty>No locations found</CommandEmpty>
                     <CommandGroup>
                       {autocompleted.map((option) => (
