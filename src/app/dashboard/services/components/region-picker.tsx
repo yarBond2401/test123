@@ -34,7 +34,6 @@ import { object } from "zod";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader } from "@/components/ui/card";
 import { OfferedService } from "@/app/constants";
-import AutoCompleteInput from "@/app/dashboard/services/components/google-autocomplete";
 
 interface RegionPickerProps {
   form: UseFormReturn<serviceOffer>;
@@ -195,7 +194,6 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
                   style={{ width: bounds.width }}
                 >
                   <Command shouldFilter={false}>
-                    {/*<AutoCompleteInput placeholder="Search for a city" onPlaceSelected={setQuery}/>*/}
                     <CommandInput
                       placeholder="Search for a city"
                       value={query}
