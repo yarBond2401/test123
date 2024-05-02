@@ -18,7 +18,7 @@ const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({ placeholder, onPl
         libraries,
     });
 
-    const handleLoad = useCallback((autocomplete) => {
+    const handleLoad = useCallback((autocomplete: any) => {
         console.log("Autocomplete is loaded");
     }, []);
 
