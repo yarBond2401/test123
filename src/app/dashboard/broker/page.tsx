@@ -198,7 +198,7 @@ const Broker = () => {
                             ID
                           </p>
                         </div>
-                        <div className="flex flex-col sitems-center pt-4 gap-2">
+                        <div className="flex flex-col items-center pt-4 gap-2">
                           <div className="grid flex-1 gap-2">
                             <Label htmlFor="id" className="sr-only">
                               Agent ID
