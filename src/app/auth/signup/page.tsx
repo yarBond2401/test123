@@ -163,7 +163,7 @@ const Signup = () => {
                                 {"I'm an agent"}
                               </div>
                               <div className="w-full text-balance weight fornt-normal">
-                                Create or associate to a brokerage firm
+                                Join as a realtor or a broker
                               </div>
                             </div>
                             <FaBuilding className="w-10 h-10" />
@@ -184,7 +184,7 @@ const Signup = () => {
                                 {"I'm a vendor"}
                               </div>
                               <div className="w-full text-balance weight fornt-normal">
-                                Create or associate to a brokerage firm
+                                Join as a realtor service provider
                               </div>
                             </div>
                             <FaHelmetSafety className="w-10 h-10" />
@@ -259,7 +259,7 @@ const Signup = () => {
                 )}
               />
               {/* <FormLabel>
-                Lorem 
+                Lorem
               </FormLabel> */}
               <FormField
                 control={form.control}
