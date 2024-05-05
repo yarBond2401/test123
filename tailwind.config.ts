@@ -67,11 +67,17 @@ const config = {
           DEFAULT: "var(--tertiary-color)",
           foreground: "var(--tertiary-color)",
         },
+        "dashboard-main": "#242933",
+        "dashboard-secondary": "#637381",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "10": "10px",
+      },
+      spacing: {
+        "22": "22px",
       },
       keyframes: {
         "accordion-down": {

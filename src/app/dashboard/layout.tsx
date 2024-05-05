@@ -241,7 +241,7 @@ const Layout: React.FC<Props> = ({ children }) => {
             </div>
           </div>
         </div>
-        <div className="group px-6 pt-6 2xl:container">{children}</div>
+        <div className="group px-5 pt-6 2xl:container">{children}</div>
       </div>
     </>
   );
