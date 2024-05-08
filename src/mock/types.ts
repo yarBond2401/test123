@@ -21,3 +21,21 @@ export interface DealType {
   isCompleted: boolean,
   income: number,
 }
+
+export interface User {
+  name: string,
+  role: "vendor" | "agent",
+  photo: StaticImageData,
+  level: string,
+  success: number,
+  rating: number,
+  response: number,
+  totalMoney: string, 
+  totalMoneyInt: string,
+  totalWork: string,
+  totalWorkInt: string,
+  totalHours: string,
+  totalHoursInt: string,
+  monthlyAmount: string,
+  annualAmount: string,
+}
