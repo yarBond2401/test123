@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,21 +22,31 @@ import iconWork from "@/icons/icon=work.svg";
 import iconWatch from "@/icons/icon=watch.svg";
 import { inboxItems } from "@/mock/indoxMock";
 import DropdownIcon from "@/icons/icon=chevron-down.svg"
-import { dealsMock } from "@/mock/dealsMock";
+import { dealsMockAgent, dealsMockVendor } from "@/mock/dealsMock";
 import { DealItem } from "@/components/dashboard/DealItem";
 import { annualEarnedChartData } from "@/mock/annualEarnedChartDataMock";
 import { elements } from "chart.js/auto";
+import { agent, vendor } from "@/mock/users";
+import { useIsVendor } from "@/hooks/useIsVendor";
+import Loading from "../loading";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
   const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
   const router = useRouter();
-
+  
   const { user } = useRequireLogin({
     onUnauthenticated: () => {
       router.push("/auth/signin");
     },
   });
+  
+  const mockUser = useIsVendor(user) ? vendor : agent;
+  const dealsMock = useIsVendor(user) ? dealsMockVendor : dealsMockAgent;
+
+  if (!user) {
+    return <Loading />;
+  }
 
   const optionsBar = {
     maintainAspectRatio: false,
@@ -92,7 +102,7 @@ const Dashboard = () => {
               <div className="flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
                 <div className="flex xl:flex-row lg:flex-col gap-[15px] items-center xl:p-22 p-4">
                   <Image
-                    src={user?.photoURL || defaultAvatar}
+                    src={user.photoURL || defaultAvatar}
                     width={80}
                     height={80}
                     alt="User profile picture"
@@ -100,10 +110,10 @@ const Dashboard = () => {
                   />
                   <div className="flex flex-col gap-1">
                     <p className="text-dashboard-main 2xl:text-xl leading-[22px] font-medium lg:text-base md:text-xl">
-                      John Strassmann
+                      {mockUser.name}
                     </p>
                     <p className="text-dashboard-secondary 2xl:text-base leading-[22px] font-medium lg:text-sm md:text-base">
-                      Vendor
+                      {mockUser.role === "vendor" ? "Vendor" : "Agent"}
                     </p>
                   </div>
                 </div>
@@ -115,15 +125,15 @@ const Dashboard = () => {
                       My Level
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm text-end md:text-base">
-                      New Seller
+                      {mockUser.level}
                     </p>
                   </div>
                   <div className="flex flex-row justify-between w-full gap-1">
                     <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      Success score
+                      {mockUser.role === "vendor" ? "Success score" : "Hire rate"}
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      100%
+                      {mockUser.success}%
                     </p>
                   </div>
                   <div className="flex flex-row justify-between w-full gap-1">
@@ -133,7 +143,7 @@ const Dashboard = () => {
                     <div className="flex flex-row gap-1">
                       <Image src={iconStar} alt="star" height={16} width={16} />
                       <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                        5
+                        {mockUser.rating}
                       </p>
                     </div>
                   </div>
@@ -142,7 +152,7 @@ const Dashboard = () => {
                       Response rate
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      80
+                      {mockUser.response}
                     </p>
                   </div>
                 </div>
@@ -152,21 +162,21 @@ const Dashboard = () => {
                 <div className="flex flex-row md:gap-6 gap-4 col-span-3 w-full md:flex-nowrap flex-wrap">
                   <Statistics
                     icon={iconDollar}
-                    result="$12.500"
-                    total="Earnings"
-                    grow="12.0%"
+                    result={mockUser.totalMoney}
+                    total={mockUser.role === "vendor" ? "Earnings" : "Spent"}
+                    grow={mockUser.totalMoneyInt}
                   />
                   <Statistics
                     icon={iconWork}
-                    result="62"
-                    total="Jobs"
-                    grow="1.0%"
+                    result={mockUser.totalWork}
+                    total={mockUser.role === "vendor" ? "Jobs" : "Hires"}
+                    grow={mockUser.totalWorkInt}
                   />
                   <Statistics
                     icon={iconWatch}
-                    result="250"
+                    result={mockUser.totalHours}
                     total="Hours"
-                    grow="0.43%"
+                    grow={mockUser.totalHoursInt}
                   />
                 </div>
 
@@ -174,10 +184,10 @@ const Dashboard = () => {
                   <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
-                        $700
+                        ${mockUser.monthlyAmount}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        Earned in April
+                        {mockUser.role === "vendor" ? "Earned in April" : "Spent in April"} 
                       </p>
                     </div>
                     <div className="xl:w-1/2 w-full xl:h-16">
@@ -185,8 +195,8 @@ const Dashboard = () => {
                         data={{
                           labels: ["", "", "", ""],
                           datasets: [{
-                            data: [0, 55, 50, 100],
-                            borderColor: "#A652BF",
+                            data:  mockUser.role === "vendor" ? [0, 55, 50, 100] : [100, 42, 45, 0],
+                            borderColor: mockUser.role === "vendor" ? "#A652BF" : "#54BF52",
                             tension: 0.4,
                             pointRadius: 0,
                           }]
@@ -199,10 +209,10 @@ const Dashboard = () => {
                   <div className="flex xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main  xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
-                        $7.500
+                        ${mockUser.annualAmount}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        Annually Earned{" "}
+                      {mockUser.role === "vendor" ? "Annually Earned" : "Annual costs"} 
                       </p>
                     </div>
                     <div className="xl:w-3/4 w-full h-[90px]">

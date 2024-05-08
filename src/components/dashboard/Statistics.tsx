@@ -2,6 +2,8 @@ import Image from "next/image";
 import { FC } from "react";
 
 import iconArrow from "@/icons/icon=arrow-up.svg";
+import iconMinus from "@/icons/icon=minus.svg";
+import { cn } from "@/lib/utils";
 
 interface Props {
   icon: string;
@@ -11,10 +13,12 @@ interface Props {
 }
 
 export const Statistics: FC<Props> = ({ icon, result, total, grow }) => {
+  const isGrow = +grow > 0;
+
   return (
     <div className="flex bg-white border border-[#DFE4EA] rounded-10 flex-col w-full xl:p-22 p-4 gap-5">
       <div className="flex items-center justify-center rounded-full bg-[#5296BF] w-[50px] h-[50px]">
-        <Image src={icon} alt="dollar" height={24} width={24} />
+        <Image src={icon} alt="icon" height={24} width={24} />
       </div>
       <div className="flex xl:flex-row lg:flex-col flex-row gap-2 justify-between w-full">
         <div className="flex flex-col gap-2 justify-between h-full">
@@ -26,10 +30,13 @@ export const Statistics: FC<Props> = ({ icon, result, total, grow }) => {
           </p>
         </div>
         <div className="flex flex-row gap-1 items-end self-end">
-          <p className="text-[#089348] leading-[22px] font-bold 2xl:text-lg lg:text-base text-lg">
-            {grow}
+          <p className={cn(
+            isGrow ? "text-[#089348]" : "text-[#D0750A]", 
+            "leading-[22px] font-bold 2xl:text-lg lg:text-base text-lg"
+          )}>
+            {grow}%
           </p>
-          <Image src={iconArrow} alt="dollar" height={24} width={24} />
+          <Image src={isGrow ? iconArrow : iconMinus} alt="icon" height={24} width={24} />
         </div>
       </div>
     </div>
