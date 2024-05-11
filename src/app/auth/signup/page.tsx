@@ -6,7 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import * as admin from "firebase-admin";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -78,26 +78,29 @@ const Signup = () => {
         description: "",
         generic_availability: [],
       });
+
+      try {
+        const docRef = await addDoc(collection(db, "mail"), {
+          to: [data.email],
+          message: {
+            subject: "Welcome email",
+            html: `Thank you for the registration 
+                  Your login: ${data.email}
+                  Your password: ${data.password}`,
+          },
+        });
+        console.log("Document written with ID: ", docRef.id);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
     }
-    // await 
-    //   db.collection("mail")
-    //   .add({
-    //     from: "yarbond2401@gmail.com",
-    //     to: [data.email],
-    //     message: {
-    //       subject: "Welcome email",
-    //       html: `Thank you for the registration 
-    //         Your login: ${data.email}
-    //         Your password: ${data.password}`,
-    //     },
-    //   });
+
     await signOut(auth);
     toast({
       title: "Account created",
       description: "You can now sign in",
     });
 
-    
     router.push("/auth/signin");
   };
 
