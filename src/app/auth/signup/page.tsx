@@ -5,6 +5,7 @@ import {
   updateProfile,
   signOut,
 } from "firebase/auth";
+import * as admin from "firebase-admin";
 import { doc, setDoc } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
@@ -78,11 +79,25 @@ const Signup = () => {
         generic_availability: [],
       });
     }
+    // await 
+    //   db.collection("mail")
+    //   .add({
+    //     from: "yarbond2401@gmail.com",
+    //     to: [data.email],
+    //     message: {
+    //       subject: "Welcome email",
+    //       html: `Thank you for the registration 
+    //         Your login: ${data.email}
+    //         Your password: ${data.password}`,
+    //     },
+    //   });
     await signOut(auth);
     toast({
       title: "Account created",
       description: "You can now sign in",
     });
+
+    
     router.push("/auth/signin");
   };
 
@@ -96,8 +111,6 @@ const Signup = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-
-
   return (
     <>
       <figure className="hidden 2xl:block col-span-3 h-full order-2">
@@ -105,7 +118,6 @@ const Signup = () => {
           src={sideImage}
           alt="US House"
           className="h-full object-cover object-right-top"
-
           priority={true}
         />
       </figure>
@@ -275,13 +287,24 @@ const Signup = () => {
                     <div className="">
                       <FormLabel className="">
                         I have read and agree the{" "}
-                        <Link href={`${WP_SITE}/terms-and-conditions/`} className="underline">
+                        <Link
+                          href={`${WP_SITE}/terms-and-conditions/`}
+                          className="underline"
+                        >
                           terms and conditions
-                        </Link>, the{" "}
-                        <Link href={`${WP_SITE}/privacy-policy/`} className="underline">
+                        </Link>
+                        , the{" "}
+                        <Link
+                          href={`${WP_SITE}/privacy-policy/`}
+                          className="underline"
+                        >
                           privacy policy
-                        </Link>, and the{" "}
-                        <Link href={`${WP_SITE}/refund-policy/`} className="underline">
+                        </Link>
+                        , and the{" "}
+                        <Link
+                          href={`${WP_SITE}/refund-policy/`}
+                          className="underline"
+                        >
                           refund policy
                         </Link>
                       </FormLabel>

@@ -98,8 +98,6 @@ export const DealItem: FC<Props> = ({ deal }) => {
               {deal.date}
             </p>
           </div>
-
-          
         </div>
 
         <div className="flex flex-col justify-between items-center">
