@@ -5,8 +5,8 @@ import {
   updateProfile,
   signOut,
 } from "firebase/auth";
-import * as admin from "firebase-admin";
 import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { ref } from "firebase/storage";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -16,7 +16,7 @@ import { FaBuilding } from "react-icons/fa";
 import { FaHelmetSafety } from "react-icons/fa6";
 import { z } from "zod";
 
-import { auth, db } from "@/app/firebase";
+import { auth, db, storage } from "@/app/firebase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -59,6 +59,9 @@ const Signup = () => {
   const [error, setError] = useState<string | null>(null);
   const [formScreen, setFormScreen] = useState<FormScreen>("user-type");
 
+  const logoRef =
+    "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
+
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -84,9 +87,12 @@ const Signup = () => {
           to: [data.email],
           message: {
             subject: "Welcome email",
-            html: `Thank you for the registration 
-                  Your login: ${data.email}
-                  Your password: ${data.password}`,
+            html: `
+              <img src=${logoRef} alt="logo" style="height:100px;" />
+              <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
+              <p>Your login: ${data.email}.</p>
+              <p>Your password: ${data.password}.</p>
+            `,
           },
         });
         console.log("Document written with ID: ", docRef.id);
