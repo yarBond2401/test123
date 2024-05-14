@@ -5,7 +5,8 @@ import {
   updateProfile,
   signOut,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { ref } from "firebase/storage";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -15,7 +16,7 @@ import { FaBuilding } from "react-icons/fa";
 import { FaHelmetSafety } from "react-icons/fa6";
 import { z } from "zod";
 
-import { auth, db } from "@/app/firebase";
+import { auth, db, storage } from "@/app/firebase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -58,6 +59,9 @@ const Signup = () => {
   const [error, setError] = useState<string | null>(null);
   const [formScreen, setFormScreen] = useState<FormScreen>("user-type");
 
+  const logoRef =
+    "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
+
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -77,12 +81,32 @@ const Signup = () => {
         description: "",
         generic_availability: [],
       });
+
+      try {
+        const docRef = await addDoc(collection(db, "mail"), {
+          to: [data.email],
+          message: {
+            subject: "Welcome email",
+            html: `
+              <img src=${logoRef} alt="logo" style="height:100px;" />
+              <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
+              <p>Your login: ${data.email}.</p>
+              <p>Your password: ${data.password}.</p>
+            `,
+          },
+        });
+        console.log("Document written with ID: ", docRef.id);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
     }
+
     await signOut(auth);
     toast({
       title: "Account created",
       description: "You can now sign in",
     });
+
     router.push("/auth/signin");
   };
 
@@ -96,8 +120,6 @@ const Signup = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-
-
   return (
     <>
       <figure className="hidden 2xl:block col-span-3 h-full order-2">
@@ -105,7 +127,6 @@ const Signup = () => {
           src={sideImage}
           alt="US House"
           className="h-full object-cover object-right-top"
-
           priority={true}
         />
       </figure>
@@ -275,13 +296,24 @@ const Signup = () => {
                     <div className="">
                       <FormLabel className="">
                         I have read and agree the{" "}
-                        <Link href={`${WP_SITE}/terms-and-conditions/`} className="underline">
+                        <Link
+                          href={`${WP_SITE}/terms-and-conditions/`}
+                          className="underline"
+                        >
                           terms and conditions
-                        </Link>, the{" "}
-                        <Link href={`${WP_SITE}/privacy-policy/`} className="underline">
+                        </Link>
+                        , the{" "}
+                        <Link
+                          href={`${WP_SITE}/privacy-policy/`}
+                          className="underline"
+                        >
                           privacy policy
-                        </Link>, and the{" "}
-                        <Link href={`${WP_SITE}/refund-policy/`} className="underline">
+                        </Link>
+                        , and the{" "}
+                        <Link
+                          href={`${WP_SITE}/refund-policy/`}
+                          className="underline"
+                        >
                           refund policy
                         </Link>
                       </FormLabel>

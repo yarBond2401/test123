@@ -37,6 +37,7 @@
     "cmdk": "^0.2.1",
     "date-fns": "^3.6.0",
     "firebase": "^10.6.0",
+    "firebase-admin": "^12.1.0",
     "geofire-common": "^6.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.331.0",
