@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as Select from "@radix-ui/react-select";
-import { Bar, Line } from 'react-chartjs-2';
-import 'chart.js/auto';
+import { Bar, Line } from "react-chartjs-2";
+import "chart.js/auto";
 
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 
@@ -21,8 +21,8 @@ import iconDollar from "@/icons/icon=dollar.svg";
 import iconWork from "@/icons/icon=work.svg";
 import iconWatch from "@/icons/icon=watch.svg";
 import { inboxItems } from "@/mock/indoxMock";
-import DropdownIcon from "@/icons/icon=chevron-down.svg"
-import { dealsMockAgent, dealsMockVendor } from "@/mock/dealsMock";
+import DropdownIcon from "@/icons/icon=chevron-down.svg";
+import { dealsMock } from "@/mock/dealsMock";
 import { DealItem } from "@/components/dashboard/DealItem";
 import { annualEarnedChartData } from "@/mock/annualEarnedChartDataMock";
 import { elements } from "chart.js/auto";
@@ -34,15 +34,14 @@ const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
   const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
   const router = useRouter();
-  
+
   const { user } = useRequireLogin({
     onUnauthenticated: () => {
       router.push("/auth/signin");
     },
   });
-  
+
   const mockUser = useIsVendor(user) ? vendor : agent;
-  const dealsMock = useIsVendor(user) ? dealsMockVendor : dealsMockAgent;
 
   if (!user) {
     return <Loading />;
@@ -63,14 +62,14 @@ const Dashboard = () => {
         ticks: {
           font: {
             size: 6,
-          }
+          },
         },
         grid: {
-          display: false, 
+          display: false,
         },
       },
     },
-  }
+  };
 
   const optionsLine = {
     maintainAspectRatio: false,
@@ -87,7 +86,7 @@ const Dashboard = () => {
         display: false,
       },
     },
-  }
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -118,24 +117,55 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <Separator className="md:hidden lg:block"/>
+                <Separator className="md:hidden lg:block" />
                 <div className="xl:p-22 p-4 flex flex-col xl:gap-5 w-full md:w-1/2 lg:w-full gap-2">
+                  {mockUser.role === "vendor" && (
+                    <div className="flex flex-row justify-between w-full gap-1">
+                      <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                        My Level
+                      </p>
+                      <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm text-end md:text-base">
+                        {mockUser.level}
+                      </p>
+                    </div>
+                  )}
                   <div className="flex flex-row justify-between w-full gap-1">
                     <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      My Level
-                    </p>
-                    <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm text-end md:text-base">
-                      {mockUser.level}
-                    </p>
-                  </div>
-                  <div className="flex flex-row justify-between w-full gap-1">
-                    <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      {mockUser.role === "vendor" ? "Success score" : "Hire rate"}
+                      {mockUser.role === "vendor"
+                        ? "Success score"
+                        : "Available posts"}
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      {mockUser.success}%
+                      {mockUser.role === "vendor"
+                        ? mockUser.success + "%"
+                        : mockUser.postsAvailable}
                     </p>
                   </div>
+                  {mockUser.role === "agent" && (
+                    <>
+                      <div className="flex flex-row justify-between w-full gap-1">
+                        <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                          Posts installed
+                        </p>
+                        <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                          {mockUser.postsInstalled}
+                        </p>
+                      </div>
+                      <div className="flex flex-row justify-between w-full gap-1">
+                        <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                          My Level
+                        </p>
+                        <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                          {mockUser.postsInstalled <= 50
+                            ? "Bronze"
+                            : mockUser.postsInstalled > 50 &&
+                              mockUser.postsInstalled <= 150
+                            ? "Gold"
+                            : "Platinum"}
+                        </p>
+                      </div>
+                    </>
+                  )}
                   <div className="flex flex-row justify-between w-full gap-1">
                     <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
                       Rating
@@ -147,14 +177,16 @@ const Dashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-row justify-between w-full gap-1">
-                    <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      Response rate
-                    </p>
-                    <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      {mockUser.response}
-                    </p>
-                  </div>
+                  {mockUser.role === "vendor" && (
+                    <div className="flex flex-row justify-between w-full gap-1">
+                      <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                        Response rate
+                      </p>
+                      <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                        {mockUser.response}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -187,19 +219,29 @@ const Dashboard = () => {
                         ${mockUser.monthlyAmount}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        {mockUser.role === "vendor" ? "Earned in April" : "Spent in April"} 
+                        {mockUser.role === "vendor"
+                          ? "Earned in April"
+                          : "Spent in April"}
                       </p>
                     </div>
                     <div className="xl:w-1/2 w-full xl:h-16">
-                      <Line 
+                      <Line
                         data={{
                           labels: ["", "", "", ""],
-                          datasets: [{
-                            data:  mockUser.role === "vendor" ? [0, 55, 50, 100] : [100, 42, 45, 0],
-                            borderColor: mockUser.role === "vendor" ? "#A652BF" : "#54BF52",
-                            tension: 0.4,
-                            pointRadius: 0,
-                          }]
+                          datasets: [
+                            {
+                              data:
+                                mockUser.role === "vendor"
+                                  ? [0, 55, 50, 100]
+                                  : [100, 42, 45, 0],
+                              borderColor:
+                                mockUser.role === "vendor"
+                                  ? "#A652BF"
+                                  : "#54BF52",
+                              tension: 0.4,
+                              pointRadius: 0,
+                            },
+                          ],
                         }}
                         options={optionsLine}
                       />
@@ -212,28 +254,38 @@ const Dashboard = () => {
                         ${mockUser.annualAmount}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                      {mockUser.role === "vendor" ? "Annually Earned" : "Annual costs"} 
+                        {mockUser.role === "vendor"
+                          ? "Annually Earned"
+                          : "Annual costs"}
                       </p>
                     </div>
                     <div className="xl:w-3/4 w-full h-[90px]">
-                      <Bar 
+                      <Bar
                         data={{
-                          labels: annualEarnedChartData.map(item => item.label),
+                          labels: annualEarnedChartData.map(
+                            (item) => item.label
+                          ),
                           datasets: [
                             {
-                              data: annualEarnedChartData.map(item => item.value1),
+                              data: annualEarnedChartData.map(
+                                (item) => item.value1
+                              ),
                               backgroundColor: "#3758F9",
                               borderRadius: 1,
                               barPercentage: 0.5,
                             },
                             {
-                              data: annualEarnedChartData.map(item => item.value2),
+                              data: annualEarnedChartData.map(
+                                (item) => item.value2
+                              ),
                               backgroundColor: "#13C296",
                               borderRadius: 1,
                               barPercentage: 0.5,
                             },
                             {
-                              data: annualEarnedChartData.map(item => item.value3),
+                              data: annualEarnedChartData.map(
+                                (item) => item.value3
+                              ),
                               backgroundColor: "#F2994A",
                               borderRadius: 1,
                               barPercentage: 0.5,
@@ -270,26 +322,45 @@ const Dashboard = () => {
               </div>
               <div className="flex flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
                 <div className="flex flex-row justify-between py-3 xl:px-6 lg:px-2 px-6 items-center">
-                  <p className="text-dashboard-main xl:text-xl text-lg leading-6 font-medium">{selectedStatus}</p>
-                  <Select.Root value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <p className="text-dashboard-main xl:text-xl text-lg leading-6 font-medium">
+                    {selectedStatus}
+                  </p>
+                  <Select.Root
+                    value={selectedStatus}
+                    onValueChange={setSelectedStatus}
+                  >
                     <Select.Trigger className="flex flex-row gap-[10px] xl:px-3 px-1 xl:py-2 py-1 border border-[#5352BF] rounded-md outline-none items-center xl:text-base text-sm text-[#5352BF] hover:bg-violet-50">
-                      <Select.Value/>
+                      <Select.Value />
                       <Select.Icon>
-                        <Image src={DropdownIcon} alt="icon" height={18} width={18} />
+                        <Image
+                          src={DropdownIcon}
+                          alt="icon"
+                          height={18}
+                          width={18}
+                        />
                       </Select.Icon>
                     </Select.Trigger>
 
                     <Select.Portal>
                       <Select.Content className="bg-white border border-[#5352BF] rounded-md outline-none">
                         <Select.Viewport className="xl:text-base text-sm text-[#5352BF]">
-                          <Select.Item value={dealStatus[0]} className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50">
-                          <Select.ItemText>{dealStatus[0]}</Select.ItemText>
+                          <Select.Item
+                            value={dealStatus[0]}
+                            className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50"
+                          >
+                            <Select.ItemText>{dealStatus[0]}</Select.ItemText>
                           </Select.Item>
-                          <Select.Item value={dealStatus[1]} className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50">
+                          <Select.Item
+                            value={dealStatus[1]}
+                            className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50"
+                          >
                             <Select.ItemText>{dealStatus[1]}</Select.ItemText>
                           </Select.Item>
-                          <Select.Item value={dealStatus[2]} className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50">
-                          <Select.ItemText>{dealStatus[2]}</Select.ItemText>
+                          <Select.Item
+                            value={dealStatus[2]}
+                            className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50"
+                          >
+                            <Select.ItemText>{dealStatus[2]}</Select.ItemText>
                           </Select.Item>
                         </Select.Viewport>
                         <Select.Arrow />
@@ -298,10 +369,8 @@ const Dashboard = () => {
                   </Select.Root>
                 </div>
                 <div className="flex flex-col justify-between">
-                  {dealsMock.map(deal => {
-                    return (
-                      <DealItem deal={deal} key={deal.id}/>
-                    )
+                  {dealsMock.map((deal) => {
+                    return <DealItem deal={deal} key={deal.id} />;
                   })}
                 </div>
               </div>
