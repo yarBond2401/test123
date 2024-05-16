@@ -22,12 +22,33 @@ export interface DealType {
   income: number,
 }
 
-export interface User {
+export interface Vendor {
   name: string,
-  role: "vendor" | "agent",
+  role: "vendor",
   photo: StaticImageData,
   level: string,
   success: number,
+  postsAvailable?: number,
+  postsInstalled?: number,
+  rating: number,
+  response: number,
+  totalMoney: string, 
+  totalMoneyInt: string,
+  totalWork: string,
+  totalWorkInt: string,
+  totalHours: string,
+  totalHoursInt: string,
+  monthlyAmount: string,
+  annualAmount: string,
+}
+
+export interface Agent {
+  name: string,
+  role: "agent",
+  photo: StaticImageData,
+  level: string,
+  postsAvailable: number,
+  postsInstalled: number,
   rating: number,
   response: number,
   totalMoney: string, 
