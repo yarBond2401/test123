@@ -116,6 +116,21 @@ const Layout: React.FC<Props> = ({ children }) => {
             )}
             {isVendor && (
               <DashboardLink
+                link="/dashboard/find-post"
+                text="Find Post"
+                icon={<MdHomeRepairService />}
+              />
+            )}
+            {isVendor && (
+              <DashboardLink
+                link="/dashboard/sign-installation"
+                text="Sign Installation Request"
+                icon={<MdHomeRepairService />}
+              />
+            )}
+
+            {isVendor && (
+              <DashboardLink
                 link="/dashboard/services"
                 text="My services"
                 icon={<MdHomeRepairService />}

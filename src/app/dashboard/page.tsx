@@ -98,7 +98,7 @@ const Dashboard = () => {
         <CardContent>
           <div className="flex flex-col md:gap-6 gap-4 w-full">
             <div className="grid grid-cols-1 md:gap-6 gap-4 md:grid-cols-2 lg:grid-cols-4 w-full">
-              <div className="flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
+              <div className="shadow flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
                 <div className="flex xl:flex-row lg:flex-col gap-[15px] items-center xl:p-22 p-4">
                   <Image
                     src={user.photoURL || defaultAvatar}
@@ -213,7 +213,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid md:gap-6 gap-4 grid-cols-3 w-full col-span-3">
-                  <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
+                  <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 shadow bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
                         ${mockUser.monthlyAmount}
@@ -248,7 +248,7 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
+                  <div className="flex shadow xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main  xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
                         ${mockUser.annualAmount}
@@ -301,7 +301,7 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:gap-6 gap-4 lg:grid-cols-4 w-full">
-              <div className="flex flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-1">
+              <div className="flex shadow flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-1">
                 <div className="flex flex-row justify-between p-5 items-center">
                   <p className="text-dashboard-main xl:text-xl leading-6 font-medium md:text-base text-xl">
                     Inbox
@@ -320,7 +320,7 @@ const Dashboard = () => {
                   })}
                 </div>
               </div>
-              <div className="flex flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
+              <div className="flex flex-col shadow bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
                 <div className="flex flex-row justify-between py-3 xl:px-6 lg:px-2 px-6 items-center">
                   <p className="text-dashboard-main xl:text-xl text-lg leading-6 font-medium">
                     {selectedStatus}

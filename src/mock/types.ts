@@ -60,3 +60,29 @@ export interface Agent {
   monthlyAmount: string,
   annualAmount: string,
 }
+
+interface Service {
+  name: string;
+  duration: number;
+}
+
+export interface Post {
+  id: string;
+  createdBy: string;
+  photo: StaticImageData; 
+  date: string;
+  services: Service[];
+  serviceNumber: number;
+  subtotal: number;
+  tax: number;
+}
+
+export interface SuperRequest {
+  id: string;
+  createdBy: string;
+  photo: StaticImageData;
+  email: string;
+  date: string; 
+  notes: string;
+  status: string;
+}
