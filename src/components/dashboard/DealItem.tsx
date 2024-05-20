@@ -79,6 +79,7 @@ export const DealItem: FC<Props> = ({ deal }) => {
               height={40}
               width={40}
               alt={deal.partner.name}
+              className="rounded-full"
             />
 
             <div className="flex flex-col">

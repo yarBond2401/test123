@@ -13,7 +13,7 @@ import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Statistics } from "@/components/dashboard/Statistics";
-import { InboxItem } from "@/components/dashboard/InboxItem";
+import { InboxItem } from "@/components/chatItem/InboxItem";
 
 import defaultAvatar from "@/images/default-user-picture.jpg";
 import iconStar from "@/icons/icon=star.svg";
@@ -316,7 +316,13 @@ const Dashboard = () => {
                 <Separator />
                 <div className="flex lg:flex-col md:flex-row flex-col 2xl:px-5 xl:px-3 pt-5 lg:px-0 px-3">
                   {inboxItems.map((item) => {
-                    return <InboxItem key={item.name} item={item} />;
+                    return (
+                      <InboxItem
+                        key={item.id}
+                        item={item}
+                        messageStyles="font-medium text-dashboard-secondary"
+                      />
+                    );
                   })}
                 </div>
               </div>
