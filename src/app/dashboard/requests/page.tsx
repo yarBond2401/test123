@@ -102,6 +102,13 @@ const Requests = () => {
           >
             Add a service request
           </Button>
+          <Button
+              className="mb-4 ml-2"
+              onClick={() => router.push("/dashboard/requests/signInRequest")}
+              type="button"
+          >
+            Add a Sign In service request
+          </Button>
           <DataTable
             columns={columns}
             // @ts-ignore

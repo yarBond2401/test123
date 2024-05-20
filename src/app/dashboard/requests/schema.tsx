@@ -92,6 +92,16 @@ export const serviceRequestWithUsersSchema = serviceRequestSchema.extend({
     }),
 })
 
+export const signInRequestCreateSchema = z.object({
+    userId: z.string(),
+    requestName: z.string().min(3),
+    firstName: z.string().default(''),
+    phoneNumber: z.string().default(''),
+    description: z.string().default(''),
+    status: z.enum(["Approved", "PendingInstallation", "Installed"]),
+});
+
 export type ServiceRequestWithUsers = z.infer<typeof serviceRequestWithUsersSchema>;
 export type ServiceRequest = z.infer<typeof serviceRequestSchema>;
 export type ServiceRequestCreate = z.infer<typeof serviceRequestCreateSchema>;
+export type ServiceSignInRequestCreate = z.infer<typeof signInRequestCreateSchema>;
