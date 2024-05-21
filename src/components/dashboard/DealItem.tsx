@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { FC } from "react";
-import * as Avatar from "@radix-ui/react-avatar";
 
-import { DealType, InboxItemType } from "@/mock/types";
+import { DealType } from "@/mock/types";
 import Image from "next/image";
 import { Separator } from "../ui/separator";
 
@@ -17,9 +16,6 @@ export const DealItem: FC<Props> = ({ deal }) => {
 
       <div className="2xl:px-6 xl:px-4 lg:px-2 px-6 py-4 flex-row w-full justify-between md:flex hidden">
         <div className="flex flex-row xl:gap-4 gap-2 items-center xl:w-1/3 w-20">
-          {/* <Avatar.Root className="rounded-full h-11 w-11">
-            <Avatar.Image src={deal.partner.avatar} height={40} width={40} alt={deal.partner.name} />
-          </Avatar.Root> */}
           <Image
             src={deal.partner.avatar}
             height={40}

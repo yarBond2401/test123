@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { posts } from "@/mock/postsMock";
 import { Post } from "@/mock/types";
 import Loading from "../loading";
+import { NewButton } from "@/components/ui/new-button";
 
 const OfferDetails = () => {
   const [post, setPost] = useState<Post>();
@@ -20,7 +21,7 @@ const OfferDetails = () => {
 
   const handleAccept = () => {
     console.log("accept");
-  }
+  };
 
   if (!post) {
     return <Loading />;
@@ -47,10 +48,10 @@ const OfferDetails = () => {
             return (
               <div key={service.name} className="flex flex-col gap-2">
                 <p className="text-lg text-[#111928] font-medium">
-                {service.name}
+                  {service.name}
                 </p>
                 <p className="text-dashboard-secondary text-lg leading-6">
-                {service.duration}h
+                  {service.duration}h
                 </p>
               </div>
             );
@@ -71,9 +72,9 @@ const OfferDetails = () => {
             </div>
           </div>
 
-          <button type="button"
-            onClick={handleAccept}
-            className="w-full py-3 bg-[#5352BF] text-base font-medium text-white rounded-md hover:bg-[#1B44C8]">Accept</button>
+          <NewButton type="button" onClick={handleAccept}>
+            Accept
+          </NewButton>
         </div>
       </CardContent>
     </Card>

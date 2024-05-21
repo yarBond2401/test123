@@ -1,5 +1,6 @@
 import { OFFERED_SERVICES } from "@/app/constants";
 import { z } from "zod";
+import { E164Number } from 'libphonenumber-js/core';
 
 // @ts-ignore
 export const serviceRequestCreateSchema = z.object({
@@ -99,6 +100,7 @@ export const signInRequestCreateSchema = z.object({
     phoneNumber: z.string().default(''),
     description: z.string().default(''),
     status: z.enum(["Approved", "PendingInstallation", "Installed"]),
+    userPhoto: z.string(),
 });
 
 export type ServiceRequestWithUsers = z.infer<typeof serviceRequestWithUsersSchema>;

@@ -1,24 +1,45 @@
 "use client";
 
+import { getDocs, collection, QuerySnapshot, doc, getDoc, DocumentData } from "firebase/firestore";
+import { db } from "@/app/firebase";
 import { RequestItem } from "@/components/sing-installation/Request";
 import { Th } from "@/components/Th";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { superRequests } from "@/mock/requests";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 
 const SignInstallation = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [requests, setRequests] = useState<DocumentData[]>([]);
 
-  const filteredRequests = superRequests.filter(
+  useEffect(() => {
+    async function fetch() {
+    const data = await getDocs(collection(db, "signInRequests"));
+    const currentRequests: DocumentData[] = [];
+
+    for (const docItem of data.docs) {
+    // data.forEach((docItem) => {
+      // const userRef = doc(db, "brokers", docItem.data().userId);
+      // let userSnap = await getDoc(userRef);
+      currentRequests.push({...docItem.data(), id: docItem.id})
+    };
+
+    setRequests(currentRequests);
+    }
+
+    fetch();
+},[]);
+
+  const filteredRequests = requests.filter(
     (request) =>
-      request.createdBy
+      request.firstName
         .toLowerCase()
         .includes(searchQuery.trim().toLowerCase()) ||
-      request.email.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-      request.notes.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      request.requestName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+      request.description.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
 
   return (
@@ -27,10 +48,7 @@ const SignInstallation = () => {
         <div className="w-full flex justify-between flex-row items-center">
           <CardTitle>Sign Installation Request</CardTitle>
           <div className="w-64">
-            <SearchBar
-              searchQuery={searchQuery}
-              onChange={setSearchQuery}
-            />
+            <SearchBar searchQuery={searchQuery} onChange={setSearchQuery} />
           </div>
         </div>
         <Separator />
@@ -39,7 +57,7 @@ const SignInstallation = () => {
         <div className="flex flex-col bg-white border border-gray-200 rounded-10 w-full shadow">
           <div className="flex flex-row justify-between w-full py-3 px-4 items-center">
             <Th styles="flex w-32">Created by</Th>
-            <Th styles="justify-center w-52 md:flex hidden">Email</Th>
+            <Th styles="justify-center w-52 md:flex hidden">Phone number</Th>
             <Th styles="md:flex hidden justify-center w-[130px]">
               Date of work
             </Th>
@@ -48,11 +66,11 @@ const SignInstallation = () => {
             <Th styles="xl:w-32 md:w-28 w-20" />
           </div>
           <div className="flex flex-col">
-            {!!filteredRequests.length ?
-             
+            {!!filteredRequests.length ? (
               filteredRequests.map((request) => (
                 <RequestItem key={request.id} request={request} />
-            )) : (
+              ))
+            ) : (
               <div className="flex flex-col w-full">
                 <Separator />
                 <div className="flex items-center justify-center p-10">

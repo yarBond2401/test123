@@ -1,16 +1,22 @@
+import { DocumentData } from "firebase/firestore";
+import { db } from "@/app/firebase";
+
 import { SuperRequest } from "@/mock/types";
 import Image from "next/image";
 import * as Select from "@radix-ui/react-select";
 import { FC, useState } from "react";
 import { Separator } from "../ui/separator";
 import DropdownIcon from "@/icons/icon=chevron-down-grey.svg";
+import { NewButton } from "../ui/new-button";
+import defaultAvatar from "@/images/default-user-picture.jpg";
+import { format } from "date-fns";
 
 interface Props {
-  request: SuperRequest;
+  request: DocumentData;
 }
 
 export const RequestItem: FC<Props> = ({ request }) => {
-  const dealStatus = ["Installed", "Resolved", "Issued"];
+  const dealStatus = ["Approved", "Pending Instal", "Installed"];
   const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
 
   const handleSubmit = () => {
@@ -24,41 +30,41 @@ export const RequestItem: FC<Props> = ({ request }) => {
         <div className="flex flex-col gap-2">
           <div className="flex flex-row w-32 gap-3 items-center box-border">
             <Image
-              src={request.photo}
-              alt={request.createdBy}
+              src={request.userPhoto || defaultAvatar}
+              alt={request.firstName}
               className="h-10 w-10 rounded-full"
             />
             <p className="text-sm text-dashboard-main font-medium">
-              {request.createdBy}
+              {request.firstName}
             </p>
           </div>
           <div className="flex flex-col gap-2 md:hidden">
             <p className="text-sm leading-5 text-dashboard-main font-medium ">
-              {request.email}
+              {request.phoneNumber}
             </p>
             <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
-              {request.date}
+              {format(request.createdAt.toDate(), "dd/MM/yyyy")}
             </p>
           </div>
         </div>
         <div className="md:flex w-52 justify-center hidden">
           <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
-            {request.email}
+            {request.phoneNumber}
           </p>
         </div>
         <div className="md:flex w-32 justify-center hidden">
           <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
-            {request.date}
+            {request.createdAt}
           </p>
         </div>
         <div className="flex w-52 pl-4 justify-center">
           <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
-            {request.notes}
+            {request.description}
           </p>
         </div>
         <div className="flex xl:w-56 pl-3 w-40 justify-center">
           <Select.Root value={selectedStatus} onValueChange={setSelectedStatus}>
-            <Select.Trigger className="flex flex-row gap-[10px] xl:px-3 px-2 py-2 border border-[#DFE4EA] rounded-md outline-none items-center xl:text-base text-sm text-dashboard-secondary hover:border-[#3758F9]">
+            <Select.Trigger className="flex flex-row w-40 gap-[10px] xl:px-3 px-2 py-2 border justify-between border-[#DFE4EA] rounded-md outline-none items-center xl:text-base text-sm text-dashboard-secondary hover:border-[#3758F9]">
               <Select.Value />
               <Select.Icon>
                 <Image src={DropdownIcon} alt="icon" height={18} width={18} />
@@ -93,13 +99,12 @@ export const RequestItem: FC<Props> = ({ request }) => {
           </Select.Root>
         </div>
         <div className="flex md:w-32 pl-3 justify-center">
-          <button
+          <NewButton
             type="button"
             onClick={handleSubmit}
-            className="xl:px-6 px-3 xl:py-[10px] py-2 bg-[#5352BF] hover:bg-[#1B44C8] xl:text-base text-sm xl:font-medium font-normal text-white rounded-md"
           >
             Submit
-          </button>
+          </NewButton>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
 import { Separator } from "../ui/separator";
+import { NewButton } from "../ui/new-button";
 
 interface Props {
   post: Post;
@@ -64,13 +65,12 @@ export const PostItem: FC<Props> = ({ post }) => {
           </Link>
         </div>
         <div className="flex md:w-40 justify-center">
-          <button
+          <NewButton
             type="button"
             onClick={handleSubmit}
-            className="md:px-6 px-3 md:py-[10px] py-2 bg-[#5352BF] hover:bg-[#1B44C8] md:text-base text-sm md:font-medium font-normal text-white rounded-md"
           >
             Submit
-          </button>
+          </NewButton>
         </div>
       </div>
     </div>

@@ -66,7 +66,10 @@ export const columns: ColumnDef<ServiceRequestWithUsers>[] = [
     header: () => <>Number of services</>,
     cell: ({ row }) => (
       <p>
-        {row.original.services.length}
+        {row.original.services
+          ? row.original.services.length
+          : "Sing Installation"
+        }
       </p>
     ),
   },
