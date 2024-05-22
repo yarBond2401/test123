@@ -2,11 +2,10 @@
 
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
-import { E164Number } from 'libphonenumber-js/core';
-import 'react-phone-number-input/style.css'
+import 'react-phone-number-input/style.css';
 
 import { db } from "@/app/firebase";
 import { BrokerType } from "@/app/firestoreTypes";
@@ -47,8 +46,6 @@ const Requests = () => {
     user?.uid
   );
 
-  const [number, setNumber] = useState<E164Number>();
-
   const broker: BrokerType | undefined = brokerData?.[0];
 
   const form = useForm<ServiceSignInRequestCreate>({
@@ -59,8 +56,8 @@ const Requests = () => {
       description: "",
       userId: user?.uid ?? "",
       requestName: "",
-      status: "PendingInstallation",
-      userPhoto: user?.photoURL || undefined,
+      status: "Pending Install",
+      photoUrl: user?.photoURL ?? "",
     },
   });
 
@@ -71,6 +68,7 @@ const Requests = () => {
   }, [user]);
 
   const onSubmit = async (data: ServiceSignInRequestCreate) => {
+    console.log(data);
     const requestData = {
       ...data,
       createdAt: serverTimestamp(),
@@ -148,6 +146,7 @@ const Requests = () => {
                       placeholder="Enter phone number"
                       {...field}
                     />
+                    
                   </FormControl>
                   <FormMessage />
                 </FormItem>

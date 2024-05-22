@@ -1,6 +1,6 @@
 import { OFFERED_SERVICES } from "@/app/constants";
 import { z } from "zod";
-import { E164Number } from 'libphonenumber-js/core';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 // @ts-ignore
 export const serviceRequestCreateSchema = z.object({
@@ -93,15 +93,31 @@ export const serviceRequestWithUsersSchema = serviceRequestSchema.extend({
     }),
 })
 
+const E164NumberSchema = z.string().refine((value) => {
+    const phoneNumber = parsePhoneNumberFromString(value || '');
+    return phoneNumber && phoneNumber.isValid() && phoneNumber.format('E.164') === value;
+  }, {
+    message: 'Invalid E164 number format',
+  });
+
 export const signInRequestCreateSchema = z.object({
     userId: z.string(),
     requestName: z.string().min(3),
     firstName: z.string().default(''),
-    phoneNumber: z.string().default(''),
+    phoneNumber: E164NumberSchema,
     description: z.string().default(''),
-    status: z.enum(["Approved", "PendingInstallation", "Installed"]),
-    userPhoto: z.string(),
+    status: z.enum(["Approved", "Pending Install", "Installed"]),
+    photoUrl: z.string(),
 });
+
+export const signInRequestWithUsersSchema = signInRequestCreateSchema.extend({
+    userDetails: z.object({
+        uid: z.string(),
+        email: z.string(),
+        displayName: z.string(),
+        photoURL: z.string(),
+    }),
+})
 
 export type ServiceRequestWithUsers = z.infer<typeof serviceRequestWithUsersSchema>;
 export type ServiceRequest = z.infer<typeof serviceRequestSchema>;

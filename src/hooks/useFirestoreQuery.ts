@@ -13,9 +13,9 @@ import { db } from "@/app/firebase";
 
 export const useFirestoreQuery = <T>(
   col: string,
-  field: string,
-  operator: WhereFilterOp,
-  value: unknown,
+  field?: string,
+  operator?: WhereFilterOp,
+  value?: unknown,
   options: {
     orderField?: string | FieldPath;
     orderDirection?: OrderByDirection;
@@ -28,20 +28,22 @@ export const useFirestoreQuery = <T>(
       const colRef = collection(db, col);
       let q;
 
-      if (options.orderField && options.orderDirection) {
+      if (field && operator && value && options.orderField && options.orderDirection) {
         q = query(
           colRef,
           where(field, operator, value),
           orderBy(options.orderField, options.orderDirection)
         );
-      } else if (options.orderField) {
+      } else if (field && operator && value && options.orderField) {
         q = query(
           colRef,
           where(field, operator, value),
           orderBy(options.orderField)
         );
-      } else {
+      } else if (field && operator && value) {
         q = query(colRef, where(field, operator, value));
+      } else {
+        q = colRef;
       }
 
       const querySnapshot = await getDocs(q);

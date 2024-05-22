@@ -1,7 +1,7 @@
-import { DocumentData } from "firebase/firestore";
 import { db } from "@/app/firebase";
+import { doc, updateDoc, DocumentData } from "firebase/firestore";
+import { toast } from "@/components/ui/use-toast";
 
-import { SuperRequest } from "@/mock/types";
 import Image from "next/image";
 import * as Select from "@radix-ui/react-select";
 import { FC, useState } from "react";
@@ -16,10 +16,19 @@ interface Props {
 }
 
 export const RequestItem: FC<Props> = ({ request }) => {
-  const dealStatus = ["Approved", "Pending Instal", "Installed"];
-  const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
+  const dealStatus = ["Approved", "Pending Install", "Installed"];
+  const [selectedStatus, setSelectedStatus] = useState(request.status);
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    let docRef = doc(db, "signInRequests", request.id);
+    await updateDoc(docRef, {
+      status: selectedStatus,
+    });
+    toast({
+      title: "Success",
+      description: "Submitted",
+    });
     console.log("submit");
   };
 
@@ -54,7 +63,7 @@ export const RequestItem: FC<Props> = ({ request }) => {
         </div>
         <div className="md:flex w-32 justify-center hidden">
           <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
-            {request.createdAt}
+          {format(request.createdAt.toDate(), "dd/MM/yyyy")}
           </p>
         </div>
         <div className="flex w-52 pl-4 justify-center">
@@ -99,12 +108,13 @@ export const RequestItem: FC<Props> = ({ request }) => {
           </Select.Root>
         </div>
         <div className="flex md:w-32 pl-3 justify-center">
-          <NewButton
-            type="button"
+          <button
+            className="md:px-6 px-3 md:py-[10px] py-2 bg-[#5352BF] hover:bg-[#1B44C8] md:text-base text-sm md:font-medium font-normal text-white rounded-md"
+            type="submit"
             onClick={handleSubmit}
           >
             Submit
-          </NewButton>
+          </button>
         </div>
       </div>
     </div>

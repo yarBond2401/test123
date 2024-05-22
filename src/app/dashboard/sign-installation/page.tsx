@@ -2,17 +2,30 @@
 
 import { getDocs, collection, QuerySnapshot, doc, getDoc, DocumentData } from "firebase/firestore";
 import { db } from "@/app/firebase";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
 import { RequestItem } from "@/components/sing-installation/Request";
 import { Th } from "@/components/Th";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { superRequests } from "@/mock/requests";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
+import { serviceRequestSchema, signInRequestWithUsersSchema } from "../requests/schema";
+import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
+import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
+import { BrokerType } from "@/app/firestoreTypes";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 
 const SignInstallation = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const { user } = useRequireLogin({
+    onUnauthenticated: () => {
+      router.push("/auth/signin");
+    },
+  });
   const [requests, setRequests] = useState<DocumentData[]>([]);
 
   useEffect(() => {
@@ -21,9 +34,6 @@ const SignInstallation = () => {
     const currentRequests: DocumentData[] = [];
 
     for (const docItem of data.docs) {
-    // data.forEach((docItem) => {
-      // const userRef = doc(db, "brokers", docItem.data().userId);
-      // let userSnap = await getDoc(userRef);
       currentRequests.push({...docItem.data(), id: docItem.id})
     };
 
@@ -67,8 +77,8 @@ const SignInstallation = () => {
           </div>
           <div className="flex flex-col">
             {!!filteredRequests.length ? (
-              filteredRequests.map((request) => (
-                <RequestItem key={request.id} request={request} />
+              filteredRequests.map((request, i) => (
+                <RequestItem key={i} request={request} />
               ))
             ) : (
               <div className="flex flex-col w-full">

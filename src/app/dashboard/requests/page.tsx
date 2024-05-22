@@ -20,11 +20,9 @@ import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 
-import { columns } from "./components/columns";
-import { DataTable } from "./components/data-table";
-import { serviceRequestSchema, signInRequestCreateSchema } from "./schema";
-import { Separator } from "@/components/ui/separator";
-import { NewButton } from "@/components/ui/new-button";
+import { columns, singInstallColumns } from "./components/columns";
+import { DataTable, SingInDataTable } from "./components/data-table";
+import { serviceRequestSchema, ServiceSignInRequestCreate, signInRequestCreateSchema } from "./schema";
 
 const Requests = () => {
   const router = useRouter();
@@ -69,25 +67,25 @@ const Requests = () => {
       createdAt: requestsData[idx].createdAt,
     }));
 
-    // @ts-ignore
-    if (usersDetails) {
-      parsed = parsed.map((request) => ({
-        ...request,
-        // @ts-ignore
-        userDetails: usersDetails.find(
-          (user: any) => user.uid === request.userId
-        ) as {
-          displayName: string;
-          photoURL: string;
-          email: string;
-        },
-      }));
-    }
+    // // @ts-ignore
+    // if (usersDetails) {
+    //   parsed = parsed.map((request) => ({
+    //     ...request,
+    //     // @ts-ignore
+    //     userDetails: usersDetails.find(
+    //       (user: any) => user.uid === request.userId
+    //     ) as {
+    //       displayName: string;
+    //       photoURL: string;
+    //       email: string;
+    //     },
+    //   }));
+    // }
 
     return parsed;
-  }, [requestsData, usersDetails]);
+  }, [requestsData]);
 
-  const [singInRequests, setSingInRequests] = useState<DocumentData[]>([]);
+  const [singInRequests, setRequests] = useState<DocumentData[]>([]);
 
   useEffect(() => {
     async function fetch() {
@@ -95,40 +93,28 @@ const Requests = () => {
     const currentRequests: DocumentData[] = [];
 
     for (const docItem of data.docs) {
-    // data.forEach((docItem) => {
-      // const userRef = doc(db, "brokers", docItem.data().userId);
-      // let userSnap = await getDoc(userRef);
-      const date = new Date(docItem.data().createdAt);
-      const formattedDate = date.getDate() + "/" + date.getMonth()+1 + "/" + date.getFullYear();
-      console.log(date);
       currentRequests.push({...docItem.data(), id: docItem.id})
     };
 
-    setSingInRequests(currentRequests);
+    setRequests(currentRequests);
     }
 
     fetch();
 },[]);
 
-  // useEffect(() => {
-  //   console.log(requests);
-  //   console.log(usersDetails);
-  // }, [requests, usersDetails]);
-
   return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="w-full md:col-span-2 lg:col-span-4">
-        <Tabs.Root className="" defaultValue="tab1">
+        <Tabs.Root defaultValue="tab1">
           <CardHeader>
-            <Tabs.List className="flex flex-row gap-4" aria-label="Manage your account">
-              <Tabs.Trigger className="data-[state=active]:underline" value="tab1">
-                <CardTitle className="">Service Requests</CardTitle>
+            <Tabs.List className="flex flex-row gap-4 border-b" aria-label="Manage your account">
+              <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab1">
+                <CardTitle >Service Requests</CardTitle>
               </Tabs.Trigger>
-              <Tabs.Trigger className="data-[state=active]:underline" value="tab2">
-                <CardTitle className="">Sing Installation Requests</CardTitle>
+              <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab2">
+                <CardTitle >Sing Installation Requests</CardTitle>
               </Tabs.Trigger>
             </Tabs.List>
-            <Separator />
           </CardHeader>
           <Tabs.Content className="" value="tab1">
             <CardContent>
@@ -153,8 +139,8 @@ const Requests = () => {
               >
                 Add a Sign Installation Request
               </Button>
-              <DataTable
-                columns={columns}
+              <SingInDataTable
+                columns={singInstallColumns}
                 // @ts-ignore
                 rows={singInRequests}
               />
