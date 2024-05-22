@@ -1,5 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { ServiceRequest, ServiceRequestWithUsers, ServiceSignInRequestCreate } from "../schema";
+import {
+  ServiceRequest,
+  ServiceRequestWithUsers,
+  ServiceSignInRequestCreate,
+  ServiceSignInRequestCreateFromDb, ServiceSignInRequestSchema
+} from "../schema";
 import { UsersActions } from "@/components/UsersActions";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -86,7 +91,8 @@ export const columns: ColumnDef<ServiceRequestWithUsers>[] = [
   },
 ];
 
-export const singInstallColumns: ColumnDef<DocumentData>[] = [
+
+export const singInstallColumns: ColumnDef<ServiceSignInRequestSchema>[] = [
   {
     id: "createdBy",
     header: () => <>Created By</>,
@@ -94,17 +100,17 @@ export const singInstallColumns: ColumnDef<DocumentData>[] = [
       <>
         <div className="flex items-center gap-1">
           {
-            row.original?.firstName ?
+            row.original?.userInfo ?
               <>
                 <Image
-                  src={row.original.photoUrl || defaultAvatar }
+                  src={row.original.userInfo.photoURL || defaultAvatar }
                   width={32}
                   height={32}
                   className="rounded-full"
-                  alt={`${row.original.firstName} profile picture`}
+                  alt={`${row.original.userInfo.displayName} profile picture`}
                 />
                 <p>
-                  {row.original.firstName}
+                  {row.original.userInfo.displayName}
                 </p>
               </> :
               <>

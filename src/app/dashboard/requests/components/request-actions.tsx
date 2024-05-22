@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Row } from "@tanstack/react-table";
 
-import { ServiceRequestWithUsers, ServiceSignInRequestCreate } from "../schema";
+import {ServiceRequestWithUsers, ServiceSignInRequestCreate, ServiceSignInRequestSchema} from "../schema";
 import { MdMoreVert } from "react-icons/md";
 import { toast } from "@/components/ui/use-toast";
 
@@ -47,14 +47,16 @@ export const RequestActions: React.FC<Props> = ({ row }) => {
 };
 
 interface SingInProps {
-  row: Row<DocumentData>;
+  row: Row<ServiceSignInRequestSchema>;
+  deleteElement: (id: string) => void;
 }
 
-export const SinInRequestActions: React.FC<SingInProps> = ({ row }) => {
+export const SinInRequestActions: React.FC<SingInProps> = ({ row, deleteElement }) => {
   const handleDelete = async (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     let docRef = doc(db, "signInRequests", row.original.id);
     await deleteDoc(docRef);
+    deleteElement(row.original.id);
     toast({
       title: "Success",
       description: "Request deleted",
@@ -63,7 +65,7 @@ export const SinInRequestActions: React.FC<SingInProps> = ({ row }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="flex" variant="ghost" type="button">
+        <Button disabled={row.original.status !== 'Pending Install'} className="flex" variant="ghost" type="button">
           <MdMoreVert />
           <span className="sr-only">Open menu</span>
         </Button>

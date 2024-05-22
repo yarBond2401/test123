@@ -102,6 +102,18 @@ const E164NumberSchema = z.string().refine((value) => {
 
 export const signInRequestCreateSchema = z.object({
     userId: z.string(),
+    userInfo: z.object({
+        email: z.string().nullable(),
+        photoURL: z.string().nullable(),
+        uid: z.string().nullable(),
+        displayName: z.string().nullable(),
+    }).nullable(),
+    signInApprover: z.object({
+        email: z.string().nullable(),
+        photoURL: z.string().nullable(),
+        uid: z.string().nullable(),
+        displayName: z.string().nullable(),
+    }).nullable(),
     requestName: z.string().min(3),
     firstName: z.string().default(''),
     phoneNumber: E164NumberSchema,
@@ -119,7 +131,27 @@ export const signInRequestWithUsersSchema = signInRequestCreateSchema.extend({
     }),
 })
 
+export const signInRequestSchema = signInRequestCreateSchema.extend({
+    id: z.string(),
+    datetime: z.object({
+        seconds: z.number(),
+        nanoseconds: z.number(),
+        // method that returns JS date
+        toDate: z.any(),
+    }),
+    createdAt: z.object({
+        seconds: z.number(),
+        nanoseconds: z.number(),
+        // method that returns JS date
+        toDate: z.any(),
+    }),
+})
+
+
+
+
 export type ServiceRequestWithUsers = z.infer<typeof serviceRequestWithUsersSchema>;
 export type ServiceRequest = z.infer<typeof serviceRequestSchema>;
 export type ServiceRequestCreate = z.infer<typeof serviceRequestCreateSchema>;
 export type ServiceSignInRequestCreate = z.infer<typeof signInRequestCreateSchema>;
+export type ServiceSignInRequestSchema = z.infer<typeof signInRequestSchema>;

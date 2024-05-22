@@ -54,6 +54,13 @@ const Requests = () => {
       firstName: "",
       phoneNumber: "",
       description: "",
+      userInfo: {
+          email: user?.email || '',
+          photoURL: user?.photoURL || '',
+          uid: user?.uid || '',
+          displayName: user?.displayName || '',
+      },
+      signInApprover: null,
       userId: user?.uid ?? "",
       requestName: "",
       status: "Pending Install",
@@ -64,6 +71,12 @@ const Requests = () => {
   useEffect(() => {
     if (user) {
       form.setValue("userId", user.uid);
+      form.setValue("userInfo", {
+            email: user?.email || '',
+            photoURL: user?.photoURL || '',
+            uid: user?.uid || '',
+            displayName: user?.displayName || ''
+        });
     }
   }, [user]);
 

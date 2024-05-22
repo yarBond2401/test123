@@ -22,7 +22,10 @@ import { useRequireLogin } from "@/hooks/useRequireLogin";
 
 import { columns, singInstallColumns } from "./components/columns";
 import { DataTable, SingInDataTable } from "./components/data-table";
-import { serviceRequestSchema, ServiceSignInRequestCreate, signInRequestCreateSchema } from "./schema";
+import {
+  serviceRequestSchema,
+  ServiceSignInRequestSchema,
+} from "./schema";
 
 const Requests = () => {
   const router = useRouter();
@@ -85,21 +88,21 @@ const Requests = () => {
     return parsed;
   }, [requestsData]);
 
-  const [singInRequests, setRequests] = useState<DocumentData[]>([]);
+  const [singInRequests, setRequests] = useState<ServiceSignInRequestSchema[]>([]);
 
-  useEffect(() => {
-    async function fetch() {
+  async function getSignInRequest() {
     const data = await getDocs(collection(db, "signInRequests"));
-    const currentRequests: DocumentData[] = [];
+    const currentRequests: ServiceSignInRequestSchema[] = [];
 
     for (const docItem of data.docs) {
-      currentRequests.push({...docItem.data(), id: docItem.id})
+      currentRequests.push({...docItem.data(), id: docItem.id} as ServiceSignInRequestSchema)
     };
 
     setRequests(currentRequests);
-    }
+  }
 
-    fetch();
+  useEffect(() => {
+    getSignInRequest();
 },[]);
 
   return (
@@ -112,13 +115,13 @@ const Requests = () => {
                 <CardTitle >Service Requests</CardTitle>
               </Tabs.Trigger>
               <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab2">
-                <CardTitle >Sing Installation Requests</CardTitle>
+                <CardTitle >Sign Installation Requests</CardTitle>
               </Tabs.Trigger>
             </Tabs.List>
           </CardHeader>
           <Tabs.Content className="" value="tab1">
             <CardContent>
-              <Button 
+              <Button
                 onClick={() => router.push("/dashboard/requests/add")}
                 type="button"
               >
@@ -140,8 +143,7 @@ const Requests = () => {
                 Add a Sign Installation Request
               </Button>
               <SingInDataTable
-                columns={singInstallColumns}
-                // @ts-ignore
+                setRequests={setRequests}
                 rows={singInRequests}
               />
             </CardContent>

@@ -10,27 +10,40 @@ import DropdownIcon from "@/icons/icon=chevron-down-grey.svg";
 import { NewButton } from "../ui/new-button";
 import defaultAvatar from "@/images/default-user-picture.jpg";
 import { format } from "date-fns";
+import {ServiceSignInRequestSchema} from "@/app/dashboard/requests/schema";
+import type {User} from "firebase/auth";
 
 interface Props {
-  request: DocumentData;
+  user: User | null;
+  request: ServiceSignInRequestSchema;
 }
 
-export const RequestItem: FC<Props> = ({ request }) => {
+export const RequestItem: FC<Props> = ({ request, user }) => {
   const dealStatus = ["Approved", "Pending Install", "Installed"];
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(request.status);
 
   const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
+    setIsLoading(true);
     let docRef = doc(db, "signInRequests", request.id);
     await updateDoc(docRef, {
       status: selectedStatus,
+      signInApprover: {
+        email: user?.email || '',
+        photoURL: user?.photoURL || '',
+        uid: user?.uid || '',
+        displayName: user?.displayName || '',
+      },
     });
     toast({
       title: "Success",
       description: "Submitted",
     });
+    setIsLoading(false);
     console.log("submit");
   };
+
 
   return (
     <div className="flex flex-col w-full">
@@ -39,8 +52,10 @@ export const RequestItem: FC<Props> = ({ request }) => {
         <div className="flex flex-col gap-2">
           <div className="flex flex-row w-32 gap-3 items-center box-border">
             <Image
-              src={request.userPhoto || defaultAvatar}
-              alt={request.firstName}
+                width={32}
+                height={32}
+              src={request.userInfo?.photoURL || defaultAvatar}
+              alt={'photo'}
               className="h-10 w-10 rounded-full"
             />
             <p className="text-sm text-dashboard-main font-medium">
@@ -108,7 +123,7 @@ export const RequestItem: FC<Props> = ({ request }) => {
           </Select.Root>
         </div>
         <div className="flex md:w-32 pl-3 justify-center">
-          <button
+          <button disabled={isLoading}
             className="md:px-6 px-3 md:py-[10px] py-2 bg-[#5352BF] hover:bg-[#1B44C8] md:text-base text-sm md:font-medium font-normal text-white rounded-md"
             type="submit"
             onClick={handleSubmit}

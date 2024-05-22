@@ -12,7 +12,7 @@ import { superRequests } from "@/mock/requests";
 
 import { useEffect, useMemo, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
-import { serviceRequestSchema, signInRequestWithUsersSchema } from "../requests/schema";
+import {serviceRequestSchema, ServiceSignInRequestSchema, signInRequestWithUsersSchema} from "../requests/schema";
 import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { BrokerType } from "@/app/firestoreTypes";
@@ -26,15 +26,15 @@ const SignInstallation = () => {
       router.push("/auth/signin");
     },
   });
-  const [requests, setRequests] = useState<DocumentData[]>([]);
+  const [requests, setRequests] = useState<ServiceSignInRequestSchema[]>([]);
 
   useEffect(() => {
     async function fetch() {
     const data = await getDocs(collection(db, "signInRequests"));
-    const currentRequests: DocumentData[] = [];
+    const currentRequests: ServiceSignInRequestSchema[] = [];
 
     for (const docItem of data.docs) {
-      currentRequests.push({...docItem.data(), id: docItem.id})
+      currentRequests.push({...docItem.data(), id: docItem.id} as ServiceSignInRequestSchema)
     };
 
     setRequests(currentRequests);
@@ -78,7 +78,7 @@ const SignInstallation = () => {
           <div className="flex flex-col">
             {!!filteredRequests.length ? (
               filteredRequests.map((request, i) => (
-                <RequestItem key={i} request={request} />
+                <RequestItem key={i} user={user} request={request} />
               ))
             ) : (
               <div className="flex flex-col w-full">
