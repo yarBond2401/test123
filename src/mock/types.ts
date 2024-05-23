@@ -1,10 +1,15 @@
 import { StaticImageData } from "next/image";
 
-export interface InboxItemType {
+interface ChatUser {
   photo: StaticImageData,
   name: string,
-  massage: string,
   online: boolean
+}
+
+export interface ChatItem {
+  id: string,
+  userDetails: ChatUser,
+  lastMessage: string,
 }
 
 export interface DealPartner {
@@ -28,9 +33,9 @@ export interface Vendor {
   photo: StaticImageData,
   level: string,
   success: number,
-  postsAvailable?: number,
-  postsInstalled?: number,
-  rating: number,
+  postsAvailable?: string,
+  postsInstalled?: string,
+  rating: string,
   response: number,
   totalMoney: string, 
   totalMoneyInt: string,
@@ -47,10 +52,10 @@ export interface Agent {
   role: "agent",
   photo: StaticImageData,
   level: string,
-  postsAvailable: number,
-  postsInstalled: number,
-  rating: number,
-  response: number,
+  postsAvailable: string,
+  postsInstalled: string,
+  rating: string,
+  response: string,
   totalMoney: string, 
   totalMoneyInt: string,
   totalWork: string,
@@ -59,4 +64,30 @@ export interface Agent {
   totalHoursInt: string,
   monthlyAmount: string,
   annualAmount: string,
+}
+
+interface Service {
+  name: string;
+  duration: number;
+}
+
+export interface Post {
+  id: string;
+  createdBy: string;
+  photo: StaticImageData; 
+  date: string;
+  services: Service[];
+  serviceNumber: number;
+  subtotal: number;
+  tax: number;
+}
+
+export interface SuperRequest {
+  id: string;
+  createdBy: string;
+  photo: StaticImageData;
+  email: string;
+  date: string; 
+  notes: string;
+  status: string;
 }

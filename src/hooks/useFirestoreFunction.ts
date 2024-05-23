@@ -10,7 +10,6 @@ interface FirestoreFunction {
 }
 
 export const useFirestoreFunction = <T, >({ name, payload }: FirestoreFunction) => {
-    console.log('test');
   const swrData = useSWR<T, Error>(
     payload?.uids ? [name, payload] : null,
     async ([name, payload]) => {

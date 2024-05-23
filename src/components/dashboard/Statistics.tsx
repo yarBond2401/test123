@@ -16,7 +16,7 @@ export const Statistics: FC<Props> = ({ icon, result, total, grow }) => {
   const isGrow = +grow > 0;
 
   return (
-    <div className="flex bg-white border border-[#DFE4EA] rounded-10 flex-col w-full xl:p-22 p-4 gap-5">
+    <div className="flex shadow bg-white border border-[#DFE4EA] rounded-10 flex-col w-full xl:p-22 p-4 gap-5">
       <div className="flex items-center justify-center rounded-full bg-[#5296BF] w-[50px] h-[50px]">
         <Image src={icon} alt="icon" height={24} width={24} />
       </div>

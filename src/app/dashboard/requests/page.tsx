@@ -1,26 +1,38 @@
 "use client";
 
-import React, { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { z } from 'zod';
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+import * as Tabs from "@radix-ui/react-tabs";
 
-import { BrokerType } from '@/app/firestoreTypes';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useFirestoreFunction } from '@/hooks/useFirestoreFunction';
-import { useFirestoreQuery } from '@/hooks/useFirestoreQuery';
-import { useRequireLogin } from '@/hooks/useRequireLogin';
+import { getDocs, collection, QuerySnapshot, doc, getDoc, DocumentData } from "firebase/firestore";
+import { db } from "@/app/firebase";
+import { BrokerType } from "@/app/firestoreTypes";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
+import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 
-import { columns } from './components/columns';
-import { DataTable } from './components/data-table';
-import { serviceRequestSchema } from './schema';
+import { columns } from "./components/columns";
+import { DataTable, SingInDataTable } from "./components/data-table";
+import {
+  serviceRequestSchema,
+  ServiceSignInRequestSchema,
+} from "./schema";
 
 const Requests = () => {
   const router = useRouter();
   const { user } = useRequireLogin({
     onUnauthenticated: () => {
       router.push("/auth/signin");
-    }
+    },
   });
 
   const { data: brokerData } = useFirestoreQuery<BrokerType[]>(
@@ -38,76 +50,92 @@ const Requests = () => {
     broker?.id,
     {
       orderField: "createdAt",
-      orderDirection: "desc"
+      orderDirection: "desc",
     }
   );
 
-  const { data: usersDetails } = useFirestoreFunction({
-    name: "get_users_info",
-    // @ts-ignore
-    payload: requestsData?.length ?
-      { uids: requestsData?.map(request => request.userId) } : null
-  })
-
-
   const requests = useMemo(() => {
-    let parsed = z.array(serviceRequestSchema).parse(
-      requestsData ?? []
-    )
+    let parsed = z.array(serviceRequestSchema).parse(requestsData ?? []);
     parsed = parsed.map((request, idx) => ({
       ...request,
       // @ts-ignore
-      createdAt: requestsData[idx].createdAt
+      createdAt: requestsData[idx].createdAt,
     }));
 
-    // @ts-ignore
-    if (usersDetails) {
-      parsed = parsed.map((request) => ({
-        ...request,
+    parsed = parsed.map((request) => ({
+         ...request,
         // @ts-ignore
-        userDetails: usersDetails.find((user: any) => user.uid === request.userId) as {
+        userDetails: {displayName: user?.displayName || '', photoURL: user?.photoURL || '', email: user?.email || ''} as {
           displayName: string;
           photoURL: string;
           email: string;
-        }
-      }))
-    }
+        },
+    }));
 
     return parsed;
-  }, [requestsData, usersDetails]);
+  }, [requestsData]);
 
+  const [singInRequests, setRequests] = useState<ServiceSignInRequestSchema[]>([]);
 
-  // useEffect(() => {
-  //   console.log(requests);
-  //   console.log(usersDetails);
-  // }, [requests, usersDetails]);
+  async function getSignInRequest() {
+    const data = await getDocs(collection(db, "signInRequests"));
+    const currentRequests: ServiceSignInRequestSchema[] = [];
 
+    for (const docItem of data.docs) {
+      currentRequests.push({...docItem.data(), id: docItem.id} as ServiceSignInRequestSchema)
+    };
+
+    setRequests(currentRequests);
+  }
+
+  useEffect(() => {
+    getSignInRequest();
+},[]);
 
   return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="w-full md:col-span-2 lg:col-span-4">
-        <CardHeader>
-          <CardTitle>
-            Service Requests
-          </CardTitle>
-          <CardDescription>
-            {"This is where you can view and manage all your and member's service requests"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            className="mb-4"
-            onClick={() => router.push("/dashboard/requests/add")}
-            type="button"
-          >
-            Add a service request
-          </Button>
-          <DataTable
-            columns={columns}
-            // @ts-ignore
-            rows={requests}
-          />
-        </CardContent>
+        <Tabs.Root defaultValue="tab1">
+          <CardHeader>
+            <Tabs.List className="flex flex-row gap-4 border-b" aria-label="Manage your account">
+              <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab1">
+                <CardTitle >Service Requests</CardTitle>
+              </Tabs.Trigger>
+              <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab2">
+                <CardTitle >Sign Installation Requests</CardTitle>
+              </Tabs.Trigger>
+            </Tabs.List>
+          </CardHeader>
+          <Tabs.Content className="" value="tab1">
+            <CardContent>
+              <Button
+                onClick={() => router.push("/dashboard/requests/add")}
+                type="button"
+              >
+                Add a service request
+              </Button>
+              <DataTable
+                columns={columns}
+                // @ts-ignore
+                rows={requests}
+              />
+            </CardContent>
+          </Tabs.Content>
+          <Tabs.Content className="TabsContent" value="tab2">
+            <CardContent>
+              <Button
+                onClick={() => router.push("/dashboard/requests/signInRequest")}
+                type="button"
+              >
+                Add a Sign Installation Request
+              </Button>
+              <SingInDataTable
+                setRequests={setRequests}
+                rows={singInRequests}
+              />
+            </CardContent>
+          </Tabs.Content>
+        </Tabs.Root>
       </Card>
     </div>
   );

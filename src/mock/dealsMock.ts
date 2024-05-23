@@ -33,7 +33,7 @@ export const dealsMock: DealType[] = [
   {
     id: "02",
     partner: partnersMock[1],
-    deal: "Real estate photo shoot",
+    deal: "Drone photo shoot",
     date: "15/04/2024",
     isCompleted: true,
     income: 400,
@@ -41,7 +41,7 @@ export const dealsMock: DealType[] = [
   {
     id: "03",
     partner: partnersMock[2],
-    deal: "Real estate photo shoot",
+    deal: "Videography",
     date: "08/02/2024",
     isCompleted: true,
     income: 200,

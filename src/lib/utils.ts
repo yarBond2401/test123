@@ -12,11 +12,11 @@ export function capitalize(str: string) {
 
 export function formatChatMessageTime(date: Date) {
   if (isToday(date)) {
-    return format(date, "HH:mm");
+    return format(date, "h:mm" + "aaa");
   } else if (isThisYear(date)) {
-    return format(date, "MM/dd HH:mm");
+    return format(date, "MM/dd h:mm aaa");
   } else {
-    return format(date, "yyyy/MM/dd HH:mm");
+    return format(date, "yyyy/MM/dd h:mm aaa");
   }
 }
 

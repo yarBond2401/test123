@@ -1,11 +1,17 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { ServiceRequest, ServiceRequestWithUsers } from "../schema";
+import {
+  ServiceRequest,
+  ServiceRequestWithUsers,
+  ServiceSignInRequestCreate,
+} from "../schema";
 import { UsersActions } from "@/components/UsersActions";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RequestActions } from "./request-actions";
+import { RequestActions, SinInRequestActions } from "./request-actions";
+import defaultAvatar from "@/images/default-user-picture.jpg";
+import { DocumentData } from "firebase/firestore";
 
 export const columns: ColumnDef<ServiceRequestWithUsers>[] = [
   {
@@ -25,7 +31,7 @@ export const columns: ColumnDef<ServiceRequestWithUsers>[] = [
                   alt={`${row.original.userDetails.displayName} profile picture`}
                 />
                 <p>
-                  {row.original.userDetails.displayName}
+                  {row.original.userDetails.displayName || "User Name"}
                 </p>
               </> :
               <>
@@ -66,7 +72,10 @@ export const columns: ColumnDef<ServiceRequestWithUsers>[] = [
     header: () => <>Number of services</>,
     cell: ({ row }) => (
       <p>
-        {row.original.services.length}
+        {row.original.services
+          ? row.original.services.length
+          : "Sing Installation"
+        }
       </p>
     ),
   },

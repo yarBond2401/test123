@@ -48,7 +48,7 @@ const DETAILS_URL = "https://places.googleapis.com/v1/places/";
 
 const MAPS_HEADERS = {
     "Content-Type": "application/json",
-    "X-Goog-Api-Key": process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string,
+    "X-Goog-Api-Key": 'AIzaSyD524tP59AM7saqTbA33HvU4IU98bdxy90',
 };
 
 export const GeoPicker: React.FC<GeoPickerProps> = ({ form }) => {

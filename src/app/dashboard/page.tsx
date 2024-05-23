@@ -13,7 +13,7 @@ import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Statistics } from "@/components/dashboard/Statistics";
-import { InboxItem } from "@/components/dashboard/InboxItem";
+import { InboxItem } from "@/components/chatItem/InboxItem";
 
 import defaultAvatar from "@/images/default-user-picture.jpg";
 import iconStar from "@/icons/icon=star.svg";
@@ -29,6 +29,8 @@ import { elements } from "chart.js/auto";
 import { agent, vendor } from "@/mock/users";
 import { useIsVendor } from "@/hooks/useIsVendor";
 import Loading from "../loading";
+import useUserInfo from "@/hooks/useUserInfo";
+import {Agent, Vendor} from "@/mock/types";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
@@ -41,7 +43,7 @@ const Dashboard = () => {
     },
   });
 
-  const mockUser = useIsVendor(user) ? vendor : agent;
+  const { mockUser} = useUserInfo(user);
 
   if (!user) {
     return <Loading />;
@@ -95,10 +97,10 @@ const Dashboard = () => {
           <CardTitle>Dashboard</CardTitle>
           <Separator />
         </CardHeader>
-        <CardContent>
+        {mockUser && <CardContent>
           <div className="flex flex-col md:gap-6 gap-4 w-full">
             <div className="grid grid-cols-1 md:gap-6 gap-4 md:grid-cols-2 lg:grid-cols-4 w-full">
-              <div className="flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
+              <div className="shadow flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
                 <div className="flex xl:flex-row lg:flex-col gap-[15px] items-center xl:p-22 p-4">
                   <Image
                     src={user.photoURL || defaultAvatar}
@@ -156,10 +158,10 @@ const Dashboard = () => {
                           My Level
                         </p>
                         <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                          {mockUser.postsInstalled <= 50
+                          {Number(mockUser.postsInstalled) <= 50
                             ? "Bronze"
-                            : mockUser.postsInstalled > 50 &&
-                              mockUser.postsInstalled <= 150
+                            : Number(mockUser.postsInstalled) > 50 &&
+                              Number(mockUser.postsInstalled) <= 150
                             ? "Gold"
                             : "Platinum"}
                         </p>
@@ -213,7 +215,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid md:gap-6 gap-4 grid-cols-3 w-full col-span-3">
-                  <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
+                  <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 shadow bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
                         ${mockUser.monthlyAmount}
@@ -248,7 +250,7 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
+                  <div className="flex shadow xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main  xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
                         ${mockUser.annualAmount}
@@ -301,7 +303,7 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:gap-6 gap-4 lg:grid-cols-4 w-full">
-              <div className="flex flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-1">
+              <div className="flex shadow flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-1">
                 <div className="flex flex-row justify-between p-5 items-center">
                   <p className="text-dashboard-main xl:text-xl leading-6 font-medium md:text-base text-xl">
                     Inbox
@@ -316,11 +318,17 @@ const Dashboard = () => {
                 <Separator />
                 <div className="flex lg:flex-col md:flex-row flex-col 2xl:px-5 xl:px-3 pt-5 lg:px-0 px-3">
                   {inboxItems.map((item) => {
-                    return <InboxItem key={item.name} item={item} />;
+                    return (
+                      <InboxItem
+                        key={item.id}
+                        item={item}
+                        messageStyles="font-medium text-dashboard-secondary"
+                      />
+                    );
                   })}
                 </div>
               </div>
-              <div className="flex flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
+              <div className="flex flex-col shadow bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
                 <div className="flex flex-row justify-between py-3 xl:px-6 lg:px-2 px-6 items-center">
                   <p className="text-dashboard-main xl:text-xl text-lg leading-6 font-medium">
                     {selectedStatus}
@@ -376,7 +384,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </CardContent>
+        </CardContent>}
       </Card>
     </div>
   );

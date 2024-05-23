@@ -1,5 +1,6 @@
 import { OFFERED_SERVICES } from "@/app/constants";
 import { z } from "zod";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 // @ts-ignore
 export const serviceRequestCreateSchema = z.object({
@@ -92,6 +93,65 @@ export const serviceRequestWithUsersSchema = serviceRequestSchema.extend({
     }),
 })
 
+const E164NumberSchema = z.string().refine((value) => {
+    const phoneNumber = parsePhoneNumberFromString(value || '');
+    return phoneNumber && phoneNumber.isValid() && phoneNumber.format('E.164') === value;
+  }, {
+    message: 'Invalid E164 number format',
+  });
+
+export const signInRequestCreateSchema = z.object({
+    userId: z.string(),
+    userInfo: z.object({
+        email: z.string().nullable(),
+        photoURL: z.string().nullable(),
+        uid: z.string().nullable(),
+        displayName: z.string().nullable(),
+    }).nullable(),
+    signInApprover: z.object({
+        email: z.string().nullable(),
+        photoURL: z.string().nullable(),
+        uid: z.string().nullable(),
+        displayName: z.string().nullable(),
+    }).nullable(),
+    requestName: z.string().min(3),
+    firstName: z.string().default(''),
+    phoneNumber: E164NumberSchema,
+    description: z.string().default(''),
+    status: z.enum(["Approved", "Pending Install", "Installed"]),
+    photoUrl: z.string(),
+});
+
+export const signInRequestWithUsersSchema = signInRequestCreateSchema.extend({
+    userDetails: z.object({
+        uid: z.string(),
+        email: z.string(),
+        displayName: z.string(),
+        photoURL: z.string(),
+    }),
+})
+
+export const signInRequestSchema = signInRequestCreateSchema.extend({
+    id: z.string(),
+    datetime: z.object({
+        seconds: z.number(),
+        nanoseconds: z.number(),
+        // method that returns JS date
+        toDate: z.any(),
+    }),
+    createdAt: z.object({
+        seconds: z.number(),
+        nanoseconds: z.number(),
+        // method that returns JS date
+        toDate: z.any(),
+    }),
+})
+
+
+
+
 export type ServiceRequestWithUsers = z.infer<typeof serviceRequestWithUsersSchema>;
 export type ServiceRequest = z.infer<typeof serviceRequestSchema>;
 export type ServiceRequestCreate = z.infer<typeof serviceRequestCreateSchema>;
+export type ServiceSignInRequestCreate = z.infer<typeof signInRequestCreateSchema>;
+export type ServiceSignInRequestSchema = z.infer<typeof signInRequestSchema>;

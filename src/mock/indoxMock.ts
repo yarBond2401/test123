@@ -1,32 +1,44 @@
-import { InboxItemType } from "./types";
+import { ChatItem } from "./types";
 import firstAvatar from "@/images/mock/image-1.jpg";
 import secondAvatar from "@/images/mock/image-2.jpg";
 import thirdAvatar from "@/images/mock/image-3.jpg";
 import fourthAvatar from "@/images/mock/image-4.jpg";
 
-export const inboxItems: InboxItemType[] = [
+export const inboxItems: ChatItem[] = [
   {
-    photo: firstAvatar,
-    name: "Devid Heilo",
-    massage: "I cam across your profile and...",
-    online: true,
+    id: "01",
+    userDetails: {
+      photo: firstAvatar,
+      name: "Devid Heilo",
+      online: true,
+    },
+    lastMessage: "I cam across your profile and...",
   },
   {
-    photo: secondAvatar,
-    name: "Henry Fisher",
-    massage: "I like your confidence 💪 ",
-    online: true,
+    id: "02",
+    userDetails: {
+      photo: secondAvatar,
+      name: "Henry Fisher",
+      online: true,
+    },
+    lastMessage: "I like your confidence 💪",
   },
   {
-    photo: thirdAvatar,
-    name: "Wilium Smith",
-    massage: "Can you share your offer?",
-    online: true,
+    id: "03",
+    userDetails: {
+      photo: thirdAvatar,
+      name: "Wilium Smith",
+      online: true,
+    },
+    lastMessage: "Can you share your offer?",
   },
   {
-    photo: fourthAvatar,
-    name: "Henry Deco",
-    massage: "I’m waiting for you response!",
-    online: false,
+    id: "04",
+    userDetails: {
+      photo: fourthAvatar,
+      name: "Henry Deco",
+      online: false,
+    },
+    lastMessage: "I’m waiting for you response!",
   },
 ];
