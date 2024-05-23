@@ -43,6 +43,13 @@ const Dashboard = () => {
     },
   });
 
+   useEffect(()=>{
+    if(user?.email === 'info@mrkit.io'){
+      router.push("dashboard/sign-installation");
+    }
+
+  }, [user])
+
   const { mockUser} = useUserInfo(user);
 
   if (!user) {
