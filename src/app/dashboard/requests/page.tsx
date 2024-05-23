@@ -20,7 +20,7 @@ import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 
-import { columns, singInstallColumns } from "./components/columns";
+import { columns } from "./components/columns";
 import { DataTable, SingInDataTable } from "./components/data-table";
 import {
   serviceRequestSchema,
@@ -54,14 +54,6 @@ const Requests = () => {
     }
   );
 
-  const { data: usersDetails } = useFirestoreFunction({
-    name: "get_users_info",
-    // @ts-ignore
-    payload: requestsData?.length
-      ? { uids: requestsData?.map((request) => request.userId) }
-      : null,
-  });
-
   const requests = useMemo(() => {
     let parsed = z.array(serviceRequestSchema).parse(requestsData ?? []);
     parsed = parsed.map((request, idx) => ({
@@ -70,20 +62,15 @@ const Requests = () => {
       createdAt: requestsData[idx].createdAt,
     }));
 
-    // // @ts-ignore
-    // if (usersDetails) {
-    //   parsed = parsed.map((request) => ({
-    //     ...request,
-    //     // @ts-ignore
-    //     userDetails: usersDetails.find(
-    //       (user: any) => user.uid === request.userId
-    //     ) as {
-    //       displayName: string;
-    //       photoURL: string;
-    //       email: string;
-    //     },
-    //   }));
-    // }
+    parsed = parsed.map((request) => ({
+         ...request,
+        // @ts-ignore
+        userDetails: {displayName: user?.displayName || '', photoURL: user?.photoURL || '', email: user?.email || ''} as {
+          displayName: string;
+          photoURL: string;
+          email: string;
+        },
+    }));
 
     return parsed;
   }, [requestsData]);

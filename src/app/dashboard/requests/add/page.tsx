@@ -5,7 +5,7 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { db } from '@/app/firebase';

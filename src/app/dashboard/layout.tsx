@@ -90,16 +90,17 @@ const Layout: React.FC<Props> = ({ children }) => {
               {user?.displayName || ""}
             </h5>
             <span className="hidden text-gray-300 lg:block">
-              {isVendor ? "Vendor" : "Agent"}
+              {user?.email === 'info@mrkit.io' && 'Sign Installation Vendor'}
+              {user?.email !== 'info@mrkit.io' ? isVendor ? "Vendor" : "Agent" : ''}
             </span>
           </div>
 
           <ul className="mt-8 space-y-2 tracking-wide">
-            <DashboardLink
+            {user?.email !== 'info@mrkit.io' && <DashboardLink
               link="/dashboard"
               text="Dashboard"
               icon={<MdSpaceDashboard />}
-            />
+            />}
             {!isVendor && broker && ( // TODO: It can be improved if only subscription is active
               <DashboardLink
                 link="/dashboard/requests"
@@ -107,21 +108,14 @@ const Layout: React.FC<Props> = ({ children }) => {
                 icon={<MdEditDocument />}
               />
             )}
-            {!isVendor && (
+            {!isVendor && user?.email !== 'info@mrkit.io' && (
               <DashboardLink
                 link="/dashboard/broker"
                 text="Broker"
                 icon={<MdKey />}
               />
             )}
-            {isVendor && (
-              <DashboardLink
-                link="/dashboard/find-post"
-                text="Find Post"
-                icon={<MdHomeRepairService />}
-              />
-            )}
-            {isVendor && (
+            {isVendor && user?.email === 'info@mrkit.io' && (
               <DashboardLink
                 link="/dashboard/sign-installation"
                 text="Sign Installation Request"
@@ -129,23 +123,23 @@ const Layout: React.FC<Props> = ({ children }) => {
               />
             )}
 
-            {isVendor && (
+            {isVendor && user?.email !== 'info@mrkit.io' && (
               <DashboardLink
                 link="/dashboard/services"
                 text="My services"
                 icon={<MdHomeRepairService />}
               />
             )}
-            <DashboardLink
+            {user?.email !== 'info@mrkit.io' && <DashboardLink
               link="/dashboard/profile"
               text="Profile"
               icon={<MdPerson />}
-            />
-            <DashboardLink
+            />}
+            {user?.email !== 'info@mrkit.io' && <DashboardLink
               link="/dashboard/chat"
               text="Chat"
               icon={<MdChat />}
-            />
+            />}
           </ul>
         </div>
         <div

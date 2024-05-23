@@ -53,6 +53,8 @@ export const ServicePicker: React.FC<ServicePickerProps> = ({ form }) => {
   //   console.log(form.formState.errors)
   // }, [form.formState.errors])
 
+    const selectedServiceIds = new Set(fields.map(service => service.serviceName));
+
   return (
     <FormField
       control={form.control}
@@ -116,14 +118,15 @@ export const ServicePicker: React.FC<ServicePickerProps> = ({ form }) => {
                                 </FormControl>
                                 <SelectContent>
                                   {
-                                    QUERIABLE_SERVICES.map((service) => (
-                                      <SelectItem
-                                        key={service.id}
-                                        value={service.id}
-                                      >
-                                        {service.name}
-                                      </SelectItem>
-                                    ))
+                                      QUERIABLE_SERVICES.filter(service => !selectedServiceIds.has(service.id))
+                                          .map((service) => (
+                                              <SelectItem
+                                                  key={service.id}
+                                                  value={service.id}
+                                              >
+                                                  {service.name}
+                                              </SelectItem>
+                                          ))
 
                                   }
                                 </SelectContent>
