@@ -11,9 +11,10 @@ import { MdInbox } from "react-icons/md";
 const ChatTab = () => {
     const pathname = usePathname();
 
+
     return (
         <Card className={
-            cn("flex col-span-1 xl:col-span-2 justify-center items-center",
+            cn("flex col-span-1 md:col-span-2 xl:col-span-3 justify-center items-center",
                 pathname === "/dashboard/chat" ? "hidden md:flex" : "flex"
             )}
         >
