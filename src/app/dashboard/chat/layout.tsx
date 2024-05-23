@@ -15,7 +15,10 @@ import { cn, formatChatMessageTime } from "@/lib/utils";
 import { User } from "firebase/auth";
 import { CurrentChatContext, UserContext } from "./utils";
 import { useIsVendor } from "@/hooks/useIsVendor";
-import { inboxItems } from "@/mock/indoxMock";
+import defaultAvatar from "@/images/default-user-picture.jpg";
+import { Separator } from "@/components/ui/separator";
+import { SearchBar } from "@/components/SearchBar";
+import { InboxItem } from "@/components/chatItem/InboxItem";
 
 interface Props {
   children: React.ReactNode;
@@ -28,6 +31,7 @@ const Layout: React.FC<Props> = ({ children }) => {
   const chatId = useMemo(() => pathname.split("/").pop(), [pathname]);
   const chatList = useChatList(user);
   const isVendor = useIsVendor(user);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     console.log("chatList", chatList)
@@ -51,95 +55,80 @@ const Layout: React.FC<Props> = ({ children }) => {
       : null,
   });
 
-   const chats = useMemo(() => {
-     // compare shapes if mismatched do not update
-     if (!chatList || !usersDetails) return chatList;
-     // else, merge userDetails into the chatList
+  const chats = useMemo(() => {
+    // compare shapes if mismatched do not update
+    if (!chatList || !usersDetails) return chatList;
+    // else, merge userDetails into the chatList
 
-     // @ts-ignore
-     return chatList.map((chat, idx) => {
-       // @ts-ignore
-       const userDetails = usersDetails[idx];
-       return {
-         ...chat,
-         userDetails,
-       };
-     });
-   }, [chatList, usersDetails]);
+    // @ts-ignore
+    return chatList.map((chat, idx) => {
+      // @ts-ignore
+      const userDetails = usersDetails[idx];
+      return {
+        ...chat,
+        userDetails,
+      };
+    });
+  }, [chatList, usersDetails]);
 
+  console.log(chats);
+
+  let filteredChats = chats;
+
+  if (chats) {
+    // @ts-ignore
+      filteredChats = chats.filter(chat => chat.userDetails?.displayName.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+  }
 
   const currentChatDetails = useMemo(() => {
     return chats?.find((chat: any) => chat.id === chatId);
   }, [chats, chatId]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 h-[calc(100vh-4rem)] p-4 gap-4">
+    <>
+    <h2 className="p-6 text-2xl font-semibold">Chat</h2>
+    <div className="grid grid-cols-1 xl:grid-cols-3 md:grid-cols-2 h-[calc(100vh-12rem)] p-4 gap-10">
       <Card
         className={cn(
-          "col-span-1 md:col-span-2 xl:col-span-1 overflow-hidden relative",
+          "col-span-1 overflow-hidden relative flex-col",
           pathname !== "/dashboard/chat" ? "hidden md:flex" : "flex"
         )}
       >
-        <ScrollArea className="flex flex-col h-full w-full">
-          {chats &&
-            chats.map((chat: any) => (
-              <Link
-                className="flex relative h-20"
-                key={chat.id}
-                href={`/dashboard/chat/${chat.id}`}
-              >
-                <div
-                  className={cn(
-                    "flex flex-row py-4 px-2 gap-1 absolute h-full w-full",
-                    chatId === chat.id ? "bg-slate-100" : "hover:bg-slate-100"
-                  )}
-                >
-                  {chat.photo ? (
-                    <Image
-                      // src={chat.userDetails.photoURL}
-                      src={chat.photo}
-                      alt="user profile"
-                      className="w-12 h-12 rounded-full flex-none object-cover"
-                      width={48}
-                      height={48}
-                    />
-                  ) : (
-                    <Skeleton className="w-10 h-10 rounded-full" />
-                  )}
-                  <div className="relative flex flex-col w-full max-w-full flex-1 min-w-0">
-                    <div className="flex flex-row justify-between items-center gap-1 min-w-0 flex-1">
-                      <div className="flex flex-1 min-w-0">
-                        {/* {chat.userDetails?.displayName ? ( */}
-                        {chat.name ? (
-                          <span className="font-bold truncate flex-1 inline-block">
-                            {chat.name}
-                          </span>
-                        ) : (
-                          <Skeleton className="w-24 h-4" />
-                        )}
-                      </div>
-                      <div className="flex-1 max-w-fit">
-                        <p className="text-xs text-slate-500 max-w-fit">
-                          {/* Format example:  */}
-                          {/* {chat?.last_time &&
-                            formatChatMessageTime(chat.last_time.toDate())
-                          } */}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm truncate text-slate-500 min-w-0">
-                      {chat.message}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+        <div className="flex flex-row p-5 gap-3 text-[#111928] items-center">
+          <p className="text-xl font-medium ">Active Conversations</p>
+          <div className="py-[2px] px-[10px] text-base leading-4 font-medium bg-gray-100 border border-[#DFE4EA] rounded-md">
+            <p>{chats.length}</p>
+          </div>
+        </div>
+        <Separator />
+
+        <ScrollArea className="flex flex-col h-full w-full p-5">
+          <SearchBar searchQuery={searchQuery} onChange={setSearchQuery} />
+          <div className="mt-7">
+            {filteredChats.length ?
+            // @ts-ignore
+              filteredChats.map((chat) => (
+                <InboxItem
+                  item={chat}
+                  key={chat.id}
+                  chatId={chatId}
+                  messageStyles="text-dashboard-main font-normal"
+                />
+              )) : (
+                <div className="flex items-center justify-center pt-4">
+                <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
+                  No chats match your search query.
+                </p>
+              </div>
+              )}
+          </div>
         </ScrollArea>
       </Card>
       <CurrentChatContext.Provider value={currentChatDetails}>
         <UserContext.Provider value={user}>{children}</UserContext.Provider>
       </CurrentChatContext.Provider>
     </div>
+  </>
   );
 };
 

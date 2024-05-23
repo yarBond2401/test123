@@ -20,7 +20,7 @@ import iconStar from "@/icons/icon=star.svg";
 import iconDollar from "@/icons/icon=dollar.svg";
 import iconWork from "@/icons/icon=work.svg";
 import iconWatch from "@/icons/icon=watch.svg";
-import { inboxItems } from "@/mock/indoxMock";
+import { inboxItems } from "@/mock/inboxMock";
 import DropdownIcon from "@/icons/icon=chevron-down.svg";
 import { dealsMock } from "@/mock/dealsMock";
 import { DealItem } from "@/components/dashboard/DealItem";

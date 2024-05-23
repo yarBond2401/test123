@@ -1,15 +1,21 @@
 import { StaticImageData } from "next/image";
 
 interface ChatUser {
-  photo: StaticImageData,
-  name: string,
+  photoURL: StaticImageData,
+  displayName: string,
+  email: string,
+  uid: string,
   online: boolean
 }
 
 export interface ChatItem {
   id: string,
   userDetails: ChatUser,
-  lastMessage: string,
+  agent: string,
+  vendor: string,
+  last_text: string,
+  last_sender: string,
+  last_time: string,
 }
 
 export interface DealPartner {

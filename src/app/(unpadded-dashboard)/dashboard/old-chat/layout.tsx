@@ -15,7 +15,6 @@ import { cn, formatChatMessageTime } from "@/lib/utils";
 import { User } from "firebase/auth";
 import { CurrentChatContext, UserContext } from "./utils";
 import { useIsVendor } from "@/hooks/useIsVendor";
-import { inboxItems } from "@/mock/indoxMock";
 
 interface Props {
   children: React.ReactNode;
@@ -51,22 +50,21 @@ const Layout: React.FC<Props> = ({ children }) => {
       : null,
   });
 
-   const chats = useMemo(() => {
-     // compare shapes if mismatched do not update
-     if (!chatList || !usersDetails) return chatList;
-     // else, merge userDetails into the chatList
+  const chats = useMemo(() => {
+    // compare shapes if mismatched do not update
+    if (!chatList || !usersDetails) return chatList;
+    // else, merge userDetails into the chatList
 
-     // @ts-ignore
-     return chatList.map((chat, idx) => {
-       // @ts-ignore
-       const userDetails = usersDetails[idx];
-       return {
-         ...chat,
-         userDetails,
-       };
-     });
-   }, [chatList, usersDetails]);
-
+    // @ts-ignore
+    return chatList.map((chat, idx) => {
+      // @ts-ignore
+      const userDetails = usersDetails[idx];
+      return {
+        ...chat,
+        userDetails,
+      };
+    });
+  }, [chatList, usersDetails]);
 
   const currentChatDetails = useMemo(() => {
     return chats?.find((chat: any) => chat.id === chatId);
@@ -94,10 +92,9 @@ const Layout: React.FC<Props> = ({ children }) => {
                     chatId === chat.id ? "bg-slate-100" : "hover:bg-slate-100"
                   )}
                 >
-                  {chat.photo ? (
+                  {chat.userDetails?.photoURL ? (
                     <Image
-                      // src={chat.userDetails.photoURL}
-                      src={chat.photo}
+                      src={chat.userDetails.photoURL}
                       alt="user profile"
                       className="w-12 h-12 rounded-full flex-none object-cover"
                       width={48}
@@ -109,10 +106,9 @@ const Layout: React.FC<Props> = ({ children }) => {
                   <div className="relative flex flex-col w-full max-w-full flex-1 min-w-0">
                     <div className="flex flex-row justify-between items-center gap-1 min-w-0 flex-1">
                       <div className="flex flex-1 min-w-0">
-                        {/* {chat.userDetails?.displayName ? ( */}
-                        {chat.name ? (
+                        {chat.userDetails?.displayName ? (
                           <span className="font-bold truncate flex-1 inline-block">
-                            {chat.name}
+                            {chat.userDetails.displayName}
                           </span>
                         ) : (
                           <Skeleton className="w-24 h-4" />
@@ -121,14 +117,14 @@ const Layout: React.FC<Props> = ({ children }) => {
                       <div className="flex-1 max-w-fit">
                         <p className="text-xs text-slate-500 max-w-fit">
                           {/* Format example:  */}
-                          {/* {chat?.last_time &&
+                          {chat?.last_time &&
                             formatChatMessageTime(chat.last_time.toDate())
-                          } */}
+                          }
                         </p>
                       </div>
                     </div>
                     <p className="text-sm truncate text-slate-500 min-w-0">
-                      {chat.message}
+                      {chat?.last_text}
                     </p>
                   </div>
                 </div>
