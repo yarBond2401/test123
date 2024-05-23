@@ -32,6 +32,7 @@ import {
 } from "../schema";
 import { Textarea } from "@/components/ui/textarea";
 import useUserInfo from "@/hooks/useUserInfo";
+import {parsePhoneNumberFromString} from "libphonenumber-js";
 
 const Requests = () => {
   const router = useRouter();
@@ -100,7 +101,8 @@ const Requests = () => {
 
   const availablePosts = mockUser?.postsAvailable ? Number(mockUser?.postsAvailable) : 0;
 
-  return (
+
+    return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="w-full md:col-span-2 lg:col-span-4 p-4 flex flex-col gap-4">
           <div className="mb-2 flex justify-between items-center max-w-xl">
@@ -164,9 +166,11 @@ const Requests = () => {
                   </FormDescription>
                   <FormControl>
                     <PhoneInput
+                        {...field}
                       className="flex h-10 w-full important:outline-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground "
                       placeholder="Enter phone number"
-                      {...field}
+                        // @ts-ignore
+                        value={form.watch('phoneNumber')}
                     />
                     
                   </FormControl>

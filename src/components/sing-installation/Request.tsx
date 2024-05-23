@@ -45,6 +45,7 @@ export const RequestItem: FC<Props> = ({ request, user }) => {
   };
 
 
+
   return (
     <div className="flex flex-col w-full">
       <Separator />
@@ -87,7 +88,13 @@ export const RequestItem: FC<Props> = ({ request, user }) => {
           </p>
         </div>
         <div className="flex xl:w-56 pl-3 w-40 justify-center">
-          <Select.Root value={selectedStatus} onValueChange={setSelectedStatus}>
+          <Select.Root value={selectedStatus} onValueChange={(value: string) => {
+            if (value === "Approved" || value === "Pending Install" || value === "Installed") {
+              setSelectedStatus(value);
+            } else {
+              console.error("Invalid status: ", value);
+            }
+          }}>
             <Select.Trigger className="flex flex-row w-40 gap-[10px] xl:px-3 px-2 py-2 border justify-between border-[#DFE4EA] rounded-md outline-none items-center xl:text-base text-sm text-dashboard-secondary hover:border-[#3758F9]">
               <Select.Value />
               <Select.Icon>

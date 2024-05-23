@@ -51,23 +51,22 @@ const Layout: React.FC<Props> = ({ children }) => {
       : null,
   });
 
-  // const chats = useMemo(() => {
-  //   // compare shapes if mismatched do not update
-  //   if (!chatList || !usersDetails) return chatList;
-  //   // else, merge userDetails into the chatList
+   const chats = useMemo(() => {
+     // compare shapes if mismatched do not update
+     if (!chatList || !usersDetails) return chatList;
+     // else, merge userDetails into the chatList
 
-  //   // @ts-ignore
-  //   return chatList.map((chat, idx) => {
-  //     // @ts-ignore
-  //     const userDetails = usersDetails[idx];
-  //     return {
-  //       ...chat,
-  //       userDetails,
-  //     };
-  //   });
-  // }, [chatList, usersDetails]);
+     // @ts-ignore
+     return chatList.map((chat, idx) => {
+       // @ts-ignore
+       const userDetails = usersDetails[idx];
+       return {
+         ...chat,
+         userDetails,
+       };
+     });
+   }, [chatList, usersDetails]);
 
-  const chats = inboxItems;
 
   const currentChatDetails = useMemo(() => {
     return chats?.find((chat: any) => chat.id === chatId);
@@ -83,7 +82,7 @@ const Layout: React.FC<Props> = ({ children }) => {
       >
         <ScrollArea className="flex flex-col h-full w-full">
           {chats &&
-            chats.map((chat) => (
+            chats.map((chat: any) => (
               <Link
                 className="flex relative h-20"
                 key={chat.id}
