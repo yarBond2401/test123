@@ -31,6 +31,7 @@ import {
   signInRequestCreateSchema,
 } from "../schema";
 import { Textarea } from "@/components/ui/textarea";
+import useUserInfo from "@/hooks/useUserInfo";
 
 const Requests = () => {
   const router = useRouter();
@@ -39,6 +40,8 @@ const Requests = () => {
       router.push("/auth/signin");
     },
   });
+
+  const {mockUser, userInfo, loading, error, updateUserInfo} = useUserInfo(user);
   const { data: brokerData } = useFirestoreQuery<BrokerType[]>(
     "brokers",
     "users",
@@ -91,31 +94,37 @@ const Requests = () => {
 
     const colRef = collection(db, "signInRequests");
     await addDoc(colRef, requestData);
+    await updateUserInfo({availablePosts: `${Number(mockUser?.postsAvailable) - 1}`, postInstalled: `${Number(mockUser?.postsInstalled) + 1}`})
     router.push("/dashboard/requests");
   };
+
+  const availablePosts = mockUser?.postsAvailable ? Number(mockUser?.postsAvailable) : 0;
 
   return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="w-full md:col-span-2 lg:col-span-4 p-4 flex flex-col gap-4">
-        <div className="mb-2 flex justify-between items-center max-w-xl">
-          <div>
-            <h3 className="text-lg font-medium">Create a broker</h3>
-            <p className="text-sm text-muted-foreground">
-              Fill the form below to create a broker
-            </p>
+          <div className="mb-2 flex justify-between items-center max-w-xl">
+              <div>
+                  <h3 className="text-lg font-medium">Create a broker</h3>
+                  <p className="text-sm text-muted-foreground">
+                      Fill the form below to create a broker
+                  </p>
+                  <p className="text-sm text-muted-foreground pt-2">
+                      {`Available Requests: ${availablePosts}`}
+                  </p>
+              </div>
+              <Button
+                  onClick={() => router.push("/dashboard/requests")}
+                  type="button"
+              >
+                  Go back
+              </Button>
           </div>
-          <Button
-            onClick={() => router.push("/dashboard/requests")}
-            type="button"
-          >
-            Go back
-          </Button>
-        </div>
-        <Separator />
-        <Form {...form}>
-          <form className="max-w-xl">
-            <FormField
-              control={form.control}
+          <Separator/>
+          <Form {...form}>
+              <form className="max-w-xl">
+                  <FormField
+                      control={form.control}
               name="requestName"
               render={({ field }) => (
                 <FormItem>
@@ -192,7 +201,7 @@ const Requests = () => {
               type="submit"
               className="w-full mt-4"
               onClick={form.handleSubmit(onSubmit)}
-              disabled={form.formState.isSubmitting}
+              disabled={form.formState.isSubmitting || availablePosts < 1}
             >
               Create request
             </Button>

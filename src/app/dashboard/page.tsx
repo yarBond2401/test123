@@ -29,6 +29,8 @@ import { elements } from "chart.js/auto";
 import { agent, vendor } from "@/mock/users";
 import { useIsVendor } from "@/hooks/useIsVendor";
 import Loading from "../loading";
+import useUserInfo from "@/hooks/useUserInfo";
+import {Agent, Vendor} from "@/mock/types";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
@@ -41,7 +43,7 @@ const Dashboard = () => {
     },
   });
 
-  const mockUser = useIsVendor(user) ? vendor : agent;
+  const { mockUser} = useUserInfo(user);
 
   if (!user) {
     return <Loading />;
@@ -95,7 +97,7 @@ const Dashboard = () => {
           <CardTitle>Dashboard</CardTitle>
           <Separator />
         </CardHeader>
-        <CardContent>
+        {mockUser && <CardContent>
           <div className="flex flex-col md:gap-6 gap-4 w-full">
             <div className="grid grid-cols-1 md:gap-6 gap-4 md:grid-cols-2 lg:grid-cols-4 w-full">
               <div className="shadow flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
@@ -156,10 +158,10 @@ const Dashboard = () => {
                           My Level
                         </p>
                         <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                          {mockUser.postsInstalled <= 50
+                          {Number(mockUser.postsInstalled) <= 50
                             ? "Bronze"
-                            : mockUser.postsInstalled > 50 &&
-                              mockUser.postsInstalled <= 150
+                            : Number(mockUser.postsInstalled) > 50 &&
+                              Number(mockUser.postsInstalled) <= 150
                             ? "Gold"
                             : "Platinum"}
                         </p>
@@ -382,7 +384,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </CardContent>
+        </CardContent>}
       </Card>
     </div>
   );
