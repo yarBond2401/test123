@@ -80,6 +80,7 @@ const Requests = () => {
     };
 
     console.log("Request data", requestData)
+    console.log("eror", form.formState.errors);
 
     const colRef = collection(db, "requests");
     await addDoc(colRef, requestData);
@@ -91,9 +92,9 @@ const Requests = () => {
       <Card className="w-full md:col-span-2 lg:col-span-4 p-4 flex flex-col gap-4">
         <div className="mb-2 flex justify-between items-center max-w-xl">
           <div>
-            <h3 className="text-lg font-medium">Create a broker</h3>
+            <h3 className="text-lg font-medium">Create a request</h3>
             <p className="text-sm text-muted-foreground">
-              Fill the form below to create a broker
+              Fill the form below to create a new request
             </p>
           </div>
           <Button

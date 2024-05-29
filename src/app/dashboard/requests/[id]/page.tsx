@@ -34,6 +34,8 @@ import { useFirestoreDocumentRT } from "@/hooks/useFirestoreDocumentRT";
 import { OFFERED_SERVICES } from "@/app/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { dot } from "@/lib/utils";
+import { useRequest } from "@/components/RequestContext";
+
 
 interface Props {
   params: {
@@ -66,6 +68,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
 
   // const { data, isLoading } = useFirestoreDocument<ServiceRequest>(`requests/${params.id}`)
   const { data, loading } = useFirestoreDocumentRT<ServiceRequest>(`requests/${params.id}`)
+  const { setRequestId } = useRequest();
 
   const users = useMemo(() => {
     if (data) {
@@ -86,6 +89,8 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
   })
 
   const handleChat = async (vendorId: string) => {
+    setRequestId(params.id);
+
     if (!user) return
     const checkQ = query(
       collection(db, "chats"),

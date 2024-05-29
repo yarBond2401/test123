@@ -6,6 +6,7 @@ import React, { forwardRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
 import 'react-phone-number-input/style.css';
+import dynamic from 'next/dynamic';
 
 import { db } from "@/app/firebase";
 import { BrokerType } from "@/app/firestoreTypes";
@@ -32,7 +33,17 @@ import {
 } from "../schema";
 import { Textarea } from "@/components/ui/textarea";
 import useUserInfo from "@/hooks/useUserInfo";
-import {parsePhoneNumberFromString} from "libphonenumber-js";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { TimePicker12 } from '@/components/ui/time-picker';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarIcon } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { add, format } from 'date-fns';
+
+const DynamicGeoPicker = dynamic(() => import("../add/components/geo-picker.tsx").then(module => module.GeoPicker), {
+  ssr: false,
+});
 
 const Requests = () => {
   const router = useRouter();
@@ -42,7 +53,7 @@ const Requests = () => {
     },
   });
 
-  const {mockUser, userInfo, loading, error, updateUserInfo} = useUserInfo(user);
+  const { mockUser, userInfo, loading, error, updateUserInfo } = useUserInfo(user);
   const { data: brokerData } = useFirestoreQuery<BrokerType[]>(
     "brokers",
     "users",
@@ -59,16 +70,21 @@ const Requests = () => {
       phoneNumber: "",
       description: "",
       userInfo: {
-          email: user?.email || '',
-          photoURL: user?.photoURL || '',
-          uid: user?.uid || '',
-          displayName: user?.displayName || '',
+        email: user?.email || '',
+        photoURL: user?.photoURL || '',
+        uid: user?.uid || '',
+        displayName: user?.displayName || '',
       },
       signInApprover: null,
       userId: user?.uid ?? "",
       requestName: "",
       status: "Pending Install",
       photoUrl: user?.photoURL ?? "",
+      requestedDate: new Date(),
+      location: {
+        latitude: 0,
+        longitude: 0,
+      }
     },
   });
 
@@ -76,57 +92,65 @@ const Requests = () => {
     if (user) {
       form.setValue("userId", user.uid);
       form.setValue("userInfo", {
-            email: user?.email || '',
-            photoURL: user?.photoURL || '',
-            uid: user?.uid || '',
-            displayName: user?.displayName || ''
-        });
+        email: user?.email || '',
+        photoURL: user?.photoURL || '',
+        uid: user?.uid || '',
+        displayName: user?.displayName || ''
+      });
     }
   }, [user]);
 
+  useEffect(() => {
+    console.log("Form", form.formState.errors);
+  }, [form.formState.errors]);
+
   const onSubmit = async (data: ServiceSignInRequestCreate) => {
-    console.log(data);
-    const requestData = {
-      ...data,
-      createdAt: serverTimestamp(),
-    };
+    try {
+      console.log(data);
+      const requestData = {
+        ...data,
+        createdAt: serverTimestamp(),
+      };
 
-    console.log("Sign in Requests data", requestData);
+      console.log("Sign in Requests data", requestData);
 
-    const colRef = collection(db, "signInRequests");
-    await addDoc(colRef, requestData);
-    await updateUserInfo({availablePosts: `${Number(mockUser?.postsAvailable) - 1}`, postInstalled: `${Number(mockUser?.postsInstalled) + 1}`})
-    router.push("/dashboard/requests");
+      const colRef = collection(db, "signInRequests");
+      await addDoc(colRef, requestData);
+      await updateUserInfo({ availablePosts: `${Number(mockUser?.postsAvailable) - 1}`, postInstalled: `${Number(mockUser?.postsInstalled) + 1}` })
+      router.push("/dashboard/requests");
+    } catch (error) {
+      console.error("Error submitting form: ", error);
+    }
   };
 
   const availablePosts = mockUser?.postsAvailable ? Number(mockUser?.postsAvailable) : 0;
 
 
-    return (
+  return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="w-full md:col-span-2 lg:col-span-4 p-4 flex flex-col gap-4">
-          <div className="mb-2 flex justify-between items-center max-w-xl">
-              <div>
-                  <h3 className="text-lg font-medium">Create a broker</h3>
-                  <p className="text-sm text-muted-foreground">
-                      Fill the form below to create a broker
-                  </p>
-                  <p className="text-sm text-muted-foreground pt-2">
-                      {`Available Requests: ${availablePosts}`}
-                  </p>
-              </div>
-              <Button
-                  onClick={() => router.push("/dashboard/requests")}
-                  type="button"
-              >
-                  Go back
-              </Button>
+        <div className="mb-2 flex justify-between items-center max-w-xl">
+          <div>
+            <h3 className="text-lg font-medium">Create a Sign Installation Request</h3>
+            <p className="text-sm text-muted-foreground">
+              Fill the form below to create a a Sign Installation Request
+            </p>
+            <p className="text-sm text-muted-foreground pt-2">
+              {`Available Requests: ${availablePosts}`}
+            </p>
           </div>
-          <Separator/>
-          <Form {...form}>
-              <form className="max-w-xl">
-                  <FormField
-                      control={form.control}
+          <Button
+            onClick={() => router.push("/dashboard/requests")}
+            type="button"
+          >
+            Go back
+          </Button>
+        </div>
+        <Separator />
+        <Form {...form}>
+          <form className="max-w-xl">
+            <FormField
+              control={form.control}
               name="requestName"
               render={({ field }) => (
                 <FormItem>
@@ -166,18 +190,85 @@ const Requests = () => {
                   </FormDescription>
                   <FormControl>
                     <PhoneInput
-                        {...field}
+                      {...field}
                       className="flex h-10 w-full important:outline-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground "
                       placeholder="Enter phone number"
-                        // @ts-ignore
-                        value={form.watch('phoneNumber')}
+                      // @ts-ignore
+                      value={form.watch('phoneNumber')}
                     />
-                    
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="requestedDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Date and time
+                  </FormLabel>
+                  <FormDescription>
+                    Choose a default date and time for the request
+                  </FormDescription>
+                  <FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {/* Date with time format */}
+                          {
+                            field.value
+                              ? format(field.value, "PPPp")
+                              : <span>Pick a date</span>
+                          }
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="flex flex-col w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={
+                            (date) => {
+                              if (!date) {
+                                field.onChange(date!)
+                              } else {
+                                const newDate = field.value ? new Date(
+                                  date.getFullYear(),
+                                  date.getMonth(),
+                                  date.getDate(),
+                                  field.value.getHours(),
+                                  field.value.getMinutes(),
+                                  field.value.getSeconds(),
+                                  field.value.getMilliseconds()
+                                ) : date;
+                                field.onChange(newDate);
+                              }
+                            }
+                          }
+                          disabled={(date) => date < add(new Date(), { days: - 1 })}
+                          initialFocus
+                        />
+                        <TimePicker12
+                          className="self-center mb-2"
+                          value={field.value}
+                          onChange={(date) => field.onChange(date)}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DynamicGeoPicker form={form} />
             <FormField
               name="description"
               control={form.control}

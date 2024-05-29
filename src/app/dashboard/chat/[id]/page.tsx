@@ -1,6 +1,6 @@
 "use client";
 
-import { format } from "date-fns";
+import { format, sub } from "date-fns";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -20,6 +20,10 @@ import SmileIcon from "@/icons/icon=smile.svg";
 import SendIcon from "@/icons/icon=send.svg";
 import MoreIcon from "@/icons/icon=more.svg";
 import defaultAvatar from "@/images/default-user-picture.jpg";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/app/firebase";
+import { useRequest } from "@/components/RequestContext";
+
 
 interface Props {
   params: {
@@ -68,9 +72,15 @@ const ChatTab: React.FC<Props> = ({ params }) => {
   const [message, setMessage] = useState("");
   const { messages, sendMessage } = useChat({ chatId, user });
   const isVendor = useIsVendor(user);
+  const { requestId } = useRequest();
+
+  const submitOffer = () => {
+    if (isVendor) return;
+    router.push(`/dashboard/requests/${requestId}`);
+  }
 
   useEffect(() => {
-    console.log('chatDetails',chatDetails);
+    console.log('chatDetails', chatDetails);
   }, [chatDetails]);
 
   return (
@@ -82,28 +92,28 @@ const ChatTab: React.FC<Props> = ({ params }) => {
     >
       <div className="flex justify-between p-6 pt-5 items-center">
         <div className="flex h-full items-center">
-        <div className="relative 2xl:h-11 2xl:w-11 md:h-8 md:w-8 h-11 w-11 shrink-0">
-          {chatDetails?.userDetails ? (
-            <>
-              <Image 
-                src={chatDetails.userDetails.photoURL || defaultAvatar} 
-                alt={chatDetails.userDetails.displayName} 
-                className="w-full h-auto rounded-full" 
-                width={44}
-                height={44}
-              />
-              <div
-              className={cn(
-                chatDetails.userDetails.online ? "bg-green-400" : "bg-red-500",
-                "2xl:w-3 2xl:h-3 md:w-2 md:h-2 w-3 h-3 rounded-full 2xl:border-[2px] md:border border-[2px] border-white absolute bottom-0 right-0 box-border"
-              )}
-              />
-            </>
-          ) : (
-            <Skeleton className="w-10 h-10 rounded-full" />
-          )}
-        </div>
-  
+          <div className="relative 2xl:h-11 2xl:w-11 md:h-8 md:w-8 h-11 w-11 shrink-0">
+            {chatDetails?.userDetails ? (
+              <>
+                <Image
+                  src={chatDetails.userDetails.photoURL || defaultAvatar}
+                  alt={chatDetails.userDetails.displayName}
+                  className="w-full h-auto rounded-full"
+                  width={44}
+                  height={44}
+                />
+                <div
+                  className={cn(
+                    chatDetails.userDetails.online ? "bg-green-400" : "bg-red-500",
+                    "2xl:w-3 2xl:h-3 md:w-2 md:h-2 w-3 h-3 rounded-full 2xl:border-[2px] md:border border-[2px] border-white absolute bottom-0 right-0 box-border"
+                  )}
+                />
+              </>
+            ) : (
+              <Skeleton className="w-10 h-10 rounded-full" />
+            )}
+          </div>
+
           <div className="flex flex-col ml-4">
             {chatDetails?.userDetails ? (
               <p className="font-medium text-lg leading-6 text-dashboard-main">{chatDetails.userDetails.displayName}</p>
@@ -118,11 +128,12 @@ const ChatTab: React.FC<Props> = ({ params }) => {
           <button
             type="button"
             className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
+            onClick={() => submitOffer()}
           >
             {isVendor ? "Accept the contract" : "Send an offer"}
           </button>
           <button type="button" className="p-[9px] bg-gray-100 border border-[#DFE4EA] rounded">
-            <Image src={MoreIcon} alt="more" width={22} height={22}/>
+            <Image src={MoreIcon} alt="more" width={22} height={22} />
           </button>
         </div>
 
@@ -139,12 +150,12 @@ const ChatTab: React.FC<Props> = ({ params }) => {
         <div className="min-w-full min-h-full flex flex-col-reverse px-7 py-4 gap-8 justify-end">
           {messages.length !== 0
             ? messages.map((message: any) => (
-                <ChatItem
-                  key={message.id}
-                  data={message}
-                  chatDetails={chatDetails}
-                />
-              ))
+              <ChatItem
+                key={message.id}
+                data={message}
+                chatDetails={chatDetails}
+              />
+            ))
             : null}
         </div>
       </div>

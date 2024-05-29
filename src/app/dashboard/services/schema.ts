@@ -31,7 +31,7 @@ const getZodParse = (parse: string) => {
         required_error: "required",
       });
     case "file":
-      return z.string().min(4, "Please upload a file");
+      return z.string().min(4, "Please upload a file")
     default:
       return z.string();
   }
