@@ -124,7 +124,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-3 items-center">
+        {(chatDetails?.userDetails?.email !== "info@mrkit.io") && <div className="flex flex-row gap-3 items-center">
           <button
             type="button"
             className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
@@ -135,7 +135,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
           <button type="button" className="p-[9px] bg-gray-100 border border-[#DFE4EA] rounded">
             <Image src={MoreIcon} alt="more" width={22} height={22} />
           </button>
-        </div>
+        </div>}
 
         <Button
           type="button"

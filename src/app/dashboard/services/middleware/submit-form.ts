@@ -59,6 +59,7 @@ export const submitForm = async (
     let promises = Object.entries(data.serviceDetails).map(([key, value]) => {
       let subcolRef = doc(servicesRef, key);
       setDoc(subcolRef, {
+        vendorId: user.uid,
         type: key,
         ...value,
         ...locationWithType,

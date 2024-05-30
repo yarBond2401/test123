@@ -167,6 +167,7 @@ const Services = () => {
   const onSubmit = (data: serviceOffer) => {
     if (!user) return;
     console.log("submitting", JSON.stringify(data));
+    console.log("gg", JSON.stringify(user));
 
     submitForm(
       data,
