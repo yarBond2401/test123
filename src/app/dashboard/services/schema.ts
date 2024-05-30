@@ -45,6 +45,9 @@ export const serviceOfferSchema = z
           id: z.string(),
           name: z.string(),
           type: z.string(),
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          radius: z.number().optional(),
         })
       )
       .optional(),
@@ -52,6 +55,8 @@ export const serviceOfferSchema = z
       .object({
         zip: z.coerce.number(),
         radius: z.coerce.number(),
+        lat: z.number().optional(),
+        lng: z.number().optional(),
       })
       .optional(),
     description: z.string().max(500).optional(),

@@ -155,6 +155,8 @@ export const GeoPicker: React.FC<GeoPickerProps> = ({ form, retrievedGeo }) => {
             response.lng
           ))
           form.setValue("location_zip.zip", response.zip)
+          form.setValue("location_zip.lat", response.lat);
+          form.setValue("location_zip.lng", response.lng);
         }
         toast({
           title: "Success",
@@ -240,7 +242,7 @@ export const GeoPicker: React.FC<GeoPickerProps> = ({ form, retrievedGeo }) => {
                     <SelectItem value="20">20 miles</SelectItem>
                     <SelectItem value="50">50 miles</SelectItem>
                     <SelectItem value="100">100 miles</SelectItem>
-                    <SelectItem value="100">500 miles</SelectItem>
+                    <SelectItem value="500">500 miles</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

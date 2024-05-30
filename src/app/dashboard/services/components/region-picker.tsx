@@ -145,7 +145,7 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
           }
         ).then((res) => res.json());
 
-        let formatted = formatRegion(res);
+        let formatted = await formatRegion(res);
         // @ts-ignore
         newLocations = [...prev, formatted];
       }
@@ -203,7 +203,7 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
                     <CommandGroup>
                       {autocompleted.map((option) => (
                         <CommandItem
-                          key={option.placePrediction.placeId}
+                          key={`cmd-${option.placePrediction.placeId}`}
                           onSelect={(_) =>
                             handleSelect(
                               option.placePrediction.placeId,
@@ -245,10 +245,10 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
                 // @ts-ignore
                 field.value.length > 0 ? (
                   // @ts-ignore
-                  field.value.map((location) => (
+                  field.value.map((location, index) => (
                     <CardHeader
                       className="grid-container grid grid-cols-10 space-y-0 items-center px-4 py-4"
-                      key={location.id}
+                      key={`card-${location.id}-${index}}`}
                     >
                       <div className="col-span-9">
                         {location.name}
@@ -281,11 +281,54 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
   );
 };
 
+function calculateRadius(bounds) {
+  const R = 6371; // Radius of the Earth in kilometers
+  const { northeast, southwest } = bounds;
 
-const formatRegion = (details: any) => {
+  // Convert degrees to radians
+  const lat1 = northeast.lat * Math.PI / 180;
+  const lon1 = northeast.lng * Math.PI / 180;
+  const lat2 = southwest.lat * Math.PI / 180;
+  const lon2 = southwest.lng * Math.PI / 180;
+
+  // Calculate the midpoint coordinates
+  const midLat = (lat1 + lat2) / 2;
+  const midLon = (lon1 + lon2) / 2;
+
+  // Calculate the differences
+  const dLat = lat1 - midLat;
+  const dLon = lon1 - midLon;
+
+  // Calculate the distance using the Haversine formula
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(midLat) * Math.cos(lat1) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  // Calculate the radius
+  const radius = R * c;
+
+  return Math.ceil(radius);
+}
+
+const formatRegion = async (details: any) => {
   const components = details.addressComponents;
   const mainComponent = components[0];
-  let obj: any = { name: mainComponent.longText, id: details.id };
+  let obj: any = {
+    name: mainComponent.longText,
+    id: details.id,
+    lat: details?.location.latitude,
+    lng: details?.location.longitude,
+  };
+
+  console.log("fromat", details?.location.latitude, details?.location.longitude);
+
+  // Fetch bounds of the location
+  const boundsRes = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?place_id=${details.id}&key=AIzaSyD524tP59AM7saqTbA33HvU4IU98bdxy90`
+  );
+  const boundsData = await boundsRes.json();
+  const bounds = boundsData.results[0].geometry.bounds;
 
   if (mainComponent.types.includes("locality")) {
     obj["type"] = "city";
@@ -297,9 +340,14 @@ const formatRegion = (details: any) => {
     throw new Error("Invalid region type");
   }
 
+  obj["radius"] = calculateRadius(bounds);
+
   return obj as {
     name: string;
     type: string;
     id: string;
+    lat: number;
+    lng: number;
+    radius: number;
   }
 }

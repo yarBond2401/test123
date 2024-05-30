@@ -42,7 +42,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
-import {parse} from "date-fns";
+import { parse } from "date-fns";
 import { useRouter } from "next/navigation";
 import { AvailabilityPicker } from "./components/availability-picker";
 import { RegionPicker } from "./components/region-picker";
@@ -165,7 +165,8 @@ const Services = () => {
 
   const onSubmit = (data: serviceOffer) => {
     if (!user) return;
-    console.log("submitting", data)
+    console.log("submitting", JSON.stringify(data));
+
     submitForm(
       data,
       user,
@@ -218,7 +219,7 @@ const Services = () => {
                     </FormDescription>
                     {OFFERED_SERVICES.map((service) => (
                       <FormField
-                        key={service.id}
+                        key={`servoce-${service.id}`}
                         control={form.control}
                         name={`serviceSelect.${service.id}`}
                         render={({ field: subfield }) => (
@@ -256,7 +257,7 @@ const Services = () => {
                     </FormDescription>
                     <Accordion type="single" collapsible>
                       {selectedServices.map((service) => (
-                        <AccordionItem value={service.id} key={service.id}>
+                        <AccordionItem value={service.id} key={`accord-${service.id}`}>
                           <AccordionTrigger
                             className="flex justify-start items-center gap-2"
                           >
@@ -273,7 +274,7 @@ const Services = () => {
                             <div className="flex flex-col gap-4">
                               {service.fields.map((serviceField) => (
                                 <FormField
-                                  key={serviceField.id}
+                                  key={`form-${serviceField.id}`}
                                   control={form.control}
                                   name={`serviceDetails.${service.id}.${serviceField.id}`}
                                   render={({ field: subfield }) => (
@@ -401,13 +402,13 @@ const Services = () => {
                                               <FormDescription>
                                                 {serviceField.description}
                                               </FormDescription>
-                                                <FormControl>
-                                                  <FileField
-                                                    path={`serviceDetails/${user?.uid}/${service.id}.pdf`}
-                                                    value={subfield.value as string}
-                                                    onChange={subfield.onChange}
-                                                  />
-                                                </FormControl>
+                                              <FormControl>
+                                                <FileField
+                                                  path={`serviceDetails/${user?.uid}/${service.id}.pdf`}
+                                                  value={subfield.value as string}
+                                                  onChange={subfield.onChange}
+                                                />
+                                              </FormControl>
                                               <FormMessage />
                                             </>
                                           )
