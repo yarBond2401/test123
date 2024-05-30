@@ -124,12 +124,6 @@ export const signInRequestCreateSchema = z.object({
         latitude: z.number(),
         longitude: z.number(),
     }),
-    requestedDate: z.object({
-        seconds: z.number(),
-        nanoseconds: z.number(),
-        // method that returns JS date
-        toDate: z.any(),
-    }),
     requestedDate: z.date().optional(),
 });
 
@@ -159,12 +153,6 @@ export const signInRequestSchema = signInRequestCreateSchema.extend({
 })
 
 export const singInRequestsWithApprovedDateSchema = signInRequestSchema.extend({
-    approvedDate: z.object({
-        seconds: z.number(),
-        nanoseconds: z.number(),
-        // method that returns JS date
-        toDate: z.any(),
-    }),
     approvedDate: z.date().optional(),
 });
 
@@ -173,4 +161,4 @@ export type ServiceRequest = z.infer<typeof serviceRequestSchema>;
 export type ServiceRequestCreate = z.infer<typeof serviceRequestCreateSchema>;
 export type ServiceSignInRequestCreate = z.infer<typeof signInRequestCreateSchema>;
 export type ServiceSignInRequestSchema = z.infer<typeof signInRequestSchema>;
-export type ServiceSignInRequestWithApprovedDateSchema = z.infer<typeof signInRequestSchema>;
+export type ServiceSignInRequestWithApprovedDateSchema = z.infer<typeof singInRequestsWithApprovedDateSchema>;

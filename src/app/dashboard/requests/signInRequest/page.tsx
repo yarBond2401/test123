@@ -3,7 +3,7 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import React, { forwardRef, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
 import 'react-phone-number-input/style.css';
 import dynamic from 'next/dynamic';
@@ -41,7 +41,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { add, format } from 'date-fns';
 
-const DynamicGeoPicker = dynamic(() => import("../add/components/geo-picker.tsx").then(module => module.GeoPicker), {
+const DynamicGeoPicker = dynamic(() => import("../add/components/geo-picker").then(module => module.GeoPicker), {
   ssr: false,
 });
 
@@ -268,7 +268,8 @@ const Requests = () => {
                 </FormItem>
               )}
             />
-            <DynamicGeoPicker form={form} />
+            {/* @ts-ignore */}
+            <DynamicGeoPicker form={form as UseFormReturn<ServiceSignInRequestCreate>} />
             <FormField
               name="description"
               control={form.control}

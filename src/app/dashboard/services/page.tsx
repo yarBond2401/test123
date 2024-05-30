@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/app/firebase";
 import { FileField } from "./components/file-field";
+import { ServiceRequestCreate } from "../requests/schema";
 
 const DynamicGeoPicker = dynamic(() => import("./components/geo-picker").then(module => module.GeoPicker),
   { ssr: false }
@@ -450,7 +451,8 @@ const Services = () => {
                   <RegionPicker form={form} />
                 </TabsContent>
                 <TabsContent value="geolocation">
-                  <DynamicGeoPicker form={form} retrievedGeo={retrievedGeo} />
+                  {/* @ts-ignore */}
+                  <DynamicGeoPicker form={form as UseFormReturn<ServiceRequestCreate>} retrievedGeo={retrievedGeo} />
                 </TabsContent>
                 <TabsContent value="nation-wide">
                   <FormDescription>

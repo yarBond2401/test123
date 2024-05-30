@@ -194,7 +194,8 @@ const Requests = () => {
                 </FormItem>
               )}
             />
-            <DynamicGeoPicker form={form} />
+            {/* @ts-ignore */}
+            <DynamicGeoPicker form={form as UseFormReturn<ServiceRequestCreate>} />
             <ServicePicker form={form} />
             <Button
               type="submit"

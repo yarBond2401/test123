@@ -281,7 +281,8 @@ export const RegionPicker: React.FC<RegionPickerProps> = ({ form }) => {
   );
 };
 
-function calculateRadius(bounds) {
+// ts-ignore
+function calculateRadius(bounds: any) {
   const R = 6371; // Radius of the Earth in kilometers
   const { northeast, southwest } = bounds;
 
