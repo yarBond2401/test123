@@ -135,11 +135,11 @@ const Layout: React.FC<Props> = ({ children }) => {
               text="Profile"
               icon={<MdPerson />}
             />}
-            {user?.email !== 'info@mrkit.io' && <DashboardLink
+            <DashboardLink
               link="/dashboard/chat"
               text="Chat"
               icon={<MdChat />}
-            />}
+            />
           </ul>
         </div>
         <div

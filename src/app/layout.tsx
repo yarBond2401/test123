@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import SWRCustomConfig from "@/components/SWRCustomConfig";
 import AppCheckProvider from "@/components/AppCheckProvider";
 import "@/app/globals.css";
+import { RequestProvider } from "@/components/RequestContext";
+
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -26,12 +28,14 @@ export default function RootLayout({
     <html lang="en" className="overflow-y-scroll">
       <SWRCustomConfig>
         <AppCheckProvider>
-          <body
-            className={`min-h-screen bg-psecondary font-sans antialiased ${fontSans.variable}`}
-          >
-            {children}
-            <Toaster />
-          </body>
+          <RequestProvider>
+            <body
+              className={`min-h-screen bg-psecondary font-sans antialiased ${fontSans.variable}`}
+            >
+              {children}
+              <Toaster />
+            </body>
+          </RequestProvider>
         </AppCheckProvider>
       </SWRCustomConfig>
     </html>

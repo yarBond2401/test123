@@ -33,14 +33,14 @@ import {
 
 import { useGeolocation } from "@uidotdev/usehooks";
 
-import { ServiceRequestCreate } from "../../schema";
+import { ServiceRequestCreate, ServiceSignInRequestCreate } from "../../schema";
 import { customIcon } from "@/lib/customIcon";
 import { LatLng } from "leaflet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Suggestion } from "@/app/dashboard/services/components/types";
 
 interface GeoPickerProps {
-    form: UseFormReturn<ServiceRequestCreate>;
+    form: UseFormReturn<ServiceRequestCreate | ServiceSignInRequestCreate>;
 }
 
 const AUTOCOMPLETE_URL = "https://places.googleapis.com/v1/places:autocomplete";
