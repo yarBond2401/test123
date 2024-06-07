@@ -25,24 +25,24 @@ export const InboxItem: FC<Props> = ({ item, chatId, messageStyles }) => {
         <div className="relative 2xl:h-11 2xl:w-11 md:h-8 md:w-8 h-11 w-11 shrink-0">
           {item.userDetails ? (
             <>
-              <Image 
-                src={item.userDetails.photoURL || defaultAvatar} 
-                alt={item.userDetails.displayName} 
-                className="w-full h-auto rounded-full" 
+              <Image
+                src={item.userDetails.photoURL || defaultAvatar}
+                alt={item.userDetails.displayName}
+                className="w-full h-auto rounded-full"
                 width={44}
                 height={44}
               />
               <div
-              className={cn(
-                item.userDetails.online ? "bg-green-400" : "bg-red-500",
-                "2xl:w-3 2xl:h-3 md:w-2 md:h-2 w-3 h-3 rounded-full 2xl:border-[2px] md:border border-[2px] border-white absolute bottom-0 right-0 box-border"
-              )}
-            />
+                className={cn(
+                  item.userDetails.online ? "bg-green-400" : "bg-red-500",
+                  "2xl:w-3 2xl:h-3 md:w-2 md:h-2 w-3 h-3 rounded-full 2xl:border-[2px] md:border border-[2px] border-white absolute bottom-0 right-0 box-border"
+                )}
+              />
             </>
           ) : (
             <Skeleton className="w-10 h-10 rounded-full" />
           )}
-         
+
         </div>
 
         <div className="flex flex-col w-full overflow-hidden">
@@ -55,10 +55,10 @@ export const InboxItem: FC<Props> = ({ item, chatId, messageStyles }) => {
           )}
 
           <p className={cn(
-              "2xl:text-sm md:text-xs text-sm text-nowrap w-full",
-              messageStyles,
-            )}>
-            {item.last_text}
+            "2xl:text-sm md:text-xs text-sm text-nowrap w-full",
+            messageStyles,
+          )}>
+            {item.last_text.length > 50 ? `${item.last_text.slice(0, 50)}...` : item.last_text}
           </p>
         </div>
       </div>
