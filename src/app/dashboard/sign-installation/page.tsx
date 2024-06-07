@@ -66,7 +66,7 @@ const SignInstallation = () => {
     .sort((a, b) => {
       const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000 + a.createdAt.nanoseconds / 1000000) : new Date(0);
       const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000 + b.createdAt.nanoseconds / 1000000) : new Date(0);
-      return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+      return sortDirection === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
     });
 
   return (

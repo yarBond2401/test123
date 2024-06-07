@@ -70,10 +70,10 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
 
   const { data, loading } = useFirestoreDocumentRT<ServiceRequest>(`requests/${params.id}`)
   const { setRequestId } = useRequest();
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const isSubmitted = data?.submittedAt;
   const now = new Date();
-  const submittedAt = isSubmitted ? data.submittedAt.toDate() : null;
+  const submittedAt = isSubmitted ? data?.submittedAt?.toDate() : null;
   const hoursSinceSubmission = submittedAt ? (now.getTime() - submittedAt.getTime()) / (1000 * 3600) : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDurationLoading, setIsDurationLoading] = useState(false);
@@ -130,6 +130,14 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
         , [] as string[])
     }
     return null
+  }, [data]);
+
+  useEffect(() => {
+    if (data && data.submittedAt) {
+      setIsSubmitted(true);
+    } else {
+      setIsSubmitted(false);
+    }
   }, [data]);
 
   useEffect(() => {
@@ -195,14 +203,14 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
     // if (!data || !data.submittedAt) return;
 
     const now = new Date();
-    const submittedAt = data.submittedAt.toDate();
+    const submittedAt = data?.submittedAt?.toDate() || null;
     const timeDifference = now.getTime() - submittedAt.getTime();
     const hoursDifference = timeDifference / (1000 * 3600);
 
     // if (hoursDifference < 24) return;
 
     let docRef = doc(db, `requests/${params.id}`);
-    let newServices = data.services.map((service, index) => {
+    let newServices = data?.services?.map((service, index) => {
       return {
         ...service,
         ...(serviceIndex === index && { selected: null, offerStatus: null })
@@ -226,7 +234,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
         if (service.selected) {
           return {
             ...service,
-            offerStatus: 'sent',
+            offerStatus: 'pending',
           };
         }
         return service;
@@ -246,11 +254,9 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
 
       const vendorData: Record<string, any> = {};
 
-      newServices.forEach(service => {
+      newServices.forEach((service, serviceIndex) => {
         if (service.selected) {
           const selectedVendor = service.candidates.find(candidate => candidate.vendorId === service.selected);
-          console.log("selectedVendor", service.duration);
-
           if (selectedVendor) {
             if (!vendorData[selectedVendor.vendorId]) {
               vendorData[selectedVendor.vendorId] = {
@@ -278,24 +284,27 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
         await addDoc(collection(docRef, 'selectedVendors'), vendorData[vendorId]);
       }
 
+
       toast({
-        type: "success",
         title: "Success",
         description: "Request submitted successfully",
+        // @ts-ignore
+        type: "success",
       });
     } catch (error) {
       console.error("Error in handleSubmit:", error);
+
       toast({
-        type: "error",
         title: "Error",
         description: "Error submitting request",
+        // @ts-ignore
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);
       await fetchDurations();
     }
   };
-
 
   const handleDurationChange = (value: number, index: number) => {
     let newDurations = [...durations];
@@ -307,7 +316,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
     if (!data) return [];
     return data.services.map(service => {
       const selectedVendor = service.candidates.find(candidate => candidate.vendorId === service.selected);
-      return selectedVendor ? selectedVendor.duration || 1 : 1; // Set duration from selected vendor or default to 1
+      return selectedVendor ? selectedVendor.duration || 1 : 1;
     });
   }, [data]);
 
@@ -321,7 +330,8 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
     if (prices.length !== durations.length) return 0;
 
     return dot(prices, durations) || 0;
-  }, [data, durations]);
+  }, [durations]);
+
 
 
   if (!data && !loading && !isDurationLoading) {
