@@ -114,6 +114,8 @@ const SignInRequestsPage = ({ params }: Props) => {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [title, setTitle] = useState("");
 
+	const [showMap, setShowMap] = useState(false);
+
 	const { user } = useRequireLogin({
 		onUnauthenticated: () => {
 			router.push("/auth/signin");
@@ -218,12 +220,15 @@ const SignInRequestsPage = ({ params }: Props) => {
 			setSelectedStatus(data?.status);
 			setPreviousStatus(data?.status);
 
-			setPosition(new LatLng(data.location.latitude, data.location.longitude));
+			if (data?.location && data?.location?.latitude && data?.location?.longitude) {
+				setPosition(new LatLng(data.location.latitude, data.location.longitude));
+				setShowMap(true);
+			}
 		}
 	}, [data]);
 
 	useEffect(() => {
-		if (position) {
+		if (position && showMap) {
 			setMap(
 				<MapContainer
 					center={position}
@@ -340,11 +345,15 @@ const SignInRequestsPage = ({ params }: Props) => {
 														<AvatarFallback>{generateInitials(data?.firstName)}</AvatarFallback>
 													</Avatar>
 													<div className="grid">
-														<div className="font-semibold text-lg">{data?.firstName}</div>
-														<div className="text-muted-foreground">
-															<a href={`mailto:${data?.userInfo?.email}`}>{data?.userInfo?.email}</a>
+														<div className="font-semibold text-lg">
+															{data?.firstName || "No data"}
 														</div>
-														<div className="text-muted-foreground">{data?.phoneNumber}</div>
+														<div className="text-muted-foreground">
+															{data?.userInfo?.email ? <a href={`mailto:${data.userInfo.email}`}>{data.userInfo.email}</a> : "No data"}
+														</div>
+														<div className="text-muted-foreground">
+															{data?.phoneNumber || "No data"}
+														</div>
 													</div>
 												</div>
 												<div className="flex items-center gap-2 justify-end">
@@ -358,11 +367,15 @@ const SignInRequestsPage = ({ params }: Props) => {
 											<div className="flex flex-row gap-10">
 												<div className="space-y-2">
 													<Label htmlFor="requested-date">Created Date</Label>
-													<div className="text-muted-foreground">{getDate(data?.createdAt)}</div>
+													<div className="text-muted-foreground">
+														{getDate(data?.createdAt) || "No data"}
+													</div>
 												</div>
 												<div className="space-y-2">
 													<Label htmlFor="requested-date">Requested Date</Label>
-													<div className="text-muted-foreground">{getDate(data?.requestedDate)}</div>
+													<div className="text-muted-foreground">
+														{getDate(data?.requestedDate) || "No data"}
+													</div>
 												</div>
 											</div>
 											<div className="space-y-2">
@@ -406,16 +419,20 @@ const SignInRequestsPage = ({ params }: Props) => {
 										</div>
 										<div className="w-full">
 											<div className="flex flex-col gap-2">
-												{map}
+												{showMap ? map : <Skeleton className="w-full h-64 mb-2" />}
 												<div className="flex flex-row gap-4">
 													<div className="flex flex-row gap-10">
 														<div className="space-y-2">
 															<Label>Longtitude</Label>
-															<div className="text-muted-foreground text-sm">{data?.location?.longitude}</div>
+															<div className="text-muted-foreground text-sm">
+																{showMap ? (data?.location?.longitude || "No data") : <Skeleton className="w-24 h-6" />}
+															</div>
 														</div>
 														<div className="space-y-2">
 															<Label>Latitude</Label>
-															<div className="text-muted-foreground text-sm">{data?.location?.longitude}</div>
+															<div className="text-muted-foreground text-sm">
+																{showMap ? (data?.location?.latitude || "No data") : <Skeleton className="w-24 h-6" />}
+															</div>
 														</div>
 													</div>
 													<Label htmlFor="map">
@@ -424,7 +441,7 @@ const SignInRequestsPage = ({ params }: Props) => {
 															size="icon"
 															variant="outline"
 															className="h-6 w-6 ml-2 opacity-80 transition-opacity group-hover:opacity-100"
-															onClick={() => copyToClipboard(data?.location?.latitude, data?.location?.longitude)}
+															onClick={() => showMap && copyToClipboard(data?.location?.latitude, data?.location?.longitude)}
 														>
 															<CopyIcon className="h-3 w-3" />
 															<span className="sr-only">Copy location</span>
