@@ -49,9 +49,10 @@ const Dashboard = () => {
     if (user?.email === 'info@mrkit.io') {
       router.push("dashboard/sign-installation");
     }
+    console.log(user);
   }, [user])
 
-  const { mockUser, userInfo } = useUserInfo(user);
+  const { userInfo } = useUserInfo(user);
 
   if (!user) {
     return <Loading />;
@@ -105,7 +106,7 @@ const Dashboard = () => {
           <CardTitle>Dashboard</CardTitle>
           <Separator />
         </CardHeader>
-        {mockUser && <CardContent>
+        {<CardContent>
           <div className="flex flex-col md:gap-6 gap-4 w-full">
             <div className="grid grid-cols-1 md:gap-6 gap-4 md:grid-cols-2 lg:grid-cols-4 w-full">
               <div className="shadow flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
@@ -119,46 +120,46 @@ const Dashboard = () => {
                   />
                   <div className="flex flex-col gap-1">
                     <p className="text-dashboard-main 2xl:text-xl leading-[22px] font-medium lg:text-base md:text-xl">
-                      {user.name || mockUser.name}
+                      {user.name || userInfo?.name}
                     </p>
                     <p className="text-dashboard-secondary 2xl:text-base leading-[22px] font-medium lg:text-sm md:text-base">
-                      {userInfo?.role ? capitalize(userInfo.role) : null}
+                      {userInfo?.role ? capitalize(userInfo?.role) : null}
                     </p>
                   </div>
                 </div>
 
                 <Separator className="md:hidden lg:block" />
                 <div className="xl:p-22 p-4 flex flex-col xl:gap-5 w-full md:w-1/2 lg:w-full gap-2">
-                  {mockUser.role === "vendor" && (
+                  {userInfo?.role === "vendor" && (
                     <div className="flex flex-row justify-between w-full gap-1">
                       <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
                         My Level
                       </p>
                       <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm text-end md:text-base">
-                        {userInfo?.level || mockUser.level}
+                        {userInfo?.level || userInfo?.level}
                       </p>
                     </div>
                   )}
                   <div className="flex flex-row justify-between w-full gap-1">
                     <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      {userInfo?.role || mockUser.role === "vendor"
+                      {userInfo?.role || userInfo?.role === "vendor"
                         ? "Success score"
                         : "Available posts"}
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      {userInfo?.role || mockUser.role === "vendor"
-                        ? mockUser.success + "%"
-                        : user.availablePosts}
+                      {userInfo?.role || userInfo?.role === "vendor"
+                        ? userInfo?.success + "%"
+                        : user?.availablePosts}
                     </p>
                   </div>
-                  {mockUser.role === "agent" && (
+                  {userInfo?.role === "agent" && (
                     <>
                       <div className="flex flex-row justify-between w-full gap-1">
                         <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
                           Posts installed
                         </p>
                         <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                          {userInfo?.postsInstalled || mockUser?.postsInstalled}
+                          {userInfo?.postsInstalled || userInfo?.postsInstalled}
                         </p>
                       </div>
                       <div className="flex flex-row justify-between w-full gap-1">
@@ -183,17 +184,17 @@ const Dashboard = () => {
                     <div className="flex flex-row gap-1">
                       <Image src={iconStar} alt="star" height={16} width={16} />
                       <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                        {userInfo?.rating || mockUser?.rating}
+                        {userInfo?.rating || userInfo?.rating}
                       </p>
                     </div>
                   </div>
-                  {mockUser.role === "vendor" && (
+                  {userInfo?.role === "vendor" && (
                     <div className="flex flex-row justify-between w-full gap-1">
                       <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
                         Response rate
                       </p>
                       <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                        {userInfo?.response || mockUser?.response}
+                        {userInfo?.response || userInfo?.response}
                       </p>
                     </div>
                   )}
@@ -204,21 +205,21 @@ const Dashboard = () => {
                 <div className="flex flex-row md:gap-6 gap-4 col-span-3 w-full md:flex-nowrap flex-wrap">
                   <Statistics
                     icon={iconDollar}
-                    result={mockUser.totalMoney}
-                    total={mockUser.role === "vendor" ? "Earnings" : "Spent"}
-                    grow={mockUser.totalMoneyInt}
+                    result={userInfo?.totalMoney}
+                    total={userInfo?.role === "vendor" ? "Earnings" : "Spent"}
+                    grow={userInfo?.totalMoneyInt}
                   />
                   <Statistics
                     icon={iconWork}
-                    result={mockUser.totalWork}
-                    total={mockUser.role === "vendor" ? "Jobs" : "Hires"}
-                    grow={mockUser.totalWorkInt}
+                    result={userInfo?.totalWork}
+                    total={userInfo?.role === "vendor" ? "Jobs" : "Hires"}
+                    grow={userInfo?.totalWorkInt}
                   />
                   <Statistics
                     icon={iconWatch}
-                    result={mockUser.totalHours}
+                    result={userInfo?.totalHours}
                     total="Hours"
-                    grow={mockUser.totalHoursInt}
+                    grow={userInfo?.totalHoursInt}
                   />
                 </div>
 
@@ -226,10 +227,10 @@ const Dashboard = () => {
                   <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 shadow bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
-                        ${mockUser.monthlyAmount}
+                        ${userInfo?.monthlyAmount}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        {mockUser.role === "vendor"
+                        {userInfo?.role === "vendor"
                           ? "Earned in April"
                           : "Spent in April"}
                       </p>
@@ -241,11 +242,11 @@ const Dashboard = () => {
                           datasets: [
                             {
                               data:
-                                mockUser.role === "vendor"
+                                userInfo?.role === "vendor"
                                   ? [0, 55, 50, 100]
                                   : [100, 42, 45, 0],
                               borderColor:
-                                mockUser.role === "vendor"
+                                userInfo?.role === "vendor"
                                   ? "#A652BF"
                                   : "#54BF52",
                               tension: 0.4,
@@ -261,10 +262,10 @@ const Dashboard = () => {
                   <div className="flex shadow xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main  xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
-                        ${mockUser.annualAmount}
+                        ${userInfo?.annualAmount}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        {mockUser.role === "vendor"
+                        {userInfo?.role === "vendor"
                           ? "Annually Earned"
                           : "Annual costs"}
                       </p>
