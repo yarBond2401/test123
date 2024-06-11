@@ -33,6 +33,7 @@ import Loading from "../loading";
 import useUserInfo from "@/hooks/useUserInfo";
 import { Agent, Vendor } from "@/mock/types";
 import { capitalize } from "@/lib/utils";
+import { format } from "date-fns";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
@@ -57,6 +58,31 @@ const Dashboard = () => {
   if (!user) {
     return <Loading />;
   }
+
+  const totalMoneyFormatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(userInfo?.totalMoney);
+
+  const totalWorkFormatted = new Intl.NumberFormat("en-US", {
+    style: "decimal",
+  }).format(userInfo?.totalWork);
+
+  const totalHoursFormatted = new Intl.NumberFormat("en-US", {
+    style: "decimal",
+  }).format(userInfo?.totalHours);
+
+  const monthlyAmountFormatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(userInfo?.monthlyAmount);
+
+  const annualAmountFormatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(userInfo?.annualAmount);
+
+
 
   const optionsBar = {
     maintainAspectRatio: false,
@@ -148,8 +174,8 @@ const Dashboard = () => {
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
                       {userInfo?.role || userInfo?.role === "vendor"
-                        ? userInfo?.success + "%"
-                        : user?.availablePosts}
+                        ? 100 + "%"
+                        : userInfo?.availablePosts}
                     </p>
                   </div>
                   {userInfo?.role === "agent" && (
@@ -205,19 +231,19 @@ const Dashboard = () => {
                 <div className="flex flex-row md:gap-6 gap-4 col-span-3 w-full md:flex-nowrap flex-wrap">
                   <Statistics
                     icon={iconDollar}
-                    result={userInfo?.totalMoney}
+                    result={totalMoneyFormatted}
                     total={userInfo?.role === "vendor" ? "Earnings" : "Spent"}
                     grow={userInfo?.totalMoneyInt}
                   />
                   <Statistics
                     icon={iconWork}
-                    result={userInfo?.totalWork}
+                    result={totalWorkFormatted}
                     total={userInfo?.role === "vendor" ? "Jobs" : "Hires"}
                     grow={userInfo?.totalWorkInt}
                   />
                   <Statistics
                     icon={iconWatch}
-                    result={userInfo?.totalHours}
+                    result={totalHoursFormatted}
                     total="Hours"
                     grow={userInfo?.totalHoursInt}
                   />
@@ -227,12 +253,12 @@ const Dashboard = () => {
                   <div className="flex xl:flex-row flex-col xl:px-22 px-4 xl:py-7 py-5 shadow bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between md:col-span-1 col-span-3">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
-                        ${userInfo?.monthlyAmount}
+                        {monthlyAmountFormatted}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
                         {userInfo?.role === "vendor"
-                          ? "Earned in April"
-                          : "Spent in April"}
+                          ? `Earned in ${format(new Date(), 'MMMM')}`
+                          : `Spent in ${format(new Date(), 'MMMM')}`}
                       </p>
                     </div>
                     <div className="xl:w-1/2 w-full xl:h-16">
@@ -262,7 +288,7 @@ const Dashboard = () => {
                   <div className="flex shadow xl:flex-row flex-col md:col-span-2 col-span-3 xl:px-22 px-4 py-3.5 bg-white border border-[#DFE4EA] rounded-10 xl:items-center gap-5 justify-between">
                     <div className="flex flex-col gap-2">
                       <p className="text-dashboard-main  xl:leading-[29px] leading-5 font-bold xl:text-2xl md:text-lg text-2xl">
-                        ${userInfo?.annualAmount}
+                        {annualAmountFormatted}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
                         {userInfo?.role === "vendor"
