@@ -13,7 +13,7 @@ export const serviceRequestCreateSchema = z.object({
         longitude: z.number(),
     }),
     datetime: z.date(),
-    status: z.enum(["issued", "resolved", "payment", "paid", "completed"]),
+    status: z.enum(["issued", "resolved", "submitted", "approved", "payment_pending", "paid", "completed"]),
     services: z.array(z.object({
         // @ts-ignore
         serviceName: z.enum(OFFERED_SERVICES.map((service) => service.id)),
@@ -67,7 +67,7 @@ export const serviceRequestSchema = serviceRequestCreateSchema.extend({
         // @ts-ignore
         serviceName: z.enum(OFFERED_SERVICES.map((service) => service.id)),
         maxPrice: z.number(),
-        offerStatus: z.enum(["pending", "accepted", "rejected", "completed"]),
+        offerStatus: z.enum(["pending", "accepted", "rejected", "completed", "sent"]).optional(),
         candidates: z.array(
             z.intersection(
                 z.object({

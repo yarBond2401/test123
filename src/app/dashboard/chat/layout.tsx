@@ -71,13 +71,11 @@ const Layout: React.FC<Props> = ({ children }) => {
     });
   }, [chatList, usersDetails]);
 
-  console.log(chats);
-
   let filteredChats = chats;
 
   if (chats) {
     // @ts-ignore
-      filteredChats = chats.filter(chat => chat.userDetails?.displayName.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    filteredChats = chats.filter(chat => chat.userDetails?.displayName.toLowerCase().includes(searchQuery.trim().toLowerCase()))
   }
 
   const currentChatDetails = useMemo(() => {
@@ -86,49 +84,49 @@ const Layout: React.FC<Props> = ({ children }) => {
 
   return (
     <>
-    <h2 className="p-6 text-2xl font-semibold">Chat</h2>
-    <div className="grid grid-cols-1 xl:grid-cols-3 md:grid-cols-2 h-[calc(100vh-12rem)] p-4 gap-10">
-      <Card
-        className={cn(
-          "col-span-1 overflow-hidden relative flex-col",
-          pathname !== "/dashboard/chat" ? "hidden md:flex" : "flex"
-        )}
-      >
-        <div className="flex flex-row p-5 gap-3 text-[#111928] items-center">
-          <p className="text-xl font-medium ">Active Conversations</p>
-          <div className="py-[2px] px-[10px] text-base leading-4 font-medium bg-gray-100 border border-[#DFE4EA] rounded-md">
-            <p>{chats.length}</p>
+      <h2 className="p-6 text-2xl font-semibold">Chat</h2>
+      <div className="grid grid-cols-1 xl:grid-cols-3 md:grid-cols-2 h-[calc(100vh-12rem)] p-4 gap-10">
+        <Card
+          className={cn(
+            "col-span-1 overflow-hidden relative flex-col",
+            pathname !== "/dashboard/chat" ? "hidden md:flex" : "flex"
+          )}
+        >
+          <div className="flex flex-row p-5 gap-3 text-[#111928] items-center">
+            <p className="text-xl font-medium ">Active Conversations</p>
+            <div className="py-[2px] px-[10px] text-base leading-4 font-medium bg-gray-100 border border-[#DFE4EA] rounded-md">
+              <p>{chats.length}</p>
+            </div>
           </div>
-        </div>
-        <Separator />
+          <Separator />
 
-        <ScrollArea className="flex flex-col h-full w-full p-5">
-          <SearchBar searchQuery={searchQuery} onChange={setSearchQuery} />
-          <div className="mt-7">
-            {filteredChats.length ?
-            // @ts-ignore
-              filteredChats.map((chat) => (
-                <InboxItem
-                  item={chat}
-                  key={chat.id}
-                  chatId={chatId}
-                  messageStyles="text-dashboard-main font-normal"
-                />
-              )) : (
-                <div className="flex items-center justify-center pt-4">
-                <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
-                  No chats match your search query.
-                </p>
-              </div>
-              )}
-          </div>
-        </ScrollArea>
-      </Card>
-      <CurrentChatContext.Provider value={currentChatDetails}>
-        <UserContext.Provider value={user}>{children}</UserContext.Provider>
-      </CurrentChatContext.Provider>
-    </div>
-  </>
+          <ScrollArea className="flex flex-col h-full w-full p-5">
+            <SearchBar searchQuery={searchQuery} onChange={setSearchQuery} />
+            <div className="mt-7">
+              {filteredChats.length ?
+                // @ts-ignore
+                filteredChats.map((chat) => (
+                  <InboxItem
+                    item={chat}
+                    key={chat.id}
+                    chatId={chatId}
+                    messageStyles="text-dashboard-main font-normal"
+                  />
+                )) : (
+                  <div className="flex items-center justify-center pt-4">
+                    <p className="xl:text-base text-sm leading-5 text-dashboard-main font-medium">
+                      No chats match your search query.
+                    </p>
+                  </div>
+                )}
+            </div>
+          </ScrollArea>
+        </Card>
+        <CurrentChatContext.Provider value={currentChatDetails}>
+          <UserContext.Provider value={user}>{children}</UserContext.Provider>
+        </CurrentChatContext.Provider>
+      </div>
+    </>
   );
 };
 

@@ -22,7 +22,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { type ServiceRequest } from "../schema";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { format, set } from "date-fns";
 import { UsersV1Type } from "@/app/firestoreTypes";
 import { MdCheck, MdClose, MdMessage, MdOutlineStar, MdOutlineStarBorder, MdOutlineStarHalf } from "react-icons/md";
@@ -38,6 +38,8 @@ import { dot } from "@/lib/utils";
 import { useRequest } from "@/components/RequestContext";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { agent } from "@/mock/users";
+import Image from "next/image";
 
 interface Props {
   params: {
@@ -78,7 +80,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDurationLoading, setIsDurationLoading] = useState(false);
 
-  const fetchDurations = async () => {
+  const fetchDurations = useCallback(async () => {
     if (!data) return;
     setIsDurationLoading(true);
     let docRef = doc(db, `requests/${params.id}`);
@@ -111,7 +113,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
 
     setDurations(newDurations);
     setIsDurationLoading(false);
-  };
+  }, [data, params.id]);
 
   const users = useMemo(() => {
     if (data) {
@@ -130,7 +132,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
         , [] as string[])
     }
     return null
-  }, [data]);
+  }, [data, fetchDurations]);
 
   useEffect(() => {
     if (data && data.submittedAt) {
@@ -142,7 +144,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
 
   useEffect(() => {
     fetchDurations();
-  }, [data]);
+  }, [data, fetchDurations]);
 
   const { data: usersData } = useFirestoreFunction<UsersV1Type>({
     name: "get_users_info_v1",
@@ -226,11 +228,12 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
 
   const handleSubmit = async () => {
     try {
-      if (!data) return;
+      if (!data || !user) return;
       setIsSubmitting(true);
 
       let docRef = doc(db, `requests/${params.id}`);
-      let newServices = data.services.map((service) => {
+
+      let newServices = data.services.map((service, index) => {
         if (service.selected) {
           return {
             ...service,
@@ -241,7 +244,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
       });
 
       const submittedAt = new Date();
-      await updateDoc(docRef, { services: newServices, submittedAt });
+      await updateDoc(docRef, { services: newServices, submittedAt, status: 'submitted' });
 
       const selectedVendorsRef = collection(docRef, 'selectedVendors');
       const selectedVendorsSnapshot = await getDocs(selectedVendorsRef);
@@ -263,8 +266,10 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
                 location: data.location,
                 datetime: data.datetime,
                 brokerId: data.brokerId,
+                agentId: user.uid,
                 requestName: data.requestName,
                 vendorId: selectedVendor.vendorId,
+                requestId: params.id,
                 services: []
               };
             }
@@ -283,7 +288,6 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
       for (const vendorId in vendorData) {
         await addDoc(collection(docRef, 'selectedVendors'), vendorData[vendorId]);
       }
-
 
       toast({
         title: "Success",
@@ -413,7 +417,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
                               <div className="flex items-center gap-2 mb-2">
                                 {
                                   usersData && usersData[candidate.vendorId] && usersData[candidate.vendorId].photoURL
-                                    ? <img
+                                    ? <Image
                                       src={usersData[candidate.vendorId].photoURL}
                                       alt="vendor"
                                       className="w-20 h-20 rounded-md object-cover"

@@ -92,7 +92,7 @@ const SignInstallation = () => {
             </Th>
 
             <Th styles="justify-center xl:w-52 w-44 flex">Notes</Th>
-            <Th styles="flex xl:w-56 w-44 px-4">Sign Status</Th>
+            <Th styles="justify-center flex xl:w-56 w-44 px-4">Sign Status</Th>
           </div>
           <div className="flex flex-col">
             {loading ? (

@@ -35,6 +35,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { TimePicker12 } from '@/components/ui/time-picker';
 import { singInRequestsWithApprovedDateSchema } from "@/app/dashboard/requests/schema";
 import { toast } from "@/components/ui/use-toast";
+import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 
 type DealStatus = "Approved" | "Pending Install" | "Installed" | "Pending Removal" | "Removed";
 
@@ -334,7 +335,8 @@ const SignInRequestsPage = ({ params }: Props) => {
 											<div className="grid grid-cols-2 gap-6">
 												<div className="flex items-center gap-4 mb-4">
 													<Avatar className="h-16 w-16 border">
-														<img src={data?.userInfo?.photoURL} />
+														{/* eslint-disable-next-line @next/next/no-img-element */}
+														<img src={data?.userInfo?.photoURL} alt="avatar" />
 														<AvatarFallback>{generateInitials(data?.firstName)}</AvatarFallback>
 													</Avatar>
 													<div className="grid">
@@ -399,7 +401,7 @@ const SignInRequestsPage = ({ params }: Props) => {
 											</div>
 											<div className="space-y-2">
 												<Label htmlFor="requestName">Request Notes</Label>
-												<Textarea className="w-full cursor-default" value={data?.description} disabled={true} />
+												<AutosizeTextarea className="w-full cursor-default" value={data?.description} disabled={true} />
 											</div>
 										</div>
 										<div className="w-full">
