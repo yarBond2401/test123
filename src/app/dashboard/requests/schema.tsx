@@ -1,6 +1,7 @@
 import { OFFERED_SERVICES } from "@/app/constants";
 import { z } from "zod";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { sub } from "date-fns";
 
 // @ts-ignore
 export const serviceRequestCreateSchema = z.object({
@@ -12,7 +13,7 @@ export const serviceRequestCreateSchema = z.object({
         longitude: z.number(),
     }),
     datetime: z.date(),
-    status: z.enum(["issued", "resolved", "payment", "paid", "completed"]),
+    status: z.enum(["issued", "resolved", "submitted", "approved", "payment_pending", "paid", "completed"]),
     services: z.array(z.object({
         // @ts-ignore
         serviceName: z.enum(OFFERED_SERVICES.map((service) => service.id)),
@@ -56,10 +57,17 @@ export const serviceRequestSchema = serviceRequestCreateSchema.extend({
         // method that returns JS date
         toDate: z.any(),
     }),
+    submittedAt: z.object({
+        seconds: z.number(),
+        nanoseconds: z.number(),
+        // method that returns JS date
+        toDate: z.any(),
+    }).optional(),
     services: z.array(z.object({
         // @ts-ignore
         serviceName: z.enum(OFFERED_SERVICES.map((service) => service.id)),
         maxPrice: z.number(),
+        offerStatus: z.enum(["pending", "accepted", "rejected", "completed", "sent"]).optional(),
         candidates: z.array(
             z.intersection(
                 z.object({

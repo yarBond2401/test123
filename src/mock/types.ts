@@ -39,18 +39,18 @@ export interface Vendor {
   photo: StaticImageData,
   level: string,
   success: number,
-  postsAvailable?: string,
-  postsInstalled?: string,
-  rating: string,
-  response: number,
-  totalMoney: string, 
-  totalMoneyInt: string,
-  totalWork: string,
-  totalWorkInt: string,
-  totalHours: string,
-  totalHoursInt: string,
-  monthlyAmount: string,
-  annualAmount: string,
+  availablePosts?: number,
+  postsInstalled?: number,
+  rating: number,
+  response: string,
+  totalMoney: number,
+  totalMoneyInt: number,
+  totalWork: number,
+  totalWorkInt: number,
+  totalHours: number,
+  totalHoursInt: number,
+  monthlyAmount: number,
+  annualAmount: number,
 }
 
 export interface Agent {
@@ -58,18 +58,18 @@ export interface Agent {
   role: "agent",
   photo: StaticImageData,
   level: string,
-  postsAvailable: string,
-  postsInstalled: string,
-  rating: string,
+  availablePosts: number,
+  postsInstalled: number,
+  rating: number,
   response: string,
-  totalMoney: string, 
-  totalMoneyInt: string,
-  totalWork: string,
-  totalWorkInt: string,
-  totalHours: string,
-  totalHoursInt: string,
-  monthlyAmount: string,
-  annualAmount: string,
+  totalMoney: number,
+  totalMoneyInt: number,
+  totalWork: number,
+  totalWorkInt: number,
+  totalHours: number,
+  totalHoursInt: number,
+  monthlyAmount: number,
+  annualAmount: number,
 }
 
 interface Service {
@@ -80,7 +80,7 @@ interface Service {
 export interface Post {
   id: string;
   createdBy: string;
-  photo: StaticImageData; 
+  photo: StaticImageData;
   date: string;
   services: Service[];
   serviceNumber: number;
@@ -93,7 +93,7 @@ export interface SuperRequest {
   createdBy: string;
   photo: StaticImageData;
   email: string;
-  date: string; 
+  date: string;
   notes: string;
   status: string;
 }

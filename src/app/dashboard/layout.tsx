@@ -69,7 +69,7 @@ const Layout: React.FC<Props> = ({ children }) => {
         onClick={() => setSideBarOpen(false)}
         className={cn(
           sideBarOpen ? "" : "ml-[-100%]",
-          "fixed top-0 z-10 flex h-screen w-full flex-col justify-between border-r bg-ptertiary px-6 pb-3 transition-margin duration-300 md:w-4/12 lg:ml-0 lg:w-[25%] xl:w-[20%] 2xl:w-[15%] dark:bg-gray-800 dark:border-gray-700"
+          "fixed top-0 z-[1000] flex h-screen w-full flex-col justify-between border-r bg-ptertiary px-6 pb-3 transition-margin duration-300 md:w-4/12 lg:ml-0 lg:w-[25%] xl:w-[20%] 2xl:w-[15%] dark:bg-gray-800 dark:border-gray-700"
         )}
       >
         <div>

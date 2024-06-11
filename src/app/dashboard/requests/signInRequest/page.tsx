@@ -116,14 +116,17 @@ const Requests = () => {
 
       const colRef = collection(db, "signInRequests");
       await addDoc(colRef, requestData);
-      await updateUserInfo({ availablePosts: `${Number(mockUser?.postsAvailable) - 1}`, postInstalled: `${Number(mockUser?.postsInstalled) + 1}` })
+      await updateUserInfo({
+        availablePosts: Number(mockUser?.availablePosts) - 1,
+        postsInstalled: Number(mockUser?.postsInstalled) + 1
+      })
       router.push("/dashboard/requests");
     } catch (error) {
       console.error("Error submitting form: ", error);
     }
   };
 
-  const availablePosts = mockUser?.postsAvailable ? Number(mockUser?.postsAvailable) : 0;
+  const availablePosts = mockUser?.availablePosts ? Number(mockUser?.availablePosts) : 0;
 
 
   return (

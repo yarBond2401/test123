@@ -1,19 +1,29 @@
 
 import { useState, useEffect } from "react";
-import {doc, getDoc, updateDoc} from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase";
-import {Agent, Vendor} from "@/mock/types";
-import {useIsVendor} from "@/hooks/useIsVendor";
-import {User} from "firebase/auth";
-import {agent, vendor} from "@/mock/users";
+import { Agent, Vendor } from "@/mock/types";
+import { useIsVendor } from "@/hooks/useIsVendor";
+import { User } from "firebase/auth";
+import { agent, vendor } from "@/mock/users";
 
 interface UserInfo {
-    availablePosts: string;
-    postInstalled: string;
-    rating: string;
+    name: string;
+    level: string;
+    availablePosts: number;
+    postsInstalled: number;
     totalContracts: string;
-    totalHires: string;
-    totalHours: string;
+    totalHires: number;
+    totalHours: number;
+    rating?: number,
+    response?: string,
+    totalMoney?: number,
+    totalMoneyInt?: number,
+    totalWork?: number,
+    totalWorkInt?: number,
+    totalHoursInt?: number,
+    monthlyAmount?: number,
+    annualAmount?: number,
 }
 
 const useUserInfo = (user: User | null) => {
@@ -24,21 +34,22 @@ const useUserInfo = (user: User | null) => {
 
     const isVendor = useIsVendor(user);
 
-    useEffect(()=> {
-        if(isVendor){
+    useEffect(() => {
+        if (isVendor) {
             setMockUser(vendor);
         }
-        if(userInfo && !isVendor){
-            setMockUser({...agent, postsAvailable: userInfo.availablePosts ?? agent.postsAvailable, postsInstalled: userInfo.postInstalled ?? agent.postsInstalled, rating: userInfo.rating ?? agent.rating  });
+        if (userInfo && !isVendor) {
+            //setMockUser({ ...agent, availablePosts: userInfo.availablePosts ?? agent.availablePosts, postsInstalled: userInfo.postInstalled ?? agent.postsInstalled, rating: userInfo.rating ?? agent.rating });
         }
     }, [userInfo, isVendor])
 
     const fetchUserInfo = async () => {
         try {
             const userDocRef = doc(db, "userInfo", user?.uid || '');
-            const userDoc :any = await getDoc(userDocRef);
+            const userDoc: any = await getDoc(userDocRef);
             if (userDoc.exists()) {
                 setUserInfo(userDoc.data());
+                console.log('User info:', userDoc.data());
             } else {
                 console.log("No such user!");
             }
@@ -66,7 +77,7 @@ const useUserInfo = (user: User | null) => {
 
     useEffect(() => {
         if (user?.uid) {
-                fetchUserInfo();
+            fetchUserInfo();
         }
     }, [user]);
 

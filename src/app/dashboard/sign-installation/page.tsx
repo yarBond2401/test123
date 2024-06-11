@@ -12,11 +12,14 @@ import { superRequests } from "@/mock/requests";
 
 import { useEffect, useMemo, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
-import {serviceRequestSchema, ServiceSignInRequestSchema, signInRequestWithUsersSchema} from "../requests/schema";
+import { serviceRequestSchema, ServiceSignInRequestSchema, signInRequestWithUsersSchema } from "../requests/schema";
 import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { BrokerType } from "@/app/firestoreTypes";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { Table, TableRow, TableHeader, TableBody, TableHead } from "@/components/ui/table";
+import { ArrowUpDown, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SignInstallation = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,30 +30,44 @@ const SignInstallation = () => {
     },
   });
   const [requests, setRequests] = useState<ServiceSignInRequestSchema[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
 
   useEffect(() => {
     async function fetch() {
-    const data = await getDocs(collection(db, "signInRequests"));
-    const currentRequests: ServiceSignInRequestSchema[] = [];
+      setLoading(true);
+      const data = await getDocs(collection(db, "signInRequests"));
+      const currentRequests: ServiceSignInRequestSchema[] = [];
 
-    for (const docItem of data.docs) {
-      currentRequests.push({...docItem.data(), id: docItem.id} as ServiceSignInRequestSchema)
-    };
+      for (const docItem of data.docs) {
+        currentRequests.push({ ...docItem.data(), id: docItem.id } as ServiceSignInRequestSchema)
+      };
 
-    setRequests(currentRequests);
+      setRequests(currentRequests);
+      setLoading(false);
     }
 
     fetch();
-},[]);
+  }, []);
 
-  const filteredRequests = requests.filter(
-    (request) =>
-      request.firstName
-        .toLowerCase()
-        .includes(searchQuery.trim().toLowerCase()) ||
-      request.requestName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-      request.description.toLowerCase().includes(searchQuery.trim().toLowerCase())
-  );
+  const handleSort = () => {
+    const direction = sortDirection === "asc" ? "desc" : "asc";
+    setSortDirection(direction);
+  };
+
+  const filteredRequests = requests
+    .filter(
+      (request) =>
+        request.firstName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+        request.requestName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+        request.description.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000 + a.createdAt.nanoseconds / 1000000) : new Date(0);
+      const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000 + b.createdAt.nanoseconds / 1000000) : new Date(0);
+      return sortDirection === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+    });
 
   return (
     <Card className="h-full">
@@ -65,18 +82,24 @@ const SignInstallation = () => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col bg-white border border-gray-200 rounded-10 w-full shadow">
-          <div className="flex flex-row justify-between w-full py-3 px-4 items-center">
+          <div className="flex flex-row justify-between w-full py-3 px-4 items-center gap-2">
             <Th styles="flex w-32">Created by</Th>
             <Th styles="justify-center w-52 md:flex hidden">Phone number</Th>
-            <Th styles="md:flex hidden justify-center w-[130px]">
-              Date of work
+            <Th styles="md:flex hidden w-[150px] cursor-pointer" >
+              <Button variant="ghost" className="w-[150px] p-0" onClick={handleSort}>
+                Date of creation <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
             </Th>
-            <Th styles="justify-center pl-4 xl:w-52 w-44 flex">Notes</Th>
-            <Th styles="flex justify-center xl:w-56 w-40 px-4">Sign Status</Th>
-            <Th styles="xl:w-32 md:w-28 w-20" />
+
+            <Th styles="justify-center xl:w-52 w-44 flex">Notes</Th>
+            <Th styles="justify-center flex xl:w-56 w-44 px-4">Sign Status</Th>
           </div>
           <div className="flex flex-col">
-            {!!filteredRequests.length ? (
+            {loading ? (
+              <div className="flex justify-center items-center my-20">
+                <Loader2 className="animate-spin text-gray-500" size={34} />
+              </div>
+            ) : !!filteredRequests.length ? (
               filteredRequests.map((request, i) => (
                 <RequestItem key={i} user={user} request={request} />
               ))

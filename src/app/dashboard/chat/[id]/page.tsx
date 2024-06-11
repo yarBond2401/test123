@@ -1,9 +1,10 @@
+// @ts-nocheck
 "use client";
 
 import { format, sub } from "date-fns";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,15 +21,28 @@ import SmileIcon from "@/icons/icon=smile.svg";
 import SendIcon from "@/icons/icon=send.svg";
 import MoreIcon from "@/icons/icon=more.svg";
 import defaultAvatar from "@/images/default-user-picture.jpg";
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "@/app/firebase";
 import { useRequest } from "@/components/RequestContext";
-
+import { Dialog } from "@radix-ui/react-dialog";
+import ServiceDetailsDialog from "./components/ServiceDetailsDialog";
 
 interface Props {
   params: {
     id: string;
   };
+}
+
+interface OfferDetails {
+  hideSendOffer: boolean;
+  showAcceptButton: boolean;
+  showViewDetailsButton: boolean;
+}
+
+interface VendorData {
+  requestId?: string;
+  vendorId?: string;
+  services: any[];
 }
 
 const ChatItem = ({ data, chatDetails }: any) => {
@@ -74,6 +88,30 @@ const ChatTab: React.FC<Props> = ({ params }) => {
   const isVendor = useIsVendor(user);
   const { requestId } = useRequest();
 
+  const [hydrated, setHydrated] = useState(false);
+  const [vendorData, setVendorData] = useState<VendorData | null>(null);
+
+  const acceptTheContract = async () => {
+    if (!vendorData) return;
+
+    const services = vendorData?.services?.map(service => ({
+      ...service,
+      offerStatus: 'accepted'
+    }));
+
+    try {
+      const vendorDocRef = doc(db, `requests/${vendorData.requestId}/selectedVendors/${vendorData.vendorId}`);
+      await updateDoc(vendorDocRef, { services });
+      console.log("Services updated to accepted");
+    } catch (error) {
+      console.error("Error updating services: ", error);
+    }
+  };
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   const submitOffer = () => {
     if (isVendor) return;
     router.push(`/dashboard/requests/${requestId}`);
@@ -82,6 +120,98 @@ const ChatTab: React.FC<Props> = ({ params }) => {
   useEffect(() => {
     console.log('chatDetails', chatDetails);
   }, [chatDetails]);
+
+  useEffect(() => {
+    const getOfferDetails = async () => {
+      console.log("Checking if user is a vendor:", isVendor);
+
+      const requestsRef = collection(db, "requests");
+      const querySnapshot = await getDocs(requestsRef);
+      console.log("Fetched requests:", querySnapshot.docs.map((doc) => doc.id));
+
+      if (isVendor) {
+        let hideSendOffer = false;
+
+        for (const requestDoc of querySnapshot.docs) {
+          const selectedVendorsRef = collection(
+            db,
+            `requests/${requestDoc.id}/selectedVendors`
+          );
+          const q = query(
+            selectedVendorsRef,
+            where("vendorId", "==", user?.uid)
+          );
+          const vendorDocs = await getDocs(q);
+
+          vendorDocs.forEach((doc) => {
+            const vendorData = doc.data();
+            console.log("Vendor Document ID:", doc.id, "Vendor Data:", vendorData);
+            if (vendorData.vendorId === user?.uid) {
+              setVendorData(vendorData); // Save vendor data to state
+              hideSendOffer = true;
+            }
+          });
+
+          if (hideSendOffer) break;
+        }
+
+        console.log("Hide Send Offer:", hideSendOffer);
+        return { hideSendOffer };
+      } else {
+        let showAcceptButton = false;
+        let showViewDetailsButton = false;
+
+        for (const requestDoc of querySnapshot.docs) {
+          const selectedVendorsRef = collection(
+            db,
+            `requests/${requestDoc.id}/selectedVendors`
+          );
+          const q = query(
+            selectedVendorsRef,
+            where("brokerId", "==", user?.uid)
+          );
+          const agentDocs = await getDocs(q);
+
+          agentDocs.forEach((doc) => {
+            const docData = doc.data();
+            console.log("Agent Document Data:", docData);
+            if (docData.agentId === user?.uid) {
+              showAcceptButton = true;
+            }
+          });
+
+          if (showAcceptButton) {
+            const requestData = requestDoc.data();
+            console.log("Request Data:", requestData);
+
+            const userService = requestData.services.find(
+              (service) => service.selected === user?.uid
+            );
+            console.log("User Service:", userService);
+
+            if (userService && userService.offerStatus === "pending") {
+              showViewDetailsButton = true;
+            }
+          }
+
+          if (showAcceptButton || showViewDetailsButton) break;
+        }
+
+        console.log("Show Accept Button:", showAcceptButton);
+        console.log("Show View Details Button:", showViewDetailsButton);
+        return { showAcceptButton, showViewDetailsButton };
+      }
+    };
+    if (user?.uid) {
+      getOfferDetails().then(offerDetails => {
+        setOfferDetails(offerDetails);
+        console.log("Offer Details:", offerDetails);
+      });
+    }
+  }, [isVendor, user?.uid]);/** */
+
+
+  const [offerDetails, setOfferDetails] = useState<OfferDetails>({ hideSendOffer: false, showAcceptButton: false, showViewDetailsButton: false });
 
   return (
     <Card
@@ -125,18 +255,32 @@ const ChatTab: React.FC<Props> = ({ params }) => {
         </div>
 
         {(chatDetails?.userDetails?.email !== "info@mrkit.io") && <div className="flex flex-row gap-3 items-center">
-          <button
-            type="button"
-            className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
-            onClick={() => submitOffer()}
-          >
-            {isVendor ? "Accept the contract" : "Send an offer"}
-          </button>
-          <button type="button" className="p-[9px] bg-gray-100 border border-[#DFE4EA] rounded">
-            <Image src={MoreIcon} alt="more" width={22} height={22} />
-          </button>
-        </div>}
 
+          {hydrated && !isVendor && !offerDetails.hideSendOffer && (
+            <button
+              type="button"
+              className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
+              onClick={() => submitOffer()}
+            >
+              Send offer
+            </button>
+          )}
+
+          {hydrated && isVendor && offerDetails.showAcceptButton && (
+            <div className="flex flex-row gap-3 items-center">
+              <button
+                type="button"
+                className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
+                onClick={() => acceptTheContract()}
+              >
+                Accept offer
+              </button>
+              {offerDetails.showViewDetailsButton && (
+                <ServiceDetailsDialog data={vendorData} />
+              )}
+            </div>
+          )}
+        </div>}
         <Button
           type="button"
           className="md:hidden"

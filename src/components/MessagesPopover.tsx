@@ -10,6 +10,8 @@ import { User } from 'firebase/auth';
 import { useIsVendor } from '@/hooks/useIsVendor';
 import Link from 'next/link';
 import { LoadingMessagesPopover } from './LoadingMessagesPopover';
+import defaultAvatar from "@/images/default-user-picture.jpg";
+import { Avatar } from './ui/avatar';
 
 interface Props {
   user: User
@@ -58,13 +60,13 @@ export const MessagesPopover: React.FC<Props> = ({ user }) => {
             >
               {
                 usersData ?
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     // @ts-ignore
-                    src={usersData[item[otherRole]].photoURL}
+                    src={usersData[item[otherRole]]?.photoURL}
                     alt="user"
                     className="w-10 h-10 rounded-full"
                   />
-                  // <Skeleton className="w-10 h-10 rounded-full flex-none" />
                   : <Skeleton className="w-10 h-10 rounded-full flex-none" />
 
               }
@@ -80,7 +82,7 @@ export const MessagesPopover: React.FC<Props> = ({ user }) => {
                     : <Skeleton className="h-4 w-2/3" />
                 }
                 <p>
-                  {item.last_text as string}
+                  {(item.last_text as string).length > 50 ? (item.last_text as string).substring(0, 50) + '...' : item.last_text}
                 </p>
               </div>
             </Link>
