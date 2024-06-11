@@ -39,6 +39,7 @@ const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
   const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
   const router = useRouter();
+  const [loadingUserInfo, setLoadingUserInfo] = useState(true);
 
   const { user } = useRequireLogin({
     onUnauthenticated: () => {
@@ -55,7 +56,13 @@ const Dashboard = () => {
 
   const { userInfo } = useUserInfo(user);
 
-  if (!user) {
+  useEffect(() => {
+    if (userInfo) {
+      setLoadingUserInfo(false);
+    }
+  }, [userInfo]);
+
+  if (!user || loadingUserInfo) {
     return <Loading />;
   }
 
