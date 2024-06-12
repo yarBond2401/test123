@@ -45,7 +45,7 @@ interface VendorData {
   services: any[];
 }
 
-const ChatItem = ({ data, chatDetails }: any) => {
+const ChatItem = ({ data, chatDetails }) => {
   const user = useContext(UserContext);
 
   const isSender = useMemo(
@@ -54,6 +54,14 @@ const ChatItem = ({ data, chatDetails }: any) => {
   );
 
   if (!user) return null;
+
+  // Regular expression to find the ID pattern
+  const idPattern = /ID-[a-zA-Z0-9]+/;
+  const matchedId = data.text.match(idPattern);
+  const id = matchedId ? matchedId[0] : null;
+
+  // Remove the ID from the message text
+  const messageText = id ? data.text.replace(idPattern, '').trim() : data.text;
 
   return (
     <div className="flex flex-col justify-start gap-2">
@@ -68,12 +76,24 @@ const ChatItem = ({ data, chatDetails }: any) => {
           ? "self-end items-end bg-[#5296BF] text-white rounded-t-2xl rounded-bl-2xl"
           : "self-start items-start bg-gray-100 text-dashboard-main rounded-b-2xl rounded-tr-2xl"
       )}>
-        <p className="text-lg font-normal">{data.text}</p>
+        <p className="text-lg font-normal">{messageText}</p>
+        {id && !isSender && (
+          <div className="flex flex-row gap-2">
+            <ServiceDetailsDialog />
+            <Button
+              type="button"
+              className="bg-[#52BF56] hover:bg-green-600 text-white"
+              onClick={() => acceptTheContract()}
+            >
+              Accept offer
+            </Button>
+          </div>
+        )}
       </div>
       <p className={cn("text-xs leading-5 text-[#637381]", isSender ? "self-end" : "self-start")}>
         {data.time ? formatChatMessageTime(data.time.toDate()) : "Sending..."}
       </p>
-    </div>
+    </div >
   );
 };
 
@@ -90,6 +110,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
 
   const [hydrated, setHydrated] = useState(false);
   const [vendorData, setVendorData] = useState<VendorData | null>(null);
+  const [offerDetails, setOfferDetails] = useState<OfferDetails>({ hideSendOffer: true, showAcceptButton: false, showViewDetailsButton: false });
 
   const acceptTheContract = async () => {
     if (!vendorData) return;
@@ -147,7 +168,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
             const vendorData = doc.data();
             console.log("Vendor Document ID:", doc.id, "Vendor Data:", vendorData);
             if (vendorData.vendorId === user?.uid) {
-              setVendorData(vendorData); // Save vendor data to state
+              setVendorData(vendorData);
               hideSendOffer = true;
             }
           });
@@ -202,16 +223,14 @@ const ChatTab: React.FC<Props> = ({ params }) => {
         return { showAcceptButton, showViewDetailsButton };
       }
     };
+
     if (user?.uid) {
       getOfferDetails().then(offerDetails => {
         setOfferDetails(offerDetails);
         console.log("Offer Details:", offerDetails);
       });
     }
-  }, [isVendor, user?.uid]);/** */
-
-
-  const [offerDetails, setOfferDetails] = useState<OfferDetails>({ hideSendOffer: false, showAcceptButton: false, showViewDetailsButton: false });
+  }, [isVendor, user?.uid]);
 
   return (
     <Card

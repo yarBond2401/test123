@@ -80,6 +80,8 @@ const Signup = () => {
       await setDoc(doc(db, "vendors", userCredential.user.uid), {
         description: "",
         generic_availability: [],
+        totalRating: 0,
+        totalReviews: 0,
       });
 
       try {

@@ -90,7 +90,6 @@ const Dashboard = () => {
   }).format(userInfo?.annualAmount);
 
 
-
   const optionsBar = {
     maintainAspectRatio: false,
     plugins: {
