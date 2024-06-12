@@ -51,7 +51,6 @@ const Dashboard = () => {
     if (user?.email === 'info@mrkit.io') {
       router.push("dashboard/sign-installation");
     }
-    console.log(user);
   }, [user])
 
   const { userInfo } = useUserInfo(user);
@@ -59,6 +58,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (userInfo) {
       setLoadingUserInfo(false);
+      console.log("info", userInfo);
     }
   }, [userInfo]);
 

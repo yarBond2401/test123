@@ -35,31 +35,26 @@ const useUserInfo = (user: User | null) => {
     const isVendor = useIsVendor(user);
 
     useEffect(() => {
-        if (isVendor) {
-            setMockUser(vendor);
-        }
-        if (userInfo && !isVendor) {
-            //setMockUser({ ...agent, availablePosts: userInfo.availablePosts ?? agent.availablePosts, postsInstalled: userInfo.postInstalled ?? agent.postsInstalled, rating: userInfo.rating ?? agent.rating });
-        }
-    }, [userInfo, isVendor])
-
-    const fetchUserInfo = async () => {
-        try {
-            const userDocRef = doc(db, "userInfo", user?.uid || '');
-            const userDoc: any = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                setUserInfo(userDoc.data());
-                console.log('User info:', userDoc.data());
-            } else {
-                console.log("No such user!");
+        const fetchVendorInfo = async () => {
+            try {
+                const vendorDocRef = doc(db, "vendors", user?.uid || '');
+                const vendorDoc: any = await getDoc(vendorDocRef);
+                if (vendorDoc.exists()) {
+                    setUserInfo(vendorDoc.data());
+                    console.log('Vendor info:', vendorDoc.data());
+                } else {
+                    console.log("No such vendor!");
+                }
+            } catch (err: any) {
+                console.error("Error fetching vendor info:", err);
+                setError(err);
             }
-        } catch (err: any) {
-            console.error("Error fetching user info:", err);
-            setError(err);
-        } finally {
-            setLoading(false);
+        };
+
+        if (isVendor) {
+            fetchVendorInfo();
         }
-    };
+    }, [isVendor, user]);
 
     const updateUserInfo = async (newUserInfo: Partial<UserInfo>) => {
         try {
@@ -76,6 +71,24 @@ const useUserInfo = (user: User | null) => {
     };
 
     useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const userDocRef = doc(db, "userInfo", user?.uid || '');
+                const userDoc: any = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    setUserInfo(userDoc.data());
+                    console.log('User info:', userDoc.data());
+                } else {
+                    console.log("No such user!");
+                }
+            } catch (err: any) {
+                console.error("Error fetching user info:", err);
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (user?.uid) {
             fetchUserInfo();
         }
