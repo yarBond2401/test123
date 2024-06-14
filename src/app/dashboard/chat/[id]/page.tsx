@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { format, sub } from "date-fns";
+import { format, set, sub } from "date-fns";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -21,11 +21,13 @@ import SmileIcon from "@/icons/icon=smile.svg";
 import SendIcon from "@/icons/icon=send.svg";
 import MoreIcon from "@/icons/icon=more.svg";
 import defaultAvatar from "@/images/default-user-picture.jpg";
-import { collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "@/app/firebase";
 import { useRequest } from "@/components/RequestContext";
 import { Dialog } from "@radix-ui/react-dialog";
 import ServiceDetailsDialog from "./components/ServiceDetailsDialog";
+import SendOfferDialog from "./components/SendOfferDialog";
+import { toast } from "@/components/ui/use-toast";
 
 interface Props {
   params: {
@@ -45,23 +47,38 @@ interface VendorData {
   services: any[];
 }
 
+
 const ChatItem = ({ data, chatDetails }) => {
   const user = useContext(UserContext);
+  const [status, setStatus] = useState("");
+  let id = null;
 
   const isSender = useMemo(
     () => user?.uid === data.sender,
     [user, data.sender]
   );
 
+  useEffect(() => {
+    if (data?.offerId) {
+      getDoc(doc(db, "offers", data?.offerId)).then((doc) => {
+        setStatus(doc.data()?.status || "unknown");
+      });
+    }
+  }, [data?.offerId]);
+
   if (!user) return null;
 
-  // Regular expression to find the ID pattern
-  const idPattern = /ID-[a-zA-Z0-9]+/;
-  const matchedId = data.text.match(idPattern);
-  const id = matchedId ? matchedId[0] : null;
-
-  // Remove the ID from the message text
-  const messageText = id ? data.text.replace(idPattern, '').trim() : data.text;
+  const handleAccept = async () => {
+    if (!id) return;
+    let docRef = doc(db, "offers", id);
+    await updateDoc(docRef, { status: "accepted", acceptedAt: serverTimestamp() });
+    toast({
+      title: "Success",
+      description: "Offer accepted",
+      type: "success",
+    });
+    setStatus("accepted");
+  };
 
   return (
     <div className="flex flex-col justify-start gap-2">
@@ -76,17 +93,21 @@ const ChatItem = ({ data, chatDetails }) => {
           ? "self-end items-end bg-[#5296BF] text-white rounded-t-2xl rounded-bl-2xl"
           : "self-start items-start bg-gray-100 text-dashboard-main rounded-b-2xl rounded-tr-2xl"
       )}>
-        <p className="text-lg font-normal">{messageText}</p>
-        {id && !isSender && (
+        <p className="text-lg font-normal">{data.text}</p>
+        {id && status === "pending" && !isSender && (
           <div className="flex flex-row gap-2">
-            <ServiceDetailsDialog />
             <Button
               type="button"
               className="bg-[#52BF56] hover:bg-green-600 text-white"
-              onClick={() => acceptTheContract()}
+              onClick={handleAccept}
             >
               Accept offer
             </Button>
+          </div>
+        )}
+        {id && (
+          <div className="flex flex-row gap-2">
+            <ServiceDetailsDialog id={data?.offerId} />
           </div>
         )}
       </div>
@@ -142,95 +163,93 @@ const ChatTab: React.FC<Props> = ({ params }) => {
     console.log('chatDetails', chatDetails);
   }, [chatDetails]);
 
-  useEffect(() => {
-    const getOfferDetails = async () => {
-      console.log("Checking if user is a vendor:", isVendor);
+  // useEffect(() => {
+  //   const getOfferDetails = async () => {
+  //     console.log("Checking if user is a vendor:", isVendor);
 
-      const requestsRef = collection(db, "requests");
-      const querySnapshot = await getDocs(requestsRef);
-      console.log("Fetched requests:", querySnapshot.docs.map((doc) => doc.id));
+  //     const requestsRef = collection(db, "requests");
+  //     const querySnapshot = await getDocs(requestsRef);
+  //     console.log("Fetched requests:", querySnapshot.docs.map((doc) => doc.id));
 
-      if (isVendor) {
-        let hideSendOffer = false;
+  //     if (isVendor) {
+  //       let hideSendOffer = false;
 
-        for (const requestDoc of querySnapshot.docs) {
-          const selectedVendorsRef = collection(
-            db,
-            `requests/${requestDoc.id}/selectedVendors`
-          );
-          const q = query(
-            selectedVendorsRef,
-            where("vendorId", "==", user?.uid)
-          );
-          const vendorDocs = await getDocs(q);
+  //       for (const requestDoc of querySnapshot.docs) {
+  //         const selectedVendorsRef = collection(
+  //           db,
+  //           `requests/${requestDoc.id}/selectedVendors`
+  //         );
+  //         const q = query(
+  //           selectedVendorsRef,
+  //           where("vendorId", "==", user?.uid)
+  //         );
+  //         const vendorDocs = await getDocs(q);
 
-          vendorDocs.forEach((doc) => {
-            const vendorData = doc.data();
-            console.log("Vendor Document ID:", doc.id, "Vendor Data:", vendorData);
-            if (vendorData.vendorId === user?.uid) {
-              setVendorData(vendorData);
-              hideSendOffer = true;
-            }
-          });
+  //         vendorDocs.forEach((doc) => {
+  //           const vendorData = doc.data();
+  //           console.log("Vendor Document ID:", doc.id, "Vendor Data:", vendorData);
+  //           if (vendorData.vendorId === user?.uid) {
+  //             setVendorData(vendorData);
+  //             hideSendOffer = true;
+  //           }
+  //         });
 
-          if (hideSendOffer) break;
-        }
+  //         if (hideSendOffer) break;
+  //       }
 
-        console.log("Hide Send Offer:", hideSendOffer);
-        return { hideSendOffer };
-      } else {
-        let showAcceptButton = false;
-        let showViewDetailsButton = false;
+  //       console.log("Hide Send Offer:", hideSendOffer);
+  //       return { hideSendOffer };
+  //     } else {
+  //       let showAcceptButton = false;
+  //       let showViewDetailsButton = false;
 
-        for (const requestDoc of querySnapshot.docs) {
-          const selectedVendorsRef = collection(
-            db,
-            `requests/${requestDoc.id}/selectedVendors`
-          );
-          const q = query(
-            selectedVendorsRef,
-            where("brokerId", "==", user?.uid)
-          );
-          const agentDocs = await getDocs(q);
+  //       for (const requestDoc of querySnapshot.docs) {
+  //         const selectedVendorsRef = collection(
+  //           db,
+  //           `requests/${requestDoc.id}/selectedVendors`
+  //         );
+  //         const q = query(
+  //           selectedVendorsRef,
+  //           where("brokerId", "==", user?.uid)
+  //         );
+  //         const agentDocs = await getDocs(q);
 
-          agentDocs.forEach((doc) => {
-            const docData = doc.data();
-            console.log("Agent Document Data:", docData);
-            if (docData.agentId === user?.uid) {
-              showAcceptButton = true;
-            }
-          });
+  //         agentDocs.forEach((doc) => {
+  //           const docData = doc.data();
+  //           console.log("Agent Document Data:", docData);
+  //           if (docData.agentId === user?.uid) {
+  //             showAcceptButton = true;
+  //           }
+  //         });
 
-          if (showAcceptButton) {
-            const requestData = requestDoc.data();
-            console.log("Request Data:", requestData);
+  //         if (showAcceptButton) {
+  //           const requestData = requestDoc.data();
+  //           console.log("Request Data:", requestData);
 
-            const userService = requestData.services.find(
-              (service) => service.selected === user?.uid
-            );
-            console.log("User Service:", userService);
+  //           const userService = requestData.services.find(
+  //             (service) => service.selected === user?.uid
+  //           );
+  //           console.log("User Service:", userService);
 
-            if (userService && userService.offerStatus === "pending") {
-              showViewDetailsButton = true;
-            }
-          }
+  //           if (userService && userService.offerStatus === "pending") {
+  //             showViewDetailsButton = true;
+  //           }
+  //         }
 
-          if (showAcceptButton || showViewDetailsButton) break;
-        }
+  //         if (showAcceptButton || showViewDetailsButton) break;
+  //       }
 
-        console.log("Show Accept Button:", showAcceptButton);
-        console.log("Show View Details Button:", showViewDetailsButton);
-        return { showAcceptButton, showViewDetailsButton };
-      }
-    };
+  //       return { showAcceptButton, showViewDetailsButton };
+  //     }
+  //   };
 
-    if (user?.uid) {
-      getOfferDetails().then(offerDetails => {
-        setOfferDetails(offerDetails);
-        console.log("Offer Details:", offerDetails);
-      });
-    }
-  }, [isVendor, user?.uid]);
+  //   if (user?.uid) {
+  //     getOfferDetails().then(offerDetails => {
+  //       setOfferDetails(offerDetails);
+  //       console.log("Offer Details:", offerDetails);
+  //     });
+  //   }
+  // }, [isVendor, user?.uid]);
 
   return (
     <Card
@@ -275,30 +294,10 @@ const ChatTab: React.FC<Props> = ({ params }) => {
 
         {(chatDetails?.userDetails?.email !== "info@mrkit.io") && <div className="flex flex-row gap-3 items-center">
 
-          {hydrated && !isVendor && !offerDetails.hideSendOffer && (
-            <button
-              type="button"
-              className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
-              onClick={() => submitOffer()}
-            >
-              Send offer
-            </button>
+          {!isVendor && chatDetails && (
+            <SendOfferDialog vendorId={chatDetails?.vendor} agentId={chatDetails?.agent} />
           )}
 
-          {hydrated && isVendor && offerDetails.showAcceptButton && (
-            <div className="flex flex-row gap-3 items-center">
-              <button
-                type="button"
-                className="py-[10px] px-10 bg-[#52BF56] hover:bg-green-600 text-white rounded-md text-base font-medium"
-                onClick={() => acceptTheContract()}
-              >
-                Accept offer
-              </button>
-              {offerDetails.showViewDetailsButton && (
-                <ServiceDetailsDialog data={vendorData} />
-              )}
-            </div>
-          )}
         </div>}
         <Button
           type="button"

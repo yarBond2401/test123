@@ -1,9 +1,10 @@
+import { Spinner } from "@/components/ui/spinner";
+
 const Loading = () => {
   return (
-    <div>
-      <h1>Loading...</h1>
+    <div className="w-full h-screen flex flex-col justify-center items-center">
+      <Spinner size="large" />
     </div>
   );
 }
-
 export default Loading

@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as Select from "@radix-ui/react-select";
@@ -14,26 +13,22 @@ import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Statistics } from "@/components/dashboard/Statistics";
-import { InboxItem } from "@/components/chatItem/InboxItem";
 
 import defaultAvatar from "@/images/default-user-picture.jpg";
 import iconStar from "@/icons/icon=star.svg";
 import iconDollar from "@/icons/icon=dollar.svg";
 import iconWork from "@/icons/icon=work.svg";
 import iconWatch from "@/icons/icon=watch.svg";
-import { inboxItems } from "@/mock/inboxMock";
 import DropdownIcon from "@/icons/icon=chevron-down.svg";
 import { dealsMock } from "@/mock/dealsMock";
 import { DealItem } from "@/components/dashboard/DealItem";
 import { annualEarnedChartData } from "@/mock/annualEarnedChartDataMock";
-import { elements } from "chart.js/auto";
-import { agent, vendor } from "@/mock/users";
 import { useIsVendor } from "@/hooks/useIsVendor";
 import Loading from "../loading";
 import useUserInfo from "@/hooks/useUserInfo";
-import { Agent, Vendor } from "@/mock/types";
 import { capitalize } from "@/lib/utils";
 import { format } from "date-fns";
+import { InboxCard } from "./Inbox";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
@@ -51,9 +46,10 @@ const Dashboard = () => {
     if (user?.email === 'info@mrkit.io') {
       router.push("dashboard/sign-installation");
     }
-  }, [user])
+  }, [user, router])
 
   const { userInfo } = useUserInfo(user);
+  const isVendor = useIsVendor(user);
 
   useEffect(() => {
     if (userInfo) {
@@ -162,7 +158,7 @@ const Dashboard = () => {
 
                 <Separator className="md:hidden lg:block" />
                 <div className="xl:p-22 p-4 flex flex-col xl:gap-5 w-full md:w-1/2 lg:w-full gap-2">
-                  {userInfo?.role === "vendor" && (
+                  {isVendor && (
                     <div className="flex flex-row justify-between w-full gap-1">
                       <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
                         My Level
@@ -174,17 +170,17 @@ const Dashboard = () => {
                   )}
                   <div className="flex flex-row justify-between w-full gap-1">
                     <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      {userInfo?.role || userInfo?.role === "vendor"
+                      {isVendor
                         ? "Success score"
                         : "Available posts"}
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      {userInfo?.role || userInfo?.role === "vendor"
+                      {isVendor
                         ? 100 + "%"
                         : userInfo?.availablePosts}
                     </p>
                   </div>
-                  {userInfo?.role === "agent" && (
+                  {!isVendor && (
                     <>
                       <div className="flex flex-row justify-between w-full gap-1">
                         <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
@@ -220,7 +216,7 @@ const Dashboard = () => {
                       </p>
                     </div>
                   </div>
-                  {userInfo?.role === "vendor" && (
+                  {isVendor && (
                     <div className="flex flex-row justify-between w-full gap-1">
                       <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
                         Response rate
@@ -238,13 +234,13 @@ const Dashboard = () => {
                   <Statistics
                     icon={iconDollar}
                     result={totalMoneyFormatted}
-                    total={userInfo?.role === "vendor" ? "Earnings" : "Spent"}
+                    total={isVendor ? "Earnings" : "Spent"}
                     grow={userInfo?.totalMoneyInt}
                   />
                   <Statistics
                     icon={iconWork}
                     result={totalWorkFormatted}
-                    total={userInfo?.role === "vendor" ? "Jobs" : "Hires"}
+                    total={isVendor ? "Jobs" : "Hires"}
                     grow={userInfo?.totalWorkInt}
                   />
                   <Statistics
@@ -262,7 +258,7 @@ const Dashboard = () => {
                         {monthlyAmountFormatted}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        {userInfo?.role === "vendor"
+                        {isVendor
                           ? `Earned in ${format(new Date(), 'MMMM')}`
                           : `Spent in ${format(new Date(), 'MMMM')}`}
                       </p>
@@ -274,11 +270,11 @@ const Dashboard = () => {
                           datasets: [
                             {
                               data:
-                                userInfo?.role === "vendor"
+                                isVendor
                                   ? [0, 55, 50, 100]
                                   : [100, 42, 45, 0],
                               borderColor:
-                                userInfo?.role === "vendor"
+                                isVendor
                                   ? "#A652BF"
                                   : "#54BF52",
                               tension: 0.4,
@@ -297,7 +293,7 @@ const Dashboard = () => {
                         {annualAmountFormatted}
                       </p>
                       <p className="text-dashboard-secondary leading-[22px] font-medium 2xl:text-base md:text-sm text-base">
-                        {userInfo?.role === "vendor"
+                        {isVendor
                           ? "Annually Earned"
                           : "Annual costs"}
                       </p>
@@ -344,31 +340,7 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:gap-6 gap-4 lg:grid-cols-4 w-full">
-              <div className="flex shadow flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-1">
-                <div className="flex flex-row justify-between p-5 items-center">
-                  <p className="text-dashboard-main xl:text-xl leading-6 font-medium md:text-base text-xl">
-                    Inbox
-                  </p>
-                  <Link
-                    href="/dashboard/chat"
-                    className="xl:text-lg md:text-sm text-lg leading-[22px] font-medium text-[#5352BF]"
-                  >
-                    View all
-                  </Link>
-                </div>
-                <Separator />
-                <div className="flex lg:flex-col md:flex-row flex-col 2xl:px-5 xl:px-3 pt-5 lg:px-0 px-3">
-                  {inboxItems.map((item) => {
-                    return (
-                      <InboxItem
-                        key={item.id}
-                        item={item}
-                        messageStyles="font-medium text-dashboard-secondary"
-                      />
-                    );
-                  })}
-                </div>
-              </div>
+              <InboxCard user={user} />
               <div className="flex flex-col shadow bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
                 <div className="flex flex-row justify-between py-3 xl:px-6 lg:px-2 px-6 items-center">
                   <p className="text-dashboard-main xl:text-xl text-lg leading-6 font-medium">

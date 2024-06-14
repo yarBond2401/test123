@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { HttpsCallable } from "firebase/functions";
-import { db, functions } from "@/app/firebase";
+import { collection, onSnapshot, query, where, limit } from "firebase/firestore";
+import { db } from "@/app/firebase";
 import { useIsVendor } from "./useIsVendor";
 import { User } from "firebase/auth";
 
-export const useChatList = (user: User | null) => {
+export const useChatList = (user: User | null, maxChats?: number) => {
   const [chats, setChats] = useState<any>([]);
   const isVendor = useIsVendor(user);
-  
+
   useEffect(() => {
-    const colRef = collection(db, "chats");
     if (!user) return;
-    console.log("user", user.uid, isVendor)
-    const q = query(
+
+    const colRef = collection(db, "chats");
+    let q = query(
       colRef,
       where(isVendor ? "vendor" : "agent", "==", user.uid)
     );
+
+    if (maxChats) {
+      q = query(q, limit(maxChats));
+    }
+
+    console.log("user", user.uid, isVendor, maxChats ? `Limit: ${maxChats}` : "No limit");
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const chats = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -25,10 +31,8 @@ export const useChatList = (user: User | null) => {
       setChats(chats);
     });
 
-    return () => {
-      unsubscribe();
-    };
-  }, [user, isVendor]);
+    return () => unsubscribe();
+  }, [user, isVendor, maxChats]);
 
   return chats;
 };

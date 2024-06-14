@@ -41,6 +41,23 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const WP_SITE = "https://mrkit.io";
 
+const defaultVendorData = {
+  description: "",
+  generic_availability: [],
+  totalRating: 0,
+  totalReviews: 0,
+  level: "New Seller",
+  responce: 0,
+  totalMoney: 0,
+  totalMoneyInt: 0,
+  totalWork: 0,
+  totalWorkInt: 0,
+  totalHours: 0,
+  totalHoursInt: 0,
+  monthlyAmount: 0,
+  annualAmount: 0,
+};
+
 const Signup = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -77,12 +94,7 @@ const Signup = () => {
       displayName: data.name,
     });
     if (data.role === "vendor") {
-      await setDoc(doc(db, "vendors", userCredential.user.uid), {
-        description: "",
-        generic_availability: [],
-        totalRating: 0,
-        totalReviews: 0,
-      });
+      await setDoc(doc(db, "vendors", userCredential.user.uid), defaultVendorData);
 
       try {
         const docRef = await addDoc(collection(db, "mail"), {

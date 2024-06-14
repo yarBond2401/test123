@@ -58,7 +58,7 @@ export const InboxItem: FC<Props> = ({ item, chatId, messageStyles }) => {
             "2xl:text-sm md:text-xs text-sm text-nowrap w-full",
             messageStyles,
           )}>
-            {item.last_text.length > 50 ? `${item.last_text.slice(0, 50)}...` : item.last_text}
+            {item.last_text?.length > 50 ? `${item.last_text.slice(0, 50)}...` : item.last_text}
           </p>
         </div>
       </div>

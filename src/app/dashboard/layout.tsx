@@ -11,6 +11,8 @@ import {
   MdHomeRepairService,
   MdEditDocument,
   MdChat,
+  MdLocalOffer,
+  MdListAlt,
 } from "react-icons/md";
 import dynamic from "next/dynamic";
 import { mutate } from "swr";
@@ -108,6 +110,13 @@ const Layout: React.FC<Props> = ({ children }) => {
                 icon={<MdEditDocument />}
               />
             )}
+            {!isVendor && broker && (
+              <DashboardLink
+                link="/dashboard/offers"
+                text="My offers"
+                icon={<MdListAlt />}
+              />
+            )}
             {!isVendor && user?.email !== 'info@mrkit.io' && (
               <DashboardLink
                 link="/dashboard/broker"
@@ -135,6 +144,13 @@ const Layout: React.FC<Props> = ({ children }) => {
               text="Profile"
               icon={<MdPerson />}
             />}
+            {isVendor && user?.email !== 'info@mrkit.io' && (
+              <DashboardLink
+                link="/dashboard/deals"
+                text="My deals"
+                icon={<MdLocalOffer />}
+              />
+            )}
             <DashboardLink
               link="/dashboard/chat"
               text="Chat"
