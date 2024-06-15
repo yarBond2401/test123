@@ -97,8 +97,9 @@ const ChatItem = ({ data, chatDetails }) => {
           : "self-start items-start bg-gray-100 text-dashboard-main rounded-b-2xl rounded-tr-2xl"
       )}>
         <p className="text-lg font-normal">{data.text}</p>
-        {data?.offerId && status === "pending" && !isSender && (
-          <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2">
+          {data?.offerId && status === "pending" && !isSender && (
+
             <Button
               type="button"
               className="bg-[#52BF56] hover:bg-green-600 text-white"
@@ -106,16 +107,17 @@ const ChatItem = ({ data, chatDetails }) => {
             >
               Accept offer
             </Button>
-          </div>
-        )}
-        {data?.offerId && (
-          <Button
-            type="button"
-            onClick={() => openDialog(data.offerId)}
-          >
-            View details
-          </Button>
-        )}
+
+          )}
+          {data?.offerId && (
+            <Button
+              type="button"
+              onClick={() => openDialog(data.offerId)}
+            >
+              View details
+            </Button>
+          )}
+        </div>
       </div>
       <p className={cn("text-xs leading-5 text-[#637381]", isSender ? "self-end" : "self-start")}>
         {data.time ? formatChatMessageTime(data.time.toDate()) : "Sending..."}
