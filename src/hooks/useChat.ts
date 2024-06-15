@@ -8,7 +8,6 @@ import {
   query,
   limit,
   addDoc,
-  doc,
   serverTimestamp,
 } from "firebase/firestore";
 import { useFirestoreDocument } from "./useFirestoreDocument";
@@ -21,10 +20,8 @@ interface Chat {
 export const useChat = ({ chatId, user }: Chat) => {
   const colRef = collection(db, "chats", chatId, "messages");
   const { data: chatDetails } = useFirestoreDocument(`chats/${chatId}`);
-  const [messages, setMessages] = useState<any>([]);
-  
-  
-  
+  const [messages, setMessages] = useState<any[]>([]);
+
   const sendMessage = async (text: string) => {
     if (!user) return;
     const message = {
@@ -45,8 +42,10 @@ export const useChat = ({ chatId, user }: Chat) => {
       }));
       setMessages(messages);
     });
+
     return () => unsubscribe();
-  }, [chatId, colRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId]);
 
   return { chatDetails, messages, sendMessage };
 };

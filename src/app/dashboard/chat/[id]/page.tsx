@@ -4,7 +4,7 @@
 import { format, set, sub } from "date-fns";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -97,7 +97,7 @@ const ChatItem = ({ data, chatDetails }) => {
           : "self-start items-start bg-gray-100 text-dashboard-main rounded-b-2xl rounded-tr-2xl"
       )}>
         <p className="text-lg font-normal">{data.text}</p>
-        {id && status === "pending" && !isSender && (
+        {data?.offerId && status === "pending" && !isSender && (
           <div className="flex flex-row gap-2">
             <Button
               type="button"
@@ -108,12 +108,14 @@ const ChatItem = ({ data, chatDetails }) => {
             </Button>
           </div>
         )}
-        <Button
-          type="button"
-          onClick={() => openDialog(data.offerId)}
-        >
-          View details
-        </Button>
+        {data?.offerId && (
+          <Button
+            type="button"
+            onClick={() => openDialog(data.offerId)}
+          >
+            View details
+          </Button>
+        )}
       </div>
       <p className={cn("text-xs leading-5 text-[#637381]", isSender ? "self-end" : "self-start")}>
         {data.time ? formatChatMessageTime(data.time.toDate()) : "Sending..."}
@@ -132,6 +134,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
   const { messages, sendMessage } = useChat({ chatId, user });
   const isVendor = useIsVendor(user);
   const { requestId } = useRequest();
+  const chatContainerRef = useRef(null);
 
   const [hydrated, setHydrated] = useState(false);
   const [vendorData, setVendorData] = useState<VendorData | null>(null);
@@ -167,93 +170,14 @@ const ChatTab: React.FC<Props> = ({ params }) => {
     console.log('chatDetails', chatDetails);
   }, [chatDetails]);
 
-  // useEffect(() => {
-  //   const getOfferDetails = async () => {
-  //     console.log("Checking if user is a vendor:", isVendor);
-
-  //     const requestsRef = collection(db, "requests");
-  //     const querySnapshot = await getDocs(requestsRef);
-  //     console.log("Fetched requests:", querySnapshot.docs.map((doc) => doc.id));
-
-  //     if (isVendor) {
-  //       let hideSendOffer = false;
-
-  //       for (const requestDoc of querySnapshot.docs) {
-  //         const selectedVendorsRef = collection(
-  //           db,
-  //           `requests/${requestDoc.id}/selectedVendors`
-  //         );
-  //         const q = query(
-  //           selectedVendorsRef,
-  //           where("vendorId", "==", user?.uid)
-  //         );
-  //         const vendorDocs = await getDocs(q);
-
-  //         vendorDocs.forEach((doc) => {
-  //           const vendorData = doc.data();
-  //           console.log("Vendor Document ID:", doc.id, "Vendor Data:", vendorData);
-  //           if (vendorData.vendorId === user?.uid) {
-  //             setVendorData(vendorData);
-  //             hideSendOffer = true;
-  //           }
-  //         });
-
-  //         if (hideSendOffer) break;
-  //       }
-
-  //       console.log("Hide Send Offer:", hideSendOffer);
-  //       return { hideSendOffer };
-  //     } else {
-  //       let showAcceptButton = false;
-  //       let showViewDetailsButton = false;
-
-  //       for (const requestDoc of querySnapshot.docs) {
-  //         const selectedVendorsRef = collection(
-  //           db,
-  //           `requests/${requestDoc.id}/selectedVendors`
-  //         );
-  //         const q = query(
-  //           selectedVendorsRef,
-  //           where("brokerId", "==", user?.uid)
-  //         );
-  //         const agentDocs = await getDocs(q);
-
-  //         agentDocs.forEach((doc) => {
-  //           const docData = doc.data();
-  //           console.log("Agent Document Data:", docData);
-  //           if (docData.agentId === user?.uid) {
-  //             showAcceptButton = true;
-  //           }
-  //         });
-
-  //         if (showAcceptButton) {
-  //           const requestData = requestDoc.data();
-  //           console.log("Request Data:", requestData);
-
-  //           const userService = requestData.services.find(
-  //             (service) => service.selected === user?.uid
-  //           );
-  //           console.log("User Service:", userService);
-
-  //           if (userService && userService.offerStatus === "pending") {
-  //             showViewDetailsButton = true;
-  //           }
-  //         }
-
-  //         if (showAcceptButton || showViewDetailsButton) break;
-  //       }
-
-  //       return { showAcceptButton, showViewDetailsButton };
-  //     }
-  //   };
-
-  //   if (user?.uid) {
-  //     getOfferDetails().then(offerDetails => {
-  //       setOfferDetails(offerDetails);
-  //       console.log("Offer Details:", offerDetails);
-  //     });
-  //   }
-  // }, [isVendor, user?.uid]);
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [messages]);
 
   return (
     <Card
@@ -312,7 +236,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
         </Button>
       </div>
       <Separator />
-      <div className="flex flex-1 overflow-y-scroll py-6">
+      <div className="flex flex-1 overflow-y-scroll py-6" ref={chatContainerRef}>
         <div className="min-w-full min-h-full flex flex-col-reverse px-7 py-4 gap-8 justify-end">
           {messages.length !== 0
             ? messages.map((message: any) => (
