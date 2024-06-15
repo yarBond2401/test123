@@ -19,6 +19,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MdMoreVert } from "react-icons/md";
+import { useOfferDetails } from '@/hooks/useOfferDetails';
 
 interface OffersProps {
 	rows: any[];
@@ -180,19 +181,7 @@ export const OffersDataTable: React.FC<OffersProps> = ({ rows, setOffers }) => {
 
 
 export const OffersActions: React.FC<SingInProps> = ({ row, deleteElement }) => {
-	// const handleDelete = async (e: React.MouseEvent<HTMLElement>) => {
-	// 	e.stopPropagation();
-	// 	let docRef = doc(db, "offers", row.original.id);
-	// 	await deleteDoc(docRef);
-	// 	deleteElement(row.original.id);
-	// 	toast({
-	// 		title: "Success",
-	// 		description: "Request deleted",
-	// 	});
-	// };
-
-	const handleDelete = async () => { };
-	const handleEdit = async () => { };
+	const { openDialog } = useOfferDetails();
 
 	return (
 		<DropdownMenu>
@@ -203,7 +192,7 @@ export const OffersActions: React.FC<SingInProps> = ({ row, deleteElement }) => 
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				<DropdownMenuItem onClick={handleDelete} disabled={row.original.offerStatus === 'accepted'} >Delete</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => openDialog(row.original.id)}>View Detail</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

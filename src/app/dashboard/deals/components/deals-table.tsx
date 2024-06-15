@@ -32,6 +32,7 @@ import { MdMoreVert } from "react-icons/md";
 import { deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/app/firebase";
+import { useOfferDetails } from "@/hooks/useOfferDetails";
 
 interface DealsProps {
 	rows: any[];
@@ -178,7 +179,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 		const newStatus = "accepted";
 		await updateDoc(docRef, { status: newStatus, acceptedAt: serverTimestamp() });
 
-		updateElementStatus(row.original.id, newStatus);
+		// updateElementStatus(row.original.id, newStatus);
 		toast({
 			title: "Success",
 			description: "Offer accepted",
@@ -200,7 +201,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 		});
 
 		// Update UI immediately after backend update
-		updateElementStatus(row.original.id, newStatus);
+		// updateElementStatus(row.original.id, newStatus);
 
 		toast({
 			title: "Success",
@@ -220,6 +221,8 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 		});
 	};
 
+	const { openDialog } = useOfferDetails();
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -235,9 +238,12 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 				>
 					Accept
 				</DropdownMenuItem>
-				<DropdownMenuItem onClick={handleViewDetails}>
+				<DropdownMenuItem
+					onClick={() => openDialog(row.original.id)}
+				>
 					View Details
 				</DropdownMenuItem>
+
 				<DropdownMenuItem
 					onClick={handleReject}
 					disabled={row.original.offerStatus === "accepted"}

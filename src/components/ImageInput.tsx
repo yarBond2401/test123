@@ -25,6 +25,7 @@ import { nanoid } from "nanoid";
 import useMeasure from "react-use-measure";
 import { toast } from "./ui/use-toast";
 import 'react-image-crop/dist/ReactCrop.css';
+import { Spinner } from "./ui/spinner";
 
 interface Props {
   storagePath: string;
@@ -168,13 +169,20 @@ const ImageInput: React.FC<Props> = (props) => {
   return (
     <div className="flex flex-col gap-4 sm:flex-row">
       <figure>
-        <Image
-          src={props.value ? props.value : placeholderImage}
-          alt="User uploaded image"
-          width={500}
-          height={500}
-          className="shadow-md w-24 h-24 border rounded-md object-cover"
-        />
+        {loading ? (
+          <div className="w-24 h-24 flex flex-col justify-between align-middle">
+            <Spinner size="large" />
+          </div>
+        ) : (
+          <Image
+            src={props.value ? props.value : placeholderImage}
+            alt="User uploaded image"
+            width={500}
+            height={500}
+            priority={true}
+            className="shadow-md w-24 h-24 border rounded-md object-cover"
+          />
+        )}
       </figure>
       <div>
         <h5 className="font-semibold">Upload an image</h5>
@@ -264,7 +272,7 @@ const ImageInput: React.FC<Props> = (props) => {
                                 src={uncroppedImage}
                                 ref={imageRef}
                                 onLoad={() => {
-                                
+
                                 }}
                                 className=" w-full object-contain max-h-md mx-auto"
                                 alt="uploaded image"

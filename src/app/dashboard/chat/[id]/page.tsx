@@ -28,6 +28,7 @@ import { Dialog } from "@radix-ui/react-dialog";
 import ServiceDetailsDialog from "./components/ServiceDetailsDialog";
 import SendOfferDialog from "./components/SendOfferDialog";
 import { toast } from "@/components/ui/use-toast";
+import { useOfferDetails } from "@/hooks/useOfferDetails";
 
 interface Props {
   params: {
@@ -57,6 +58,8 @@ const ChatItem = ({ data, chatDetails }) => {
     () => user?.uid === data.sender,
     [user, data.sender]
   );
+
+  const { openDialog } = useOfferDetails();
 
   useEffect(() => {
     if (data?.offerId) {
@@ -105,11 +108,12 @@ const ChatItem = ({ data, chatDetails }) => {
             </Button>
           </div>
         )}
-        {id && (
-          <div className="flex flex-row gap-2">
-            <ServiceDetailsDialog id={data?.offerId} />
-          </div>
-        )}
+        <Button
+          type="button"
+          onClick={() => openDialog(data.offerId)}
+        >
+          View details
+        </Button>
       </div>
       <p className={cn("text-xs leading-5 text-[#637381]", isSender ? "self-end" : "self-start")}>
         {data.time ? formatChatMessageTime(data.time.toDate()) : "Sending..."}

@@ -25,10 +25,12 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
+import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 
 const offerSchema = z.object({
 	datetime: z.date(),
-	costs: z.number().min(0, "Costs must be greater than 0"),
+	costs: z.number().min(1, "Offered price must be greater than 0"),
+	message: z.string().optional(),
 });
 
 interface SendOfferDialogProps {
@@ -43,6 +45,7 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 		defaultValues: {
 			datetime: new Date(),
 			costs: 0,
+			message: "",
 		},
 	});
 
@@ -56,7 +59,7 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 		setLoading(true);
 		console.log("Vendor ID: ", vendorId, "Agent ID: ", agentId);
 		try {
-			const { datetime, costs } = data;
+			const { datetime, costs, message } = data;
 			const withoutTax = costs;
 			// TODO: Calculate withTax and vendorСosts
 			const withTax = costs * 0.8;
@@ -70,6 +73,7 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 				withoutTax,
 				withTax,
 				vendorСosts,
+				message,
 				createdAt: serverTimestamp(),
 				status: 'pending',
 			});
@@ -178,10 +182,27 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 									</FormItem>
 								)}
 							/>
+							<FormField
+								control={control}
+								name="message"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Message</FormLabel>
+										<FormDescription>Enter optional message</FormDescription>
+										<FormControl>
+											<AutosizeTextarea
+												{...field}
+												placeholder="Enter a message"
+											/>
+										</FormControl>
+										<FormMessage>{errors.costs && <span>{errors.costs.message}</span>}</FormMessage>
+									</FormItem>
+								)}
+							/>
 							<DialogFooter className="mt-2">
 								<Button type="button" variant="secondary" onClick={handleClose} disabled={loading}>Close</Button>
-								<Button type="submit" disabled={loading}>
-									{loading ? <Spinner size="medium" /> : "Send offer"}
+								<Button type="submit" disabled={loading} className="min-w-20">
+									{loading ? <Spinner size="small" /> : "Send offer"}
 								</Button>
 							</DialogFooter>
 						</form>
