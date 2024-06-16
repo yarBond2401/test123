@@ -234,7 +234,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 			<DropdownMenuContent>
 				<DropdownMenuItem
 					onClick={() => handleAccept()}
-					disabled={row.original.offerStatus === "accepted"}
+					disabled={row.original.status === "accepted"}
 				>
 					Accept
 				</DropdownMenuItem>
@@ -246,13 +246,13 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 
 				<DropdownMenuItem
 					onClick={handleReject}
-					disabled={row.original.offerStatus === "accepted"}
+					disabled={row.original.status === "accepted"}
 				>
 					Reject
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={handleDelete}
-					disabled={row.original.offerStatus === "accepted"}
+					disabled={row.original.status === "accepted"}
 				>
 					Delete
 				</DropdownMenuItem>

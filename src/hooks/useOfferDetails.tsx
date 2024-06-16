@@ -2,6 +2,7 @@
 
 import ServiceDetailsDialog from '@/app/dashboard/chat/[id]/components/ServiceDetailsDialog';
 import React, { createContext, useContext, useState, FC, ReactNode } from 'react';
+import { useChat } from './useChat';
 
 interface OfferDetailsContextType {
 	openDialog: (id: string) => void;

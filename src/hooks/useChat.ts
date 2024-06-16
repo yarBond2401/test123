@@ -21,6 +21,9 @@ export const useChat = ({ chatId, user }: Chat) => {
   const colRef = collection(db, "chats", chatId, "messages");
   const { data: chatDetails } = useFirestoreDocument(`chats/${chatId}`);
   const [messages, setMessages] = useState<any[]>([]);
+  const [reload, setReload] = useState(false);
+
+  const triggerReload = () => setReload(!reload);
 
   const sendMessage = async (text: string) => {
     if (!user) return;
@@ -45,7 +48,7 @@ export const useChat = ({ chatId, user }: Chat) => {
 
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId]);
+  }, [chatId, reload]);
 
-  return { chatDetails, messages, sendMessage };
+  return { chatDetails, messages, sendMessage, triggerReload };
 };

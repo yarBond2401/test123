@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import * as Select from "@radix-ui/react-select";
 import { Bar, Line } from "react-chartjs-2";
 import "chart.js/auto";
 
@@ -19,9 +18,6 @@ import iconStar from "@/icons/icon=star.svg";
 import iconDollar from "@/icons/icon=dollar.svg";
 import iconWork from "@/icons/icon=work.svg";
 import iconWatch from "@/icons/icon=watch.svg";
-import DropdownIcon from "@/icons/icon=chevron-down.svg";
-import { dealsMock } from "@/mock/dealsMock";
-import { DealItem } from "@/components/dashboard/DealItem";
 import { annualEarnedChartData } from "@/mock/annualEarnedChartDataMock";
 import { useIsVendor } from "@/hooks/useIsVendor";
 import Loading from "../loading";
@@ -29,6 +25,7 @@ import useUserInfo from "@/hooks/useUserInfo";
 import { capitalize } from "@/lib/utils";
 import { format } from "date-fns";
 import { InboxCard } from "./Inbox";
+import OffersDashboard from "./offers-dash";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
@@ -65,6 +62,7 @@ const Dashboard = () => {
   const totalMoneyFormatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    maximumFractionDigits: 0,
   }).format(userInfo?.totalMoney);
 
   const totalWorkFormatted = new Intl.NumberFormat("en-US", {
@@ -78,11 +76,13 @@ const Dashboard = () => {
   const monthlyAmountFormatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    maximumFractionDigits: 0,
   }).format(userInfo?.monthlyAmount);
 
   const annualAmountFormatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    maximumFractionDigits: 0,
   }).format(userInfo?.annualAmount);
 
 
@@ -341,60 +341,7 @@ const Dashboard = () => {
 
             <div className="grid grid-cols-1 md:gap-6 gap-4 lg:grid-cols-4 w-full">
               <InboxCard user={user} />
-              <div className="flex flex-col shadow bg-white border border-[#DFE4EA] rounded-10 lg:col-span-3">
-                <div className="flex flex-row justify-between py-3 xl:px-6 lg:px-2 px-6 items-center">
-                  <p className="text-dashboard-main xl:text-xl text-lg leading-6 font-medium">
-                    {selectedStatus}
-                  </p>
-                  <Select.Root
-                    value={selectedStatus}
-                    onValueChange={setSelectedStatus}
-                  >
-                    <Select.Trigger className="flex flex-row gap-[10px] xl:px-3 px-1 xl:py-2 py-1 border border-[#5352BF] rounded-md outline-none items-center xl:text-base text-sm text-[#5352BF] hover:bg-violet-50">
-                      <Select.Value />
-                      <Select.Icon>
-                        <Image
-                          src={DropdownIcon}
-                          alt="icon"
-                          height={18}
-                          width={18}
-                        />
-                      </Select.Icon>
-                    </Select.Trigger>
-
-                    <Select.Portal>
-                      <Select.Content className="bg-white border border-[#5352BF] rounded-md outline-none">
-                        <Select.Viewport className="xl:text-base text-sm text-[#5352BF]">
-                          <Select.Item
-                            value={dealStatus[0]}
-                            className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50"
-                          >
-                            <Select.ItemText>{dealStatus[0]}</Select.ItemText>
-                          </Select.Item>
-                          <Select.Item
-                            value={dealStatus[1]}
-                            className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50"
-                          >
-                            <Select.ItemText>{dealStatus[1]}</Select.ItemText>
-                          </Select.Item>
-                          <Select.Item
-                            value={dealStatus[2]}
-                            className="xl:px-3 px-1 xl:py-2 py-1 outline-none rounded-md hover:bg-violet-50"
-                          >
-                            <Select.ItemText>{dealStatus[2]}</Select.ItemText>
-                          </Select.Item>
-                        </Select.Viewport>
-                        <Select.Arrow />
-                      </Select.Content>
-                    </Select.Portal>
-                  </Select.Root>
-                </div>
-                <div className="flex flex-col justify-between">
-                  {dealsMock.map((deal) => {
-                    return <DealItem deal={deal} key={deal.id} />;
-                  })}
-                </div>
-              </div>
+              <OffersDashboard />
             </div>
           </div>
         </CardContent>}
