@@ -111,7 +111,7 @@ export const DealsDataTable: React.FC<DealsProps> = ({ rows, setDeals }) => {
 		getCoreRowModel: getCoreRowModel(),
 	});
 
-	const updateElementStatus = (id, newStatus) => {
+	const updateElementStatus = (id: string, newStatus: string) => {
 		setDeals((currentData) =>
 			currentData.map((item) =>
 				item.id === id ? { ...item, status: newStatus } : item
@@ -183,7 +183,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 		toast({
 			title: "Success",
 			description: "Offer accepted",
-			type: "success",
+			toastType: "success",
 		});
 	};
 
@@ -206,7 +206,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 		toast({
 			title: "Success",
 			description: "Offer rejected",
-			type: "success",
+			toastType: "success",
 		});
 	};
 
@@ -217,7 +217,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 		toast({
 			title: "Success",
 			description: "Offer deleted",
-			type: "success",
+			toastType: "success",
 		});
 	};
 

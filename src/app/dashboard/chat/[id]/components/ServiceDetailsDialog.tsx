@@ -30,6 +30,7 @@ import { format, addDays, set } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { useRouter } from "next/navigation";
 
 interface ServiceDetailsDialogProps {
 	id: string;
@@ -40,6 +41,8 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	id,
 	onClose,
 }) => {
+	const router = useRouter();
+
 	const { user } = useRequireLogin({
 		onUnauthenticated: () => {
 			router.push("/auth/signin");
@@ -67,7 +70,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		toast({
 			title: "Success",
 			description: "Offer accepted",
-			type: "success",
+			toastType: "success",
 		});
 	};
 
@@ -83,7 +86,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		toast({
 			title: "Success",
 			description: "Offer rejected",
-			type: "success",
+			toastType: "success",
 		});
 	};
 
@@ -96,7 +99,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		toast({
 			title: "Success",
 			description: "Offer deleted",
-			type: "success",
+			toastType: "success",
 		});
 	};
 

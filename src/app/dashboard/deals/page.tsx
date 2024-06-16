@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -17,6 +16,7 @@ import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { Spinner } from "@/components/ui/spinner";
 import { DealsDataTable } from "./components/deals-table";
+import { BrokerType } from "@/app/firestoreTypes";
 
 const offerSchema = z.object({
 	id: z.string().optional(),
@@ -46,7 +46,7 @@ const VendorOffers = () => {
 		"array-contains",
 		user?.uid
 	);
-	const broker: BrokerType | undefined = brokerData?.[0];
+	const broker: BrokerType | undefined = (brokerData as BrokerType[] | [])?.[0]
 
 	const { data: offersData, isLoading: isOffersLoading } = useFirestoreQuery<any[]>(
 		"offers",
@@ -72,8 +72,8 @@ const VendorOffers = () => {
 		let parsed = z.array(offerSchema).parse(offersData ?? []);
 		parsed = parsed.map((offer, idx) => ({
 			...offer,
-			createdAt: offersData[idx].createdAt,
-			offerDate: offersData[idx].offerDate,
+			createdAt: offersData?.[idx].createdAt,
+			offerDate: offersData?.[idx].offerDate,
 		}));
 
 		parsed = parsed.map((offer) => ({
@@ -83,6 +83,7 @@ const VendorOffers = () => {
 				photoURL: string;
 				email: string;
 			},
+			// @ts-ignore
 			agentDetails: agentDetails?.[0] || null,
 		}));
 
@@ -103,6 +104,7 @@ const VendorOffers = () => {
 							<Spinner />
 						</div>
 					) : (
+						// @ts-ignore
 						<DealsDataTable rows={offers} />
 					)}
 				</CardContent>

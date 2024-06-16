@@ -179,8 +179,12 @@ export const OffersDataTable: React.FC<OffersProps> = ({ rows, setOffers }) => {
 	);
 };
 
+interface OffersActionsProps {
+	row: any;
+	deleteElement: (id: string) => void;
+}
 
-export const OffersActions: React.FC<SingInProps> = ({ row, deleteElement }) => {
+export const OffersActions: React.FC<OffersActionsProps> = ({ row, deleteElement }) => {
 	const { openDialog } = useOfferDetails();
 
 	return (

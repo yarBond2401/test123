@@ -23,7 +23,7 @@ import {
 import { add } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { toast } from '@/components/ui/use-toast';
+import { toast, ToastType } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 
@@ -86,7 +86,7 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 			toast({
 				title: "Success",
 				description: "Offer sent successfully",
-				type: "success",
+				toastType: "success",
 			});
 			setLoading(false);
 

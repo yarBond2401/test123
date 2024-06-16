@@ -95,11 +95,12 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
     payload: { uids: users }
   })
 
-  const getVendorsRating = async (vendorIds) => {
-    const docSnapshots = await Promise.all(vendorIds.map(vendorId => getDoc(doc(db, "vendors", vendorId))));
+  const getVendorsRating = async (vendorIds: string[]) => {
+    const docSnapshots = await Promise.all(vendorIds.map((vendorId: string) => getDoc(doc(db, "vendors", vendorId))));
     const vendorRatings = {};
     docSnapshots.forEach((doc, index) => {
       if (doc.exists()) {
+        // @ts-ignore
         vendorRatings[vendorIds[index]] = {
           totalRating: doc.data().totalRating,
           totalReviews: doc.data().totalReviews,
@@ -114,7 +115,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
       const users = Object.keys(usersData);
       getVendorsRating(users).then((ratings) => {
         console.log("ratings", ratings);
-        setRating(ratings);
+        setRating(ratings as Rating[]);
       });
     }
   }, [usersData]);

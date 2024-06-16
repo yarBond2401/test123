@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { useChatList } from "@/hooks/useChatList";
 
+import { User } from "firebase/auth";
+
 interface Props {
 	user: User
 }
@@ -60,7 +62,7 @@ export const InboxCard: React.FC<Props> = ({ user }) => {
 			<Separator />
 			<div className="flex flex-col px-3 pt-5">
 				{
-					chats && usersDetails ? chats.map((item, index) => (
+					chats && usersDetails ? chats.map((item: any, index: string) => (
 						<InboxItem
 							key={`${item.id}-${index}`}
 							item={item}

@@ -78,7 +78,7 @@ const ChatItem = ({ data, chatDetails }) => {
     toast({
       title: "Success",
       description: "Offer accepted",
-      type: "success",
+      toastType: "success",
     });
     setStatus("accepted");
   };

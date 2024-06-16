@@ -155,7 +155,7 @@ const SignInRequestsPage = ({ params }: Props) => {
 
 		toast({
 			title: "Success",
-			type: "success",
+			toastType: "success",
 			description: `Request status updated to ${status}.`,
 		});
 		setLoading(false);
@@ -265,14 +265,14 @@ const SignInRequestsPage = ({ params }: Props) => {
 			.then(() => {
 				toast({
 					title: "Copied",
-					type: "success",
+					toastType: "success",
 					description: "Location copied to clipboard.",
 				});
 			})
 			.catch((err) => {
 				toast({
 					title: "Error",
-					type: "error",
+					toastType: "error",
 					description: "Failed to copy location.",
 				});
 				console.error('Failed to copy text: ', err);

@@ -106,7 +106,7 @@ export const RequestItem: FC<Props> = ({ request, user }) => {
 
     toast({
       title: "Success",
-      type: "success",
+      toastType: "success",
       description: `Request status updated to ${status}.`,
     });
     setIsLoading(false);

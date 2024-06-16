@@ -8,6 +8,7 @@ import { useRequireLogin } from '@/hooks/useRequireLogin';
 import DropdownIcon from "@/icons/icon=chevron-down.svg";
 import Loading from './loading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 
 interface OffersDashboardProps {
@@ -16,6 +17,7 @@ interface OffersDashboardProps {
 const dealStatus = ["All", "Pending", "Accepted", "Rejected", "Completed"];
 
 const OffersDashboard: React.FunctionComponent<OffersDashboardProps> = (props) => {
+	const router = useRouter();
 	const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
 	const { user } = useRequireLogin({
 		onUnauthenticated: () => {
