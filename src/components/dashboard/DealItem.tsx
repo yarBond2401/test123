@@ -30,18 +30,18 @@ export const DealItem: FC<Props> = ({ deal, isVendor }) => {
       <div className="2xl:px-6 xl:px-4 lg:px-2 px-6 py-4 flex-row w-full justify-between md:flex hidden">
         <div className="flex flex-row xl:gap-4 gap-2 items-center xl:w-1/3 w-20">
           <Image
-            src={deal.otherUserDetails.photoURL}
+            src={deal?.otherUserDetails?.photoURL}
             height={40}
             width={40}
-            alt={deal.otherUserDetails.displayName}
+            alt={deal?.otherUserDetails?.displayName}
           />
 
           <div className="flex flex-col">
             <p className="text-sm font-medium text-dashboard-main">
-              {deal.otherUserDetails.displayName}
+              {deal?.otherUserDetails?.displayName}
             </p>
             <p className="text-sm font-regular text-dashboard-secondary xl:block hidden">
-              {deal.otherUserDetails.email}
+              {deal?.otherUserDetails?.email}
             </p>
           </div>
         </div>
@@ -97,19 +97,19 @@ export const DealItem: FC<Props> = ({ deal, isVendor }) => {
         <div className="flex flex-col gap-3 items-start justify-between">
           <div className="flex flex-row gap-2 items-center">
             <Image
-              src={deal.otherUserDetails.photoURL}
+              src={deal?.otherUserDetails?.photoURL}
               height={40}
               width={40}
-              alt={deal.otherUserDetails.displayName}
+              alt={deal?.otherUserDetails?.displayName}
               className="rounded-full"
             />
 
             <div className="flex flex-col">
               <p className="text-sm font-medium text-dashboard-main">
-                {deal.otherUserDetails.displayName}
+                {deal?.otherUserDetails?.displayName}
               </p>
               <p className="text-sm font-regular text-dashboard-secondary">
-                {deal.otherUserDetails.email}
+                {deal?.otherUserDetails?.email}
               </p>
             </div>
           </div>
