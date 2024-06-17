@@ -112,7 +112,7 @@ const Dashboard = () => {
               <div className="shadow flex bg-white border border-[#DFE4EA] rounded-10 flex-col md:flex-row lg:flex-col md:col-span-2 lg:col-span-1 justify-between">
                 <div className="flex xl:flex-row lg:flex-col gap-[15px] items-center xl:p-22 p-4">
                   <Image
-                    src={user.photoURL || defaultAvatar}
+                    src={user?.photoURL || defaultAvatar}
                     width={80}
                     height={80}
                     alt="User profile picture"

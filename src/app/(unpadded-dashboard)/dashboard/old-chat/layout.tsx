@@ -92,9 +92,9 @@ const Layout: React.FC<Props> = ({ children }) => {
                     chatId === chat.id ? "bg-slate-100" : "hover:bg-slate-100"
                   )}
                 >
-                  {chat.userDetails?.photoURL ? (
+                  {chat?.userDetails?.photoURL ? (
                     <Image
-                      src={chat.userDetails.photoURL}
+                      src={chat?.userDetails?.photoURL}
                       alt="user profile"
                       className="w-12 h-12 rounded-full flex-none object-cover"
                       width={48}

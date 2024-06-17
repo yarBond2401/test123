@@ -84,7 +84,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
           {
             chatDetails?.userDetails ?
               <Image
-                src={chatDetails.userDetails.photoURL}
+                src={chatDetail?.userDetails?.photoURL}
                 alt="Profile Picture"
                 width={64}
                 height={64}
