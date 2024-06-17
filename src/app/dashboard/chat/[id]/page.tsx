@@ -21,7 +21,7 @@ import SmileIcon from "@/icons/icon=smile.svg";
 import SendIcon from "@/icons/icon=send.svg";
 import MoreIcon from "@/icons/icon=more.svg";
 import defaultAvatar from "@/images/default-user-picture.jpg";
-import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "@/app/firebase";
 import { useRequest } from "@/components/RequestContext";
 import { Dialog } from "@radix-ui/react-dialog";
@@ -52,6 +52,7 @@ interface VendorData {
 const ChatItem = ({ data, chatDetails }) => {
   const user = useContext(UserContext);
   const [status, setStatus] = useState("");
+  const [loadingAccept, setLoadingAccept] = useState(false);
   let id = null;
 
   const isSender = useMemo(
@@ -63,24 +64,30 @@ const ChatItem = ({ data, chatDetails }) => {
 
   useEffect(() => {
     if (data?.offerId) {
-      getDoc(doc(db, "offers", data?.offerId)).then((doc) => {
+      const docRef = doc(db, "offers", data?.offerId);
+      const unsubscribe = onSnapshot(docRef, (doc) => {
         setStatus(doc.data()?.status || "unknown");
       });
+
+      return () => unsubscribe();
     }
   }, [data?.offerId]);
 
   if (!user) return null;
 
   const handleAccept = async () => {
-    if (!id) return;
-    let docRef = doc(db, "offers", id);
-    await updateDoc(docRef, { status: "accepted", acceptedAt: serverTimestamp() });
+    setLoadingAccept(true);
+    let docRef = doc(db, "offers", data?.offerId);
+    await updateDoc(docRef, {
+      status: "accepted",
+      acceptedAt: serverTimestamp(),
+    });
+    setLoadingAccept(false);
     toast({
       title: "Success",
       description: "Offer accepted",
       toastType: "success",
     });
-    setStatus("accepted");
   };
 
   return (
