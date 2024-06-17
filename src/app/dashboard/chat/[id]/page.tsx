@@ -230,21 +230,21 @@ const ChatTab: React.FC<Props> = ({ params }) => {
             <p className="font-normal text-sm text-dashboard-secondary">Reply to message</p>
           </div>
         </div>
-
-        {(chatDetails?.userDetails?.email !== "info@mrkit.io") && <div className="flex flex-row gap-3 items-center">
-
-          {!isVendor && chatDetails && (
-            <SendOfferDialog vendorId={chatDetails?.vendor} agentId={chatDetails?.agent} />
-          )}
-
-        </div>}
-        <Button
-          type="button"
-          className="md:hidden"
-          onClick={() => router.push("/dashboard/chat")}
-        >
-          Back
-        </Button>
+        <div className="flex flex-row gap-3 items-center">
+          {(chatDetails?.userDetails?.email !== "info@mrkit.io") &&
+            !isVendor && chatDetails && (
+              <SendOfferDialog vendorId={chatDetails?.vendor} agentId={chatDetails?.agent} />
+            )
+          }
+          <Button
+            type="button"
+            variant="outline"
+            className="md:hidden"
+            onClick={() => router.push("/dashboard/chat")}
+          >
+            Back
+          </Button>
+        </div>
       </div>
       <Separator />
       <div className="flex flex-1 overflow-y-scroll py-6" ref={chatContainerRef}>
