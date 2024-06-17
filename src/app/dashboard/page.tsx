@@ -176,7 +176,7 @@ const Dashboard = () => {
                     </p>
                     <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
                       {isVendor
-                        ? 100 + "%"
+                        ? userInfo?.success + "%"
                         : userInfo?.availablePosts}
                     </p>
                   </div>

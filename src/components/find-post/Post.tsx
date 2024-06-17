@@ -1,4 +1,4 @@
-import { Post } from "@/mock/types";
+import { Post } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";

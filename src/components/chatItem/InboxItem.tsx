@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { cn } from "@/lib/utils";
 
-import { ChatItem } from "@/mock/types";
+import { ChatItem } from "@/lib/types";
 import Image from "next/image";
 import { Skeleton } from "../ui/skeleton";
 import defaultAvatar from "@/images/default-user-picture.jpg";

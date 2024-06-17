@@ -53,7 +53,7 @@ const Requests = () => {
     },
   });
 
-  const { mockUser, userInfo, loading, error, updateUserInfo } = useUserInfo(user);
+  const { userInfo, loading, error, updateUserInfo } = useUserInfo(user);
   const { data: brokerData } = useFirestoreQuery<BrokerType[]>(
     "brokers",
     "users",
@@ -117,8 +117,8 @@ const Requests = () => {
       const colRef = collection(db, "signInRequests");
       await addDoc(colRef, requestData);
       await updateUserInfo({
-        availablePosts: Number(mockUser?.availablePosts) - 1,
-        postsInstalled: Number(mockUser?.postsInstalled) + 1
+        availablePosts: Number(userInfo?.availablePosts) - 1,
+        postsInstalled: Number(userInfo?.postsInstalled) + 1
       })
       router.push("/dashboard/requests");
     } catch (error) {
@@ -126,8 +126,7 @@ const Requests = () => {
     }
   };
 
-  const availablePosts = mockUser?.availablePosts ? Number(mockUser?.availablePosts) : 0;
-
+  const availablePosts = userInfo?.availablePosts ? userInfo?.availablePosts : 0;
 
   return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

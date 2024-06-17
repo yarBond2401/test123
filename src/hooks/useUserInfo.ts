@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase";
-import { Agent, Vendor } from "@/mock/types";
 import { useIsVendor } from "@/hooks/useIsVendor";
 import { User } from "firebase/auth";
-import { agent, vendor } from "@/mock/users";
+import { Agent, Vendor } from "@/lib/types";
 
 interface UserInfo {
     name: string;
@@ -24,10 +23,10 @@ interface UserInfo {
     totalHoursInt?: number,
     monthlyAmount?: number,
     annualAmount?: number,
+    success?: number,
 }
 
 const useUserInfo = (user: User | null) => {
-    const [mockUser, setMockUser] = useState<Vendor | Agent | null>(null);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -94,7 +93,7 @@ const useUserInfo = (user: User | null) => {
         }
     }, [user]);
 
-    return { mockUser, userInfo, loading, error, updateUserInfo };
+    return { userInfo, loading, error, updateUserInfo };
 };
 
 export default useUserInfo;

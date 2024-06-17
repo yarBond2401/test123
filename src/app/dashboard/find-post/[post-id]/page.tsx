@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { useLayoutEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { posts } from "@/mock/postsMock";
-import { Post } from "@/mock/types";
+import { Post } from "@/lib/types";
 import Loading from "../loading";
 import { NewButton } from "@/components/ui/new-button";
 

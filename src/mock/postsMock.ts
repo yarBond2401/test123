@@ -1,7 +1,7 @@
 import firstAvatar from "@/images/mock/agent.jpg";
 import secondAvatar from "@/images/mock/Avatar-2.jpg";
 import thirdAvatar from "@/images/mock/Avatar-3.jpg";
-import { Post } from "./types";
+import { Post } from "../lib/types";
 
 export const posts: Post[] = [
   {
@@ -13,7 +13,7 @@ export const posts: Post[] = [
       {
         name: "Photographer",
         duration: 1,
-      }, 
+      },
       {
         name: "Videographer",
         duration: 1,
@@ -36,7 +36,7 @@ export const posts: Post[] = [
       {
         name: "Photographer",
         duration: 1,
-      }, 
+      },
     ],
     serviceNumber: 2,
     subtotal: 350,
@@ -51,7 +51,7 @@ export const posts: Post[] = [
       {
         name: "Home Stager",
         duration: 3,
-      }, 
+      },
     ],
     serviceNumber: 1,
     subtotal: 150,
