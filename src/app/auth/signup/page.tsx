@@ -18,7 +18,7 @@ import { z } from "zod";
 
 import { auth, db, storage } from "@/app/firebase";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -38,6 +38,8 @@ import { signUpSchema } from "./schema";
 import { FormScreen, Inputs } from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CheckIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const WP_SITE = "https://mrkit.io";
 
@@ -75,6 +77,39 @@ const defaultAgentData = {
   annualAmount: 0,
 };
 
+const pricingNames = {
+  bronze: "Bronze",
+  silver: "Silver",
+  gold: "Gold",
+};
+
+const pricingModels = {
+  northwest: {
+    regionName: "Northwest",
+    bronze: { price: 350, postPrice: 70, maxPosts: 5 },
+    silver: { price: 510, postPrice: 51, maxPosts: 10 },
+    gold: { price: 600, postPrice: 40, maxPosts: 15 },
+  },
+  northcalifornia: {
+    regionName: "North California",
+    bronze: { price: 400, postPrice: 80, maxPosts: 5 },
+    silver: { price: 560, postPrice: 56, maxPosts: 10 },
+    gold: { price: 660, postPrice: 44, maxPosts: 15 },
+  },
+  southcalifornia: {
+    regionName: "South California",
+    bronze: { price: 450, postPrice: 90, maxPosts: 5 },
+    silver: { price: 610, postPrice: 61, maxPosts: 10 },
+    gold: { price: 720, postPrice: 48, maxPosts: 15 },
+  },
+  westcentral: {
+    regionName: "West Central",
+    bronze: { price: 500, postPrice: 100, maxPosts: 5 },
+    silver: { price: 660, postPrice: 66, maxPosts: 10 },
+    gold: { price: 780, postPrice: 52, maxPosts: 15 },
+  }
+};
+
 const Signup = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,11 +122,13 @@ const Signup = () => {
       email: "",
       password: "",
       passwordConfirmation: "",
+      region: "northwest",
     },
   });
 
   const [error, setError] = useState<string | null>(null);
   const [formScreen, setFormScreen] = useState<FormScreen>("user-type");
+  const [region, setRegion] = useState("northwest");
 
   const logoRef =
     "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
@@ -153,6 +190,10 @@ const Signup = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  useEffect(() => {
+    setRegion(form.watch("region"));
+  }, [form]);
+
   return (
     <>
       <figure className="hidden 2xl:block col-span-3 h-full order-2">
@@ -163,7 +204,7 @@ const Signup = () => {
           priority={true}
         />
       </figure>
-      <section className="col-span-5 2xl:col-span-2 flex flex-col self-center justify-self-center items-center justify-center max-w-lg mx-4 order-1">
+      <section className="col-span-5 2xl:col-span-2 flex flex-col self-center justify-self-center items-center justify-center mx-4 order-1">
         <Image src={logo} alt="US House" width={170} className="mb-8" />
         <h1 className="font-akira text-3xl mb-8 text-center">
           Welcome to MRK IT
@@ -196,7 +237,7 @@ const Signup = () => {
             className="flex w-full flex-col"
           >
             <fieldset
-              className={formScreen === "user-details" ? "hidden" : "flex"}
+              className={formScreen === "user-type" ? "flex" : "hidden"}
             >
               <FormField
                 name="role"
@@ -204,8 +245,8 @@ const Signup = () => {
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <RadioGroup
-                      defaultValue={field.value}
-                      onChange={field.onChange}
+                      value={field.value}
+                      onValueChange={(value) => form.setValue("role", value)}
                       className="flex flex-col gap-6 md:flex-row w-full"
                     >
                       <FormItem>
@@ -254,7 +295,7 @@ const Signup = () => {
             </fieldset>
             <fieldset
               className={cn(
-                formScreen === "user-type" ? "hidden" : "flex",
+                formScreen === "user-details" ? "flex" : "hidden",
                 "flex-col items-stretch gap-1 w-full"
               )}
             >
@@ -314,9 +355,6 @@ const Signup = () => {
                   </FormItem>
                 )}
               />
-              {/* <FormLabel>
-                Lorem
-              </FormLabel> */}
               <FormField
                 control={form.control}
                 name="acceptTerms"
@@ -358,7 +396,97 @@ const Signup = () => {
                 )}
               />
             </fieldset>
-            {error && (
+
+            {formScreen === "agent-pricing" && form.watch("role") === "agent" && (
+              <fieldset className="flex flex-col items-stretch gap-1 w-full">
+                <FormField
+                  control={form.control}
+                  name="region"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Region</FormLabel>
+                      <FormControl>
+                        <select
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setRegion(e.target.value);
+                          }}
+                          className="form-select"
+                        >
+                          {Object.keys(pricingModels).map((key) => (
+                            <option key={key} value={key}>
+                              {pricingModels[key].regionName}
+                            </option>
+                          ))}
+                        </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="priceModel"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={(value) => form.setValue("priceModel", value)}
+                        className="flex flex-col gap-6 md:flex-row w-full"
+                      >
+                        {Object.keys(pricingNames).map((key) => (
+                          <FormItem key={key}>
+                            <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
+                              <FormControl>
+                                <RadioGroupItem value={key} className="sr-only" />
+                              </FormControl>
+                              <Card className={cn("min-w-[250px] transition-colors duration-300", field.value !== key ? "bg-gray-100" : "")}>
+                                <CardHeader className="text-center pb-2">
+                                  {key == "silver" && <Badge className="uppercase w-max self-center mb-3">
+                                    Most popular
+                                  </Badge>
+                                  }
+                                  <CardTitle className="mb-7">{pricingNames[key]} Plan</CardTitle>
+                                  <span className="font-bold text-5xl">${pricingModels[region][key].price}</span>
+                                </CardHeader>
+                                <CardDescription className="text-center">
+                                  Perfect for getting started
+                                </CardDescription>
+                                <CardContent>
+                                  <ul className="mt-7 space-y-2.5 text-sm">
+                                    <li className="flex space-x-2">
+                                      <CheckIcon className="flex-shrink-0 mt-0.5 h-4 w-4" />
+                                      <span className="text-muted-foreground">${pricingModels[region][key].postPrice} per post</span>
+                                    </li>
+                                    <li className="flex space-x-2">
+                                      <CheckIcon className="flex-shrink-0 mt-0.5 h-4 w-4" />
+                                      <span className="text-muted-foreground">Up to {pricingModels[region][key].maxPosts} posts per month</span>
+                                    </li>
+                                  </ul>
+                                </CardContent>
+                                <CardFooter>
+                                  <Button
+                                    variant="outline"
+                                    className={cn("w-full transition-all duration-300", field.value !== key ? "bg-primary text-white" : "bg-white text-primary border border-primary")}
+                                    onClick={() => form.setValue("priceModel", key)}
+                                  >
+                                    {field.value !== key ? "Select" : "Selected"}
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormItem>
+                  )}
+                />
+
+              </fieldset>
+            )}
+
+            {error && formScreen === "user-details" && (
               <div
                 className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800 mt-4"
                 role="alert"
@@ -379,9 +507,6 @@ const Signup = () => {
                 </div>
               </div>
             )}
-            {/* <div className="flex flex-row items-center">
-            <Progress />
-            </div> */}
             {formScreen === "user-type" ? (
               <Button
                 className={cn("mt-4")}
@@ -390,6 +515,24 @@ const Signup = () => {
               >
                 Continue
               </Button>
+            ) : formScreen === "user-details" && form.watch("role") === "agent" ? (
+              <div className="flex w-full flex-row gap-4 mt-4">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  type="button"
+                  onClick={() => setFormScreen("user-type")}
+                >
+                  Back
+                </Button>
+                <Button
+                  className="flex-1"
+                  type="button"
+                  onClick={() => setFormScreen("agent-pricing")}
+                >
+                  Continue
+                </Button>
+              </div>
             ) : (
               <div className="flex w-full flex-row gap-4 mt-4">
                 <Button
@@ -416,8 +559,8 @@ const Signup = () => {
               </Link>
             </p>
           </form>
-        </Form>
-      </section>
+        </Form >
+      </section >
     </>
   );
 };
