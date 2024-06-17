@@ -7,4 +7,4 @@ export type Inputs = {
 };
 
 
-export type FormScreen = "user-type" | "user-details";
+export type FormScreen = "user-type" | "user-details" | "agent-pricing" | "vendor-pricing";

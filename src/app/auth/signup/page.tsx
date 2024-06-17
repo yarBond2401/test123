@@ -58,6 +58,23 @@ const defaultVendorData = {
   annualAmount: 0,
 };
 
+const defaultAgentData = {
+  description: "",
+  generic_availability: [],
+  totalRating: 0,
+  totalReviews: 0,
+  level: "New Agent",
+  responce: 100,
+  totalMoney: 0,
+  totalMoneyInt: 0,
+  totalWork: 0,
+  totalWorkInt: 0,
+  totalHours: 0,
+  totalHoursInt: 0,
+  monthlyAmount: 0,
+  annualAmount: 0,
+};
+
 const Signup = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -113,6 +130,8 @@ const Signup = () => {
       } catch (e) {
         console.error("Error adding document: ", e);
       }
+    } else {
+      await setDoc(doc(db, "userInfo", userCredential.user.uid), defaultAgentData);
     }
 
     await signOut(auth);
@@ -163,6 +182,8 @@ const Signup = () => {
                   </span>{" "}
                   account
                 </>
+              ) : formScreen === "agent-pricing" || formScreen === "vendor-pricing" ? (
+                "Select your pricing"
               ) : (
                 "Select user type"
               )}
