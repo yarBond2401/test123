@@ -93,3 +93,7 @@ body {
     @apply active:opacity-50;
   }
 }
+
+.EmojiPickerReact {
+  --epr-emoji-size: 1.5rem !important;
+}

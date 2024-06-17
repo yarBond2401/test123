@@ -29,6 +29,8 @@ import ServiceDetailsDialog from "./components/ServiceDetailsDialog";
 import SendOfferDialog from "./components/SendOfferDialog";
 import { toast } from "@/components/ui/use-toast";
 import { useOfferDetails } from "@/hooks/useOfferDetails";
+import EmojiPicker from 'emoji-picker-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Props {
   params: {
@@ -287,9 +289,24 @@ const ChatTab: React.FC<Props> = ({ params }) => {
               width={18}
             />
           </button>
-          <button>
-            <Image src={SmileIcon} alt="add an emoji" height={18} width={18} />
-          </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button>
+                <Image src={SmileIcon} alt="add an emoji" height={18} width={18} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent avoidCollisions align="end" className="p-0 rounded-lg">
+              <EmojiPicker
+                width={350}
+                height={400}
+                disableAutoFocus={true}
+                onEmojiClick={(emojiData) => {
+                  console.log(emojiData);
+                  setMessage((prev) => prev + emojiData.emoji);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
         <button
           type="submit"
