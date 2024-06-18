@@ -91,7 +91,7 @@ const Signup = () => {
       email: "",
       password: "",
       passwordConfirmation: "",
-      region: "northwest",
+      pricingRegion: "northwest",
     },
   });
 
@@ -210,7 +210,7 @@ const Signup = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    setRegion(form.watch("region"));
+    setRegion(form.watch("pricingRegion"));
   }, [form]);
 
   return (
@@ -421,7 +421,7 @@ const Signup = () => {
                 <div className="flex justify-center">
                   <FormField
                     control={form.control}
-                    name="region"
+                    name="pricingRegion"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-baseline gap-2">
                         <FormLabel className="text-md font-medium">Region</FormLabel>
@@ -433,7 +433,7 @@ const Signup = () => {
                             }}
                             defaultValue={field.value}
                           >
-                            <SelectTrigger className="w-48">
+                            <SelectTrigger className="w-56">
                               <SelectValue placeholder="Select a region" />
                             </SelectTrigger>
                             <SelectContent className="">
