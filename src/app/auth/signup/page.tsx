@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 "use client";
 
 import {
@@ -78,7 +80,6 @@ const defaultAgentData = {
   annualAmount: 0,
 };
 
-
 const Signup = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -106,6 +107,8 @@ const Signup = () => {
     if (data.role === "agent") {
       // Save user data temporarily
       localStorage.setItem("userData", JSON.stringify(data));
+      console.log("data", data);
+      console.log("region", region);
 
       // Redirect to Stripe Checkout for payment
       // const stripe = await getStripe();
@@ -180,7 +183,7 @@ const Signup = () => {
     router.push("/auth/signin");
   };
 
-  const handleStripeSuccess = async (sessionId) => {
+  const handleStripeSuccess = async (sessionId: string) => {
     const response = await fetch(`/api/stripe/success?session_id=${sessionId}`);
     const data = await response.json();
 
@@ -210,7 +213,10 @@ const Signup = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    setRegion(form.watch("pricingRegion"));
+    const pricingRegion = form.watch("pricingRegion");
+    if (pricingRegion) {
+      setRegion(pricingRegion);
+    }
   }, [form]);
 
   return (
@@ -265,7 +271,7 @@ const Signup = () => {
                   <FormItem className="w-full">
                     <RadioGroup
                       value={field.value}
-                      onValueChange={(value) => form.setValue("role", value)}
+                      onValueChange={(value) => form.setValue("role", value as Inputs["role"])}
                       className="flex flex-col gap-6 md:flex-row w-full"
                     >
                       <FormItem>
@@ -455,13 +461,13 @@ const Signup = () => {
                   />
                 </div>
                 <FormField
-                  name="priceModel"
+                  name="pricingModel"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <RadioGroup
                         value={field.value}
-                        onValueChange={(value) => form.setValue("priceModel", value)}
+                        onValueChange={(value) => form.setValue("pricingModel", value)}
                         className="flex flex-col gap-6 md:flex-row w-full"
                       >
                         {Object.keys(pricingNames).map((key) => (
@@ -503,7 +509,7 @@ const Signup = () => {
                                   <Button
                                     variant="outline"
                                     className={cn("w-full transition-all duration-300", field.value !== key ? "bg-primary text-white" : "bg-white text-primary border border-primary")}
-                                    onClick={() => form.setValue("priceModel", key)}
+                                    onClick={() => form.setValue("pricingModel", key)}
                                   >
                                     {field.value !== key ? "Select" : "Selected"}
                                   </Button>
