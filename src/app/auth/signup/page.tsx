@@ -79,7 +79,6 @@ const defaultAgentData = {
 };
 
 
-
 const Signup = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -473,9 +472,10 @@ const Signup = () => {
                               </FormControl>
                               <Card className={cn("min-w-[250px] transition-colors duration-300", field.value !== key ? "bg-secondary" : "")}>
                                 <CardHeader className="text-center pb-2">
-                                  {key == "silver" && <Badge className="uppercase w-max self-center mb-3">
-                                    Most popular
-                                  </Badge>
+                                  {key == "silver" &&
+                                    <Badge className="uppercase w-max self-center mb-3">
+                                      Most popular
+                                    </Badge>
                                   }
                                   <CardTitle className="mb-7">{pricingNames[key]} Plan</CardTitle>
                                   <span className="font-bold text-5xl">
