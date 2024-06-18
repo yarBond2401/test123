@@ -40,6 +40,7 @@ import { CheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@/components/ui/select";
 import { pricingModels, pricingNames } from "@/lib/pricing-models";
+import { AnimatedNumber } from "@/components/ui/animated-numbers";
 
 const WP_SITE = "https://mrkit.io";
 
@@ -417,8 +418,8 @@ const Signup = () => {
             </fieldset>
 
             {formScreen === "agent-pricing" && form.watch("role") === "agent" && (
-              <fieldset className="flex flex-col items-stretch gap-4 w-full">
-                <div className="flex justify-center">
+              <fieldset className="flex flex-col items-stretch gap-2 w-full">
+                <div className="flex justify-center pb-6">
                   <FormField
                     control={form.control}
                     name="pricingRegion"
@@ -477,7 +478,9 @@ const Signup = () => {
                                   </Badge>
                                   }
                                   <CardTitle className="mb-7">{pricingNames[key]} Plan</CardTitle>
-                                  <span className="font-bold text-5xl">${pricingModels[region][key].price}</span>
+                                  <span className="font-bold text-5xl">
+                                    $<AnimatedNumber value={pricingModels[region][key].price} />
+                                  </span>
                                 </CardHeader>
                                 <CardDescription className="text-center">
                                   Perfect for getting started
@@ -486,7 +489,9 @@ const Signup = () => {
                                   <ul className="mt-7 space-y-2.5 text-sm">
                                     <li className="flex space-x-2">
                                       <CheckIcon className="flex-shrink-0 mt-0.5 h-4 w-4" />
-                                      <span className="text-muted-foreground">${pricingModels[region][key].postPrice} per post</span>
+                                      <span className="text-muted-foreground">
+                                        $<AnimatedNumber value={pricingModels[region][key].postPrice} /> per post
+                                      </span>
                                     </li>
                                     <li className="flex space-x-2">
                                       <CheckIcon className="flex-shrink-0 mt-0.5 h-4 w-4" />
