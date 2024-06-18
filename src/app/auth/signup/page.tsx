@@ -41,7 +41,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@/components/ui/select";
-import { pricingModels, pricingNames } from "@/lib/pricing-models";
+import { pricingDescriptions, pricingModels, pricingNames } from "@/lib/pricing-models";
 import { AnimatedNumber } from "@/components/ui/animated-numbers";
 
 const WP_SITE = "https://mrkit.io";
@@ -93,6 +93,7 @@ const Signup = () => {
       password: "",
       passwordConfirmation: "",
       pricingRegion: "northwest",
+      pricingModel: "silver",
     },
   });
 
@@ -489,7 +490,7 @@ const Signup = () => {
                                   </span>
                                 </CardHeader>
                                 <CardDescription className="text-center">
-                                  Perfect for getting started
+                                  {pricingDescriptions[key]}
                                 </CardDescription>
                                 <CardContent>
                                   <ul className="mt-7 space-y-2.5 text-sm">
@@ -547,69 +548,71 @@ const Signup = () => {
                 </div>
               </div>
             )}
-            {formScreen === "user-type" ? (
-              <Button
-                className={cn("mt-4")}
-                disabled={form.watch("role") === undefined}
-                onClick={() => setFormScreen("user-details")}
-              >
-                Continue
-              </Button>
-            ) : formScreen === "user-details" && form.watch("role") === "agent" ? (
-              <div className="flex w-full flex-row gap-4 mt-4">
+            <div className="flex max-w-lg flex-col justify-center align-items-center gap-4 mt-4">
+              {formScreen === "user-type" ? (
                 <Button
-                  variant="secondary"
-                  className="flex-1"
-                  type="button"
-                  onClick={() => setFormScreen("user-type")}
-                >
-                  Back
-                </Button>
-                <Button
-                  className="flex-1"
-                  type="button"
-                  onClick={() => setFormScreen("agent-pricing")}
+                  className="mt-4 flex-1"
+                  disabled={form.watch("role") === undefined}
+                  onClick={() => setFormScreen("user-details")}
                 >
                   Continue
                 </Button>
-              </div>
-            ) : formScreen === "agent-pricing" ? (
-              <div className="flex w-full flex-row gap-4 mt-4">
-                <Button
-                  variant="secondary"
-                  className="flex-1"
-                  type="button"
-                  onClick={() => setFormScreen("user-type")}
-                >
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={form.formState.isSubmitting}
-                >
-                  Sign up and pay
-                </Button>
-              </div>
-            ) : (
-              <div className="flex w-full flex-row gap-4 mt-4">
-                <Button
-                  variant="secondary"
-                  className="flex-1"
-                  type="button"
-                  onClick={() => setFormScreen("user-type")}
-                >
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={form.formState.isSubmitting}
-                >
-                  Sign up
-                </Button>
-              </div>
-            )}
+              ) : formScreen === "user-details" && form.watch("role") === "agent" ? (
+                <div className="flex w-full flex-row gap-4 mt-4">
+                  <Button
+                    variant="secondary"
+                    className="flex-1"
+                    type="button"
+                    onClick={() => setFormScreen("user-type")}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    type="button"
+                    onClick={() => setFormScreen("agent-pricing")}
+                  >
+                    Continue
+                  </Button>
+                </div>
+              ) : formScreen === "agent-pricing" ? (
+                <div className="flex w-full flex-row gap-4 mt-4">
+                  <Button
+                    variant="secondary"
+                    className="flex-1"
+                    type="button"
+                    onClick={() => setFormScreen("user-type")}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    Sign up and pay
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex w-full flex-row gap-4 mt-4">
+                  <Button
+                    variant="secondary"
+                    className="flex-1"
+                    type="button"
+                    onClick={() => setFormScreen("user-type")}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    Sign up
+                  </Button>
+                </div>
+              )}
+            </div>
             <p className="text-sm self-center mt-4">
               Already have an account?{" "}
               <Link href="/auth/signin" className="underline">

@@ -84,3 +84,9 @@ export const pricingNames = {
 	silver: "Silver",
 	gold: "Gold",
 };
+
+export const pricingDescriptions = {
+	bronze: "Affordable and efficient",
+	silver: "Balanced and popular",
+	gold: "Premium and comprehensive",
+};
