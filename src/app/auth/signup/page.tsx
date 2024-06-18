@@ -127,6 +127,7 @@ const Signup = () => {
 
       // if (error) {
       //   toast({
+      //     toastType: "error",
       //     title: "Payment error",
       //     description: error.message,
       //   });
@@ -177,6 +178,7 @@ const Signup = () => {
 
     await signOut(auth);
     toast({
+      toastType: "success",
       title: "Account created",
       description: "You can now sign in",
     });
@@ -198,6 +200,7 @@ const Signup = () => {
     } else {
       toast({
         title: "Payment error",
+        toastType: "error",
         description: "Your payment could not be verified. Please try again.",
       });
     }
@@ -219,6 +222,19 @@ const Signup = () => {
       setRegion(pricingRegion);
     }
   }, [form]);
+
+  const navigateToAgentPricing = async () => {
+    const isValid = await form.trigger(["name", "email", "password", "passwordConfirmation", "acceptTerms"]);
+    if (isValid) {
+      setFormScreen("agent-pricing");
+    } else {
+      toast({
+        toastType: "error",
+        title: "Validation error",
+        description: "Please complete all required fields correctly.",
+      });
+    }
+  };
 
   return (
     <>
@@ -570,7 +586,7 @@ const Signup = () => {
                   <Button
                     className="flex-1"
                     type="button"
-                    onClick={() => setFormScreen("agent-pricing")}
+                    onClick={() => navigateToAgentPricing()}
                   >
                     Continue
                   </Button>
@@ -581,7 +597,7 @@ const Signup = () => {
                     variant="secondary"
                     className="flex-1"
                     type="button"
-                    onClick={() => setFormScreen("user-type")}
+                    onClick={() => setFormScreen("user-details")}
                   >
                     Back
                   </Button>
