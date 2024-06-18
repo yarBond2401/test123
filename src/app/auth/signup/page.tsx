@@ -39,6 +39,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@/components/ui/select";
+import { pricingModels, pricingNames } from "@/lib/pricing-models";
 
 const WP_SITE = "https://mrkit.io";
 
@@ -76,38 +77,7 @@ const defaultAgentData = {
   annualAmount: 0,
 };
 
-const pricingNames = {
-  bronze: "Bronze",
-  silver: "Silver",
-  gold: "Gold",
-};
 
-const pricingModels = {
-  northwest: {
-    regionName: "Northwest",
-    bronze: { price: 350, postPrice: 70, maxPosts: 5 },
-    silver: { price: 510, postPrice: 51, maxPosts: 10 },
-    gold: { price: 600, postPrice: 40, maxPosts: 15 },
-  },
-  northcalifornia: {
-    regionName: "North California",
-    bronze: { price: 400, postPrice: 80, maxPosts: 5 },
-    silver: { price: 560, postPrice: 56, maxPosts: 10 },
-    gold: { price: 660, postPrice: 44, maxPosts: 15 },
-  },
-  southcalifornia: {
-    regionName: "South California",
-    bronze: { price: 450, postPrice: 90, maxPosts: 5 },
-    silver: { price: 610, postPrice: 61, maxPosts: 10 },
-    gold: { price: 720, postPrice: 48, maxPosts: 15 },
-  },
-  westcentral: {
-    regionName: "West Central",
-    bronze: { price: 500, postPrice: 100, maxPosts: 5 },
-    silver: { price: 660, postPrice: 66, maxPosts: 10 },
-    gold: { price: 780, postPrice: 52, maxPosts: 15 },
-  }
-};
 
 const Signup = () => {
   const router = useRouter();
@@ -133,6 +103,36 @@ const Signup = () => {
     "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+    if (data.role === "agent") {
+      // Save user data temporarily
+      localStorage.setItem("userData", JSON.stringify(data));
+
+      // Redirect to Stripe Checkout for payment
+      // const stripe = await getStripe();
+      // const { error } = await stripe.redirectToCheckout({
+      //   lineItems: [
+      //     {
+      //       price: "price_1Hh1B1Gr6L5MiP11", // Replace with your price ID
+      //       quantity: 1,
+      //     },
+      //   ],
+      //   mode: "payment",
+      //   successUrl: `${window.location.origin}/auth/success?session_id={CHECKOUT_SESSION_ID}`,
+      //   cancelUrl: `${window.location.origin}/auth/cancel`,
+      // });
+
+      // if (error) {
+      //   toast({
+      //     title: "Payment error",
+      //     description: error.message,
+      //   });
+      // }
+    } else {
+      await completeSignUp(data);
+    }
+  };
+
+  const completeSignUp = async (data: z.infer<typeof signUpSchema>) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       data.email,
@@ -146,6 +146,7 @@ const Signup = () => {
     await updateProfile(userCredential.user, {
       displayName: data.name,
     });
+
     if (data.role === "vendor") {
       await setDoc(doc(db, "vendors", userCredential.user.uid), defaultVendorData);
 
@@ -155,11 +156,11 @@ const Signup = () => {
           message: {
             subject: "Welcome email",
             html: `
-              <img src=${logoRef} alt="logo" style="height:100px;" />
-              <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
-              <p>Your login: ${data.email}.</p>
-              <p>Your password: ${data.password}.</p>
-            `,
+            <img src=${logoRef} alt="logo" style="height:100px;" />
+            <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
+            <p>Your login: ${data.email}.</p>
+            <p>Your password: ${data.password}.</p>
+          `,
           },
         });
         console.log("Document written with ID: ", docRef.id);
@@ -177,6 +178,25 @@ const Signup = () => {
     });
 
     router.push("/auth/signin");
+  };
+
+  const handleStripeSuccess = async (sessionId) => {
+    const response = await fetch(`/api/stripe/success?session_id=${sessionId}`);
+    const data = await response.json();
+
+    if (data.success) {
+      // Retrieve user data from local storage
+      const userData = localStorage.getItem("userData");
+      if (userData) {
+        await completeSignUp(JSON.parse(userData));
+        localStorage.removeItem("userData");
+      }
+    } else {
+      toast({
+        title: "Payment error",
+        description: "Your payment could not be verified. Please try again.",
+      });
+    }
   };
 
   // Effect in case has role in query params
@@ -540,6 +560,24 @@ const Signup = () => {
                   onClick={() => setFormScreen("agent-pricing")}
                 >
                   Continue
+                </Button>
+              </div>
+            ) : formScreen === "agent-pricing" ? (
+              <div className="flex w-full flex-row gap-4 mt-4">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  type="button"
+                  onClick={() => setFormScreen("user-type")}
+                >
+                  Back
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={form.formState.isSubmitting}
+                >
+                  Sign up and pay
                 </Button>
               </div>
             ) : (
