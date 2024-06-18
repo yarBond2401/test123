@@ -6,7 +6,6 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, setDoc, collection, addDoc } from "firebase/firestore";
-import { ref } from "firebase/storage";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -15,8 +14,7 @@ import { useForm } from "react-hook-form";
 import { FaBuilding } from "react-icons/fa";
 import { FaHelmetSafety } from "react-icons/fa6";
 import { z } from "zod";
-
-import { auth, db, storage } from "@/app/firebase";
+import { auth, db } from "@/app/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import {
@@ -40,6 +38,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@/components/ui/select";
 
 const WP_SITE = "https://mrkit.io";
 
@@ -224,7 +223,7 @@ const Signup = () => {
                   account
                 </>
               ) : formScreen === "agent-pricing" || formScreen === "vendor-pricing" ? (
-                "Select your pricing"
+                "Select your region and pricing"
               ) : (
                 "Select user type"
               )}
@@ -398,33 +397,43 @@ const Signup = () => {
             </fieldset>
 
             {formScreen === "agent-pricing" && form.watch("role") === "agent" && (
-              <fieldset className="flex flex-col items-stretch gap-1 w-full">
-                <FormField
-                  control={form.control}
-                  name="region"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Region</FormLabel>
-                      <FormControl>
-                        <select
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            setRegion(e.target.value);
-                          }}
-                          className="form-select"
-                        >
-                          {Object.keys(pricingModels).map((key) => (
-                            <option key={key} value={key}>
-                              {pricingModels[key].regionName}
-                            </option>
-                          ))}
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <fieldset className="flex flex-col items-stretch gap-4 w-full">
+                <div className="flex justify-center">
+                  <FormField
+                    control={form.control}
+                    name="region"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-baseline gap-2">
+                        <FormLabel className="text-md font-medium">Region</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setRegion(value);
+                            }}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger className="w-48">
+                              <SelectValue placeholder="Select a region" />
+                            </SelectTrigger>
+                            <SelectContent className="">
+                              {Object.keys(pricingModels).map((key) => (
+                                <SelectItem
+                                  key={key}
+                                  value={key}
+                                  className="cursor-pointer"
+                                >
+                                  {pricingModels[key].regionName}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   name="priceModel"
                   control={form.control}
@@ -441,7 +450,7 @@ const Signup = () => {
                               <FormControl>
                                 <RadioGroupItem value={key} className="sr-only" />
                               </FormControl>
-                              <Card className={cn("min-w-[250px] transition-colors duration-300", field.value !== key ? "bg-gray-100" : "")}>
+                              <Card className={cn("min-w-[250px] transition-colors duration-300", field.value !== key ? "bg-secondary" : "")}>
                                 <CardHeader className="text-center pb-2">
                                   {key == "silver" && <Badge className="uppercase w-max self-center mb-3">
                                     Most popular
