@@ -182,7 +182,7 @@ const Dashboard = () => {
                         : userInfo?.availablePosts}
                     </p>
                   </div>
-                  {!isVendor && userInfo?.availablePosts < 10 && (
+                  {!isVendor && userInfo?.availablePosts <= 3 && (
                     <AddPostsModal userEmail={user?.email} userInfo={userInfo} userId={user?.uid} />
                   )}
                   {!isVendor && (

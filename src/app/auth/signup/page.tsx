@@ -11,7 +11,7 @@ import { doc, setDoc, collection, addDoc } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaBuilding } from "react-icons/fa";
 import { FaHelmetSafety } from "react-icons/fa6";
@@ -44,6 +44,7 @@ import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@
 import { pricingDescriptions, pricingModels, pricingNames } from "@/lib/pricing-models";
 import { AnimatedNumber } from "@/components/ui/animated-numbers";
 import { createCheckoutSession, checkPaymentStatus } from "@/lib/checkout";
+import { usePaymentLoading } from "@/hooks/usePaymentLoading";
 
 const WP_SITE = "https://mrkit.io";
 
@@ -78,6 +79,7 @@ const defaultAgentData = {
   totalHoursInt: 0,
   monthlyAmount: 0,
   annualAmount: 0,
+  postsInstalled: 0,
 };
 
 const showSuccessToast = () => {
@@ -135,33 +137,40 @@ const Signup = () => {
   const [formScreen, setFormScreen] = useState<FormScreen>("user-type");
   const [region, setRegion] = useState("northwest");
 
+  const { setPaymentLoading } = usePaymentLoading();
+
   const logoRef =
     "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     try {
+      setPaymentLoading(true);
       // Create user account for both agent and vendor
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
       );
+      console.log("userCredential", userCredential);
 
       if (!userCredential) throw new Error("Failed to create user");
+
+      console.log("userCredential.user", userCredential.user);
+
+      await signOut(auth);
 
       await updateProfile(userCredential.user, {
         displayName: data.name,
       });
 
       const userId = userCredential.user.uid;
-
+      console.log("data.role", data.role);
       if (data.role === "agent") {
         // For agents, save initial user data and redirect to payment
         await setDoc(doc(db, "userInfo", userId), {
           ...defaultAgentData,
           pricingRegion: data.pricingRegion,
           pricingModel: data.pricingModel,
-          paymentPending: true,
         });
 
         const uniqueId = Math.random().toString(36).substring(7);
@@ -173,13 +182,14 @@ const Signup = () => {
           plan: data.pricingModel,
           isNewUser: true,
         });
-
+        // await signOut(auth);
         window.location.href = url;
       } else {
         // For vendors, complete the signup process
         await setDoc(doc(db, "vendors", userId), defaultVendorData);
         await sendWelcomeEmail(data.email, data.name, data.password);
         await signOut(auth);
+        setPaymentLoading(false);
         showSuccessToast();
         router.push("/auth/signin");
       }
@@ -189,78 +199,17 @@ const Signup = () => {
     }
   };
 
-  const completeSignUp = useCallback(async (data: z.infer<typeof signUpSchema>) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
-
-      if (!userCredential) throw new Error("Failed to create user");
-
-      await updateProfile(userCredential.user, {
-        displayName: data.name,
-      });
-
-      if (data.role === 'agent') {
-        await setDoc(doc(db, "userInfo", userCredential.user.uid), {
-          ...defaultAgentData,
-          pricingRegion: data.pricingRegion,
-          pricingModel: data.pricingModel,
-        });
-      } else {
-        await setDoc(doc(db, "vendors", userCredential.user.uid), defaultVendorData);
-
-        // Send welcome email for vendors
-        try {
-          await addDoc(collection(db, "mail"), {
-            to: [data.email],
-            message: {
-              subject: "Welcome email",
-              html: `
-              <img src=${logoRef} alt="logo" style="height:100px;" />
-              <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
-              <p>Your login: ${data.email}.</p>
-              <p>Your password: ${data.password}.</p>
-            `,
-            },
-          });
-        } catch (e) {
-          console.error("Error sending welcome email: ", e);
-        }
-      }
-
-      await signOut(auth);
-      toast({
-        toastType: "success",
-        title: "Account created",
-        description: "You can now sign in",
-      });
-
-      router.push("/auth/signin");
-    } catch (error) {
-      console.error("Error in completeSignUp: ", error);
-      setError(error.message);
-    }
-  }, [router]);
-
-
   useEffect(() => {
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
     const checkoutSessionId = localStorage.getItem("checkoutSessionId");
-    const userId = localStorage.getItem("userId");
 
-    if (success && checkoutSessionId && userId) {
+    if (success && checkoutSessionId) {
       checkPaymentStatus(checkoutSessionId)
         .then(async (status) => {
           if (status === 'complete' || status === 'paid') {
-            // Update user document to complete signup
-            await updateDoc(doc(db, "userInfo", userId), {
-              paymentPending: false,
-            });
             showSuccessToast();
+            setPaymentLoading(false);
             router.push("/auth/signin");
           } else {
             console.error("Payment status is not complete: ", status);
@@ -270,17 +219,14 @@ const Signup = () => {
         .catch(() => console.error("Error checking payment status"))
         .finally(() => {
           localStorage.removeItem("checkoutSessionId");
-          localStorage.removeItem("userId");
         });
     } else if (canceled) {
       console.error("Payment was canceled");
       showErrorToast("Payment was canceled. Please try again.");
       localStorage.removeItem("checkoutSessionId");
-      localStorage.removeItem("userId");
     }
   }, [router, searchParams]);
 
-  // Effect in case has role in query params
   useEffect(() => {
     const role = searchParams.get("role");
     if (role && ["agent", "vendor"].includes(role as string)) {
@@ -297,7 +243,9 @@ const Signup = () => {
     }
   }, [form]);
 
-  const navigateToAgentPricing = async () => {
+  const navigateToAgentPricing = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     const isValid = await form.trigger(["name", "email", "password", "passwordConfirmation", "acceptTerms"]);
     if (isValid) {
       setFormScreen("agent-pricing");
@@ -559,7 +507,7 @@ const Signup = () => {
                       <RadioGroup
                         value={field.value}
                         onValueChange={(value) => form.setValue("pricingModel", value)}
-                        className="flex flex-col gap-6 md:flex-row w-full"
+                        className="flex flex-col gap-6 sm:flex-row w-full"
                       >
                         {Object.keys(pricingNames).map((key) => (
                           <FormItem key={key}>
@@ -567,7 +515,7 @@ const Signup = () => {
                               <FormControl>
                                 <RadioGroupItem value={key} className="sr-only" />
                               </FormControl>
-                              <Card className={cn("min-w-[250px] transition-colors duration-300", field.value !== key ? "bg-secondary" : "")}>
+                              <Card className={cn("p-2 transition-colors duration-300 lg:min-w-[200px] lg:max-w-[300px] md:min-w-[250px] md:max-w-[250px] sm:min-w-[200px] sm:max-w-[200px]", field.value !== key ? "bg-secondary" : "")}>
                                 <CardHeader className="text-center pb-2">
                                   {key == "silver" &&
                                     <Badge className="uppercase w-max self-center mb-3">
@@ -599,8 +547,13 @@ const Signup = () => {
                                 <CardFooter>
                                   <Button
                                     variant="outline"
+                                    type="button"
                                     className={cn("w-full transition-all duration-300", field.value !== key ? "bg-primary text-white" : "bg-white text-primary border border-primary")}
-                                    onClick={() => form.setValue("pricingModel", key)}
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      event.stopPropagation();
+                                      form.setValue("pricingModel", key);
+                                    }}
                                   >
                                     {field.value !== key ? "Select" : "Selected"}
                                   </Button>
@@ -617,7 +570,7 @@ const Signup = () => {
               </fieldset>
             )}
 
-            {error && formScreen === "user-details" && (
+            {error && (formScreen === "user-details" || formScreen === "agent-pricing") && (
               <div
                 className="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800 mt-4"
                 role="alert"
@@ -644,6 +597,7 @@ const Signup = () => {
                   className="mt-4 flex-1"
                   disabled={form.watch("role") === undefined}
                   onClick={() => setFormScreen("user-details")}
+                  type="button"
                 >
                   Continue
                 </Button>
@@ -659,8 +613,8 @@ const Signup = () => {
                   </Button>
                   <Button
                     className="flex-1"
+                    onClick={navigateToAgentPricing}
                     type="button"
-                    onClick={() => navigateToAgentPricing()}
                   >
                     Continue
                   </Button>
