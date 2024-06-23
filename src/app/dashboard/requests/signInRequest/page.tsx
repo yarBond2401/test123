@@ -40,6 +40,7 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { add, format } from 'date-fns';
+import AddPostsModal from "@/components/payment/AddPostsModal";
 
 const DynamicGeoPicker = dynamic(() => import("../add/components/geo-picker").then(module => module.GeoPicker), {
   ssr: false,
@@ -140,6 +141,7 @@ const Requests = () => {
             <p className="text-sm text-muted-foreground pt-2">
               {`Available Requests: ${availablePosts}`}
             </p>
+            {availablePosts < 3 && <AddPostsModal userEmail={user?.email} userInfo={userInfo} userId={user?.uid} />}
           </div>
           <Button
             onClick={() => router.push("/dashboard/requests")}

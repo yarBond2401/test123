@@ -11,7 +11,7 @@ import { doc, setDoc, collection, addDoc } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaBuilding } from "react-icons/fa";
 import { FaHelmetSafety } from "react-icons/fa6";
@@ -43,6 +43,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue } from "@/components/ui/select";
 import { pricingDescriptions, pricingModels, pricingNames } from "@/lib/pricing-models";
 import { AnimatedNumber } from "@/components/ui/animated-numbers";
+import { createCheckoutSession, checkPaymentStatus } from "@/lib/checkout";
 
 const WP_SITE = "https://mrkit.io";
 
@@ -68,7 +69,6 @@ const defaultAgentData = {
   generic_availability: [],
   totalRating: 0,
   totalReviews: 0,
-  level: "New Agent",
   responce: 100,
   totalMoney: 0,
   totalMoneyInt: 0,
@@ -80,10 +80,44 @@ const defaultAgentData = {
   annualAmount: 0,
 };
 
+const showSuccessToast = () => {
+  toast({
+    toastType: "success",
+    title: "Account created",
+    description: "You can now sign in",
+  });
+};
+
+const showErrorToast = (message: string) => {
+  toast({
+    toastType: "error",
+    title: "Error",
+    description: message,
+  });
+};
+
+const sendWelcomeEmail = async (email: string, name: string, password: string) => {
+  try {
+    await addDoc(collection(db, "mail"), {
+      to: [email],
+      message: {
+        subject: "Welcome to MRK IT",
+        html: `
+          <img src=${logoRef} alt="logo" style="height:100px;" />
+          <p>Hello, ${name}. Thank you for registering!</p>
+          <p>Your login: ${email}</p>
+          <p>Your password: ${password}</p>
+        `,
+      },
+    });
+  } catch (e) {
+    console.error("Error sending welcome email: ", e);
+  }
+};
+
 const Signup = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -105,106 +139,146 @@ const Signup = () => {
     "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-    if (data.role === "agent") {
-      // Save user data temporarily
-      localStorage.setItem("userData", JSON.stringify(data));
-      console.log("data", data);
-      console.log("region", region);
+    try {
+      // Create user account for both agent and vendor
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
 
-      // Redirect to Stripe Checkout for payment
-      // const stripe = await getStripe();
-      // const { error } = await stripe.redirectToCheckout({
-      //   lineItems: [
-      //     {
-      //       price: "price_1Hh1B1Gr6L5MiP11", // Replace with your price ID
-      //       quantity: 1,
-      //     },
-      //   ],
-      //   mode: "payment",
-      //   successUrl: `${window.location.origin}/auth/success?session_id={CHECKOUT_SESSION_ID}`,
-      //   cancelUrl: `${window.location.origin}/auth/cancel`,
-      // });
+      if (!userCredential) throw new Error("Failed to create user");
 
-      // if (error) {
-      //   toast({
-      //     toastType: "error",
-      //     title: "Payment error",
-      //     description: error.message,
-      //   });
-      // }
-    } else {
-      await completeSignUp(data);
-    }
-  };
-
-  const completeSignUp = async (data: z.infer<typeof signUpSchema>) => {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      data.email,
-      data.password
-    ).catch((error) => {
-      setError(error.code);
-    });
-
-    if (!userCredential) return;
-
-    await updateProfile(userCredential.user, {
-      displayName: data.name,
-    });
-
-    if (data.role === "vendor") {
-      await setDoc(doc(db, "vendors", userCredential.user.uid), defaultVendorData);
-
-      try {
-        const docRef = await addDoc(collection(db, "mail"), {
-          to: [data.email],
-          message: {
-            subject: "Welcome email",
-            html: `
-            <img src=${logoRef} alt="logo" style="height:100px;" />
-            <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
-            <p>Your login: ${data.email}.</p>
-            <p>Your password: ${data.password}.</p>
-          `,
-          },
-        });
-        console.log("Document written with ID: ", docRef.id);
-      } catch (e) {
-        console.error("Error adding document: ", e);
-      }
-    } else {
-      await setDoc(doc(db, "userInfo", userCredential.user.uid), defaultAgentData);
-    }
-
-    await signOut(auth);
-    toast({
-      toastType: "success",
-      title: "Account created",
-      description: "You can now sign in",
-    });
-
-    router.push("/auth/signin");
-  };
-
-  const handleStripeSuccess = async (sessionId: string) => {
-    const response = await fetch(`/api/stripe/success?session_id=${sessionId}`);
-    const data = await response.json();
-
-    if (data.success) {
-      // Retrieve user data from local storage
-      const userData = localStorage.getItem("userData");
-      if (userData) {
-        await completeSignUp(JSON.parse(userData));
-        localStorage.removeItem("userData");
-      }
-    } else {
-      toast({
-        title: "Payment error",
-        toastType: "error",
-        description: "Your payment could not be verified. Please try again.",
+      await updateProfile(userCredential.user, {
+        displayName: data.name,
       });
+
+      const userId = userCredential.user.uid;
+
+      if (data.role === "agent") {
+        // For agents, save initial user data and redirect to payment
+        await setDoc(doc(db, "userInfo", userId), {
+          ...defaultAgentData,
+          pricingRegion: data.pricingRegion,
+          pricingModel: data.pricingModel,
+          paymentPending: true,
+        });
+
+        const uniqueId = Math.random().toString(36).substring(7);
+        const { url, session } = await createCheckoutSession({
+          id: uniqueId,
+          userId,
+          email: data.email,
+          region: data.pricingRegion,
+          plan: data.pricingModel,
+          isNewUser: true,
+        });
+
+        window.location.href = url;
+      } else {
+        // For vendors, complete the signup process
+        await setDoc(doc(db, "vendors", userId), defaultVendorData);
+        await sendWelcomeEmail(data.email, data.name, data.password);
+        await signOut(auth);
+        showSuccessToast();
+        router.push("/auth/signin");
+      }
+    } catch (error) {
+      console.error("Error in onSubmit: ", error);
+      setError(error.message);
     }
   };
+
+  const completeSignUp = useCallback(async (data: z.infer<typeof signUpSchema>) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+
+      if (!userCredential) throw new Error("Failed to create user");
+
+      await updateProfile(userCredential.user, {
+        displayName: data.name,
+      });
+
+      if (data.role === 'agent') {
+        await setDoc(doc(db, "userInfo", userCredential.user.uid), {
+          ...defaultAgentData,
+          pricingRegion: data.pricingRegion,
+          pricingModel: data.pricingModel,
+        });
+      } else {
+        await setDoc(doc(db, "vendors", userCredential.user.uid), defaultVendorData);
+
+        // Send welcome email for vendors
+        try {
+          await addDoc(collection(db, "mail"), {
+            to: [data.email],
+            message: {
+              subject: "Welcome email",
+              html: `
+              <img src=${logoRef} alt="logo" style="height:100px;" />
+              <p>Hello, ${data.name}. Thank you for registering as a vendor!</p>
+              <p>Your login: ${data.email}.</p>
+              <p>Your password: ${data.password}.</p>
+            `,
+            },
+          });
+        } catch (e) {
+          console.error("Error sending welcome email: ", e);
+        }
+      }
+
+      await signOut(auth);
+      toast({
+        toastType: "success",
+        title: "Account created",
+        description: "You can now sign in",
+      });
+
+      router.push("/auth/signin");
+    } catch (error) {
+      console.error("Error in completeSignUp: ", error);
+      setError(error.message);
+    }
+  }, [router]);
+
+
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    const checkoutSessionId = localStorage.getItem("checkoutSessionId");
+    const userId = localStorage.getItem("userId");
+
+    if (success && checkoutSessionId && userId) {
+      checkPaymentStatus(checkoutSessionId)
+        .then(async (status) => {
+          if (status === 'complete' || status === 'paid') {
+            // Update user document to complete signup
+            await updateDoc(doc(db, "userInfo", userId), {
+              paymentPending: false,
+            });
+            showSuccessToast();
+            router.push("/auth/signin");
+          } else {
+            console.error("Payment status is not complete: ", status);
+            showErrorToast("Payment was not completed successfully.");
+          }
+        })
+        .catch(() => console.error("Error checking payment status"))
+        .finally(() => {
+          localStorage.removeItem("checkoutSessionId");
+          localStorage.removeItem("userId");
+        });
+    } else if (canceled) {
+      console.error("Payment was canceled");
+      showErrorToast("Payment was canceled. Please try again.");
+      localStorage.removeItem("checkoutSessionId");
+      localStorage.removeItem("userId");
+    }
+  }, [router, searchParams]);
 
   // Effect in case has role in query params
   useEffect(() => {
@@ -518,7 +592,7 @@ const Signup = () => {
                                     </li>
                                     <li className="flex space-x-2">
                                       <CheckIcon className="flex-shrink-0 mt-0.5 h-4 w-4" />
-                                      <span className="text-muted-foreground">Up to {pricingModels[region][key].maxPosts} posts per month</span>
+                                      <span className="text-muted-foreground">{pricingModels[region][key].maxPosts} posts in plan</span>
                                     </li>
                                   </ul>
                                 </CardContent>
@@ -564,7 +638,7 @@ const Signup = () => {
                 </div>
               </div>
             )}
-            <div className="flex max-w-lg flex-col justify-center align-items-center gap-4 mt-4">
+            <div className="flex max-w-full flex-col justify-center align-items-center gap-4 mt-4">
               {formScreen === "user-type" ? (
                 <Button
                   className="mt-4 flex-1"
@@ -636,8 +710,8 @@ const Signup = () => {
               </Link>
             </p>
           </form>
-        </Form >
-      </section >
+        </Form>
+      </section>
     </>
   );
 };

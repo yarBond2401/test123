@@ -38,6 +38,7 @@ export interface Vendor {
   role: "vendor",
   photo: StaticImageData,
   level: string,
+  pricingRegion?: string,
   success: number,
   availablePosts?: number,
   postsInstalled?: number,
@@ -51,7 +52,6 @@ export interface Vendor {
   totalHours: number,
   totalHoursInt: number,
   monthlyAmount: number,
-  annualAmount: number,
 }
 
 export interface Agent {
@@ -59,6 +59,7 @@ export interface Agent {
   role: "agent",
   photo: StaticImageData,
   level: string,
+  pricingRegion?: string,
   availablePosts: number,
   postsInstalled: number,
   totalRating: number,

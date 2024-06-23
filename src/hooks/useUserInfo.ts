@@ -9,6 +9,7 @@ import { Agent, Vendor } from "@/lib/types";
 interface UserInfo {
     name: string;
     level: string;
+    pricingRegion?: string;
     availablePosts: number;
     postsInstalled: number;
     totalContracts: string;
