@@ -37,6 +37,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { dot } from "@/lib/utils";
 import { useRequest } from "@/components/RequestContext";
 import Image from "next/image";
+import DEFAULT_USER_IMAGE from "@/images/default-user-picture.jpg";
 
 interface Props {
   params: {
@@ -279,7 +280,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
                                   {
                                     usersData && usersData[candidate.vendorId]
                                       ? <Image
-                                        src={usersData[candidate.vendorId].photoURL}
+                                        src={usersData[candidate.vendorId].photoURL || DEFAULT_USER_IMAGE}
                                         alt="vendor"
                                         width={80}
                                         height={80}
