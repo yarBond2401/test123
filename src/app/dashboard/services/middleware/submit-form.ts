@@ -1,11 +1,21 @@
 import { User } from "firebase/auth";
-import { collection, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, deleteDoc, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebase";
 import { pick } from "remeda";
 import { format } from "date-fns";
 import { LocationMode } from "../types";
 import { toast } from "@/components/ui/use-toast";
 import { serviceOffer } from "../schema";
+
+const transformPortfolio = (serviceDetails: any) => {
+  return Object.entries(serviceDetails).reduce((acc, [key, value]) => {
+    if (value.portfolio === undefined) {
+      value.portfolio = "";
+    }
+    acc[key] = value;
+    return acc;
+  }, {});
+};
 
 export const submitForm = async (
   data: serviceOffer,
@@ -14,7 +24,6 @@ export const submitForm = async (
   callback: () => void
 ) => {
   let newData: Record<string, any> = {};
-
   // Data transformation
   newData = pick(data, ["description"]);
   newData["generic_availability"] = Object.entries(
@@ -23,20 +32,13 @@ export const submitForm = async (
     acc[key] = {};
     acc[key].open = parseInt(format(value.open, "HHmm"));
     acc[key].close = parseInt(format(value.close, "HHmm"));
-    if (value.closed) {
-      acc[key].closed = true;
-    } else {
-      acc[key].closed = false;
-    }
-
+    acc[key].closed = value.closed ? true : false;
     return acc;
   }, {} as Record<string, any>);
 
   let locationWithType: Record<string, any> = {};
-
   if (locationMode === "regional") {
     locationWithType["locations"] = data.locations;
-    // @ts-ignore
     locationWithType["locations_queriable"] = data.locations.map(
       (loc) => `${loc.type}-${loc.name.replaceAll(" ", "_")}`
     );
@@ -55,42 +57,54 @@ export const submitForm = async (
   let servicesRef = collection(db, "vendors", user.uid, "services");
 
   try {
-  const docSnap = await getDoc(docRef);
-  const currentData = docSnap.data() || {};
+    // Use setDoc with merge option to update or create the document
+    await setDoc(docRef, newData, { merge: true });
 
-  const updatedData = { ...currentData, ...newData };
+    const transformedServiceDetails = transformPortfolio(data.serviceDetails);
 
-  // Update the document with merged data
-  await updateDoc(docRef, updatedData);
+    // Get all existing services
+    const existingServicesSnapshot = await getDocs(servicesRef);
+    const existingServices = new Set(existingServicesSnapshot.docs.map(doc => doc.id));
 
-  let promises = Object.entries(data.serviceDetails).map(async ([key, value]) => {
-    let subcolRef = doc(servicesRef, key);
-    const serviceSnap = await getDoc(subcolRef);
-    const currentServiceData = serviceSnap.data() || {};
-    const updatedServiceData = {
-      ...currentServiceData,
-      vendorId: user.uid,
-      type: key,
-      ...value,
-      ...locationWithType,
-    };
-    return updateDoc(subcolRef, updatedServiceData);
-  });
-  await Promise.all(promises);
+    console.log("Existing services", existingServices);
 
-  toast({
-    toastType: "success",
-    title: "Update success",
-    description: "Your vendor profile has been updated",
-  });
-} catch (error) {
-  console.error(error);
-  toast({
-    toastType: "error",
-    title: "Update failed",
-    description: "An error occurred while updating your profile",
-  });
-} finally {
-  callback();
-}
+    let promises = Object.entries(transformedServiceDetails).map(async ([key, value]) => {
+      console.log("Updating service", key);
+      let subcolRef = doc(servicesRef, key);
+      const updatedServiceData = {
+        vendorId: user.uid,
+        type: key,
+        ...value,
+        ...locationWithType,
+      };
+      console.log("updatedServiceData", updatedServiceData);
+      // Use setDoc with merge option for services
+      existingServices.delete(key); // Remove from set as it's being updated
+      return setDoc(subcolRef, updatedServiceData, { merge: true });
+    });
+    console.log("existingServices", existingServices);
+
+    // Delete services that are no longer present
+    existingServices.forEach(serviceId => {
+      console.log("Deleting service", serviceId);
+      promises.push(deleteDoc(doc(servicesRef, serviceId)));
+    });
+
+    await Promise.all(promises);
+
+    toast({
+      toastType: "success",
+      title: "Update success",
+      description: "Your vendor profile has been updated",
+    });
+  } catch (error) {
+    console.error(error);
+    toast({
+      toastType: "error",
+      title: "Update failed",
+      description: "An error occurred while updating your profile",
+    });
+  } finally {
+    callback();
+  }
 };
