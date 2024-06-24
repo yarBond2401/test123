@@ -10,7 +10,8 @@ import { serviceOffer } from "../schema";
 export const submitForm = async (
   data: serviceOffer,
   user: User,
-  locationMode: LocationMode
+  locationMode: LocationMode,
+  callback: () => void
 ) => {
   let newData: Record<string, any> = {};
 
@@ -89,5 +90,7 @@ export const submitForm = async (
     title: "Update failed",
     description: "An error occurred while updating your profile",
   });
+} finally {
+  callback();
 }
 };
