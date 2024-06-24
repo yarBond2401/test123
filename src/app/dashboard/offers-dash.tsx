@@ -9,6 +9,7 @@ import DropdownIcon from "@/icons/icon=chevron-down.svg";
 import Loading from './loading';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
+import { mockDeals } from '@/mock/deals';
 
 
 interface OffersDashboardProps {
@@ -71,9 +72,7 @@ const OffersDashboard: React.FunctionComponent<OffersDashboardProps> = (props) =
 				{isLoading ? (
 					<SkeletonLoader />
 				) : (
-					offers?.length ? offers?.map((deal) => <DealItem deal={deal} key={deal.id} isVendor={isVendor} />) : <div className="flex flex-col items-center justify-center py-6">
-						<p className="text-[#5352BF] text-sm font-medium">No offers found</p>
-					</div>
+					offers?.length ? offers?.map((deal) => <DealItem deal={deal} key={deal.id} isVendor={isVendor} />) : mockDeals.map((deal) => <DealItem deal={deal} key={deal.id} isVendor={isVendor} />)
 				)}
 			</div>
 		</div>
