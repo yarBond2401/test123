@@ -42,7 +42,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
-import { parse } from "date-fns";
+import { parse, set } from "date-fns";
 import { useRouter } from "next/navigation";
 import { AvailabilityPicker } from "./components/availability-picker";
 import { RegionPicker } from "./components/region-picker";
@@ -57,6 +57,8 @@ import { functions } from "@/app/firebase";
 import { FileField } from "./components/file-field";
 import { ServiceRequestCreate } from "../requests/schema";
 import { useToast } from "@/components/ui/use-toast";
+import { Spinner } from "@/components/ui/spinner";
+import { Loader2 } from "lucide-react";
 
 const DynamicGeoPicker = dynamic(() => import("./components/geo-picker").then(module => module.GeoPicker),
   { ssr: false }
@@ -77,6 +79,7 @@ const generateDayAvailability = (
 const Services = () => {
   const router = useRouter();
   const [locationMode, setLocationMode] = useState<LocationMode>("regional");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [retrievedGeo, setRetrievedGeo] = useState<number[] | null>(null);
   const { user } = useRequireLogin({
     onUnauthenticated: () => router.push("/auth/signin"),
@@ -186,13 +189,15 @@ const Services = () => {
 
   const onSubmit = (data: serviceOffer) => {
     if (!user) return;
+    setIsSubmitting(true);
     console.log("submitting", JSON.stringify(data));
     console.log("gg", JSON.stringify(user));
 
     submitForm(
       data,
       user,
-      locationMode
+      locationMode,
+      () => setIsSubmitting(false)
     );
   };
 
@@ -526,7 +531,7 @@ const Services = () => {
                 type="submit"
                 disabled={form.formState.isSubmitting}
               >
-                Save
+                {isSubmitting ? <Loader2 className="animate-spin text-gray-500" /> : "Submit"}
               </Button>
             </form>
           </Form>

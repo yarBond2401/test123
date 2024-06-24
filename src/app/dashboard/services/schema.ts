@@ -31,7 +31,7 @@ const getZodParse = (parse: string) => {
         required_error: "required",
       });
     case "file":
-      return z.string().min(4, "Please upload a file");
+      return z.string().optional();
     default:
       return z.string();
   }
@@ -109,6 +109,8 @@ export const serviceOfferSchema = z
             });
           } else {
             service.fields.forEach(field => {
+               if (field.id === 'portfolio') return;
+
               // @ts-ignore
               const fieldValue = data.serviceDetails[serviceId]?.[field.id];
               if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
