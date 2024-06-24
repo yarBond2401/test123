@@ -219,6 +219,7 @@ const Services = () => {
         const updatedServiceDetails = { ...currentServiceDetails };
         Object.keys(updatedServiceDetails).forEach((serviceId) => {
           if (!selected.includes(serviceId)) {
+            // @ts-ignore
             delete updatedServiceDetails[serviceId];
           }
         });

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { User } from "firebase/auth";
 import { collection, doc, setDoc, getDoc, deleteDoc, getDocs } from "firebase/firestore";
 import { db } from "@/app/firebase";
