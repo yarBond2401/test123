@@ -1,11 +1,11 @@
 import { User } from "firebase/auth";
-import { collection, doc, updateDoc, setDoc } from "firebase/firestore";
-import { serviceOffer } from "../schema";
+import { collection, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/app/firebase";
 import { pick } from "remeda";
 import { format } from "date-fns";
 import { LocationMode } from "../types";
 import { toast } from "@/components/ui/use-toast";
+import { serviceOffer } from "../schema";
 
 export const submitForm = async (
   data: serviceOffer,
@@ -53,24 +53,41 @@ export const submitForm = async (
   let docRef = doc(db, "vendors", user.uid);
   let servicesRef = collection(db, "vendors", user.uid, "services");
 
-  // Submit to firestore
   try {
-    await setDoc(docRef, newData);
-    let promises = Object.entries(data.serviceDetails).map(([key, value]) => {
-      let subcolRef = doc(servicesRef, key);
-      setDoc(subcolRef, {
-        vendorId: user.uid,
-        type: key,
-        ...value,
-        ...locationWithType,
-      });
-    });
-    await Promise.all(promises);
-    toast({
-      title: "Update success",
-      description: "Your vendor profile has been updated",
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  const docSnap = await getDoc(docRef);
+  const currentData = docSnap.data() || {};
+
+  const updatedData = { ...currentData, ...newData };
+
+  // Update the document with merged data
+  await updateDoc(docRef, updatedData);
+
+  let promises = Object.entries(data.serviceDetails).map(async ([key, value]) => {
+    let subcolRef = doc(servicesRef, key);
+    const serviceSnap = await getDoc(subcolRef);
+    const currentServiceData = serviceSnap.data() || {};
+    const updatedServiceData = {
+      ...currentServiceData,
+      vendorId: user.uid,
+      type: key,
+      ...value,
+      ...locationWithType,
+    };
+    return updateDoc(subcolRef, updatedServiceData);
+  });
+  await Promise.all(promises);
+
+  toast({
+    toastType: "success",
+    title: "Update success",
+    description: "Your vendor profile has been updated",
+  });
+} catch (error) {
+  console.error(error);
+  toast({
+    toastType: "error",
+    title: "Update failed",
+    description: "An error occurred while updating your profile",
+  });
+}
 };

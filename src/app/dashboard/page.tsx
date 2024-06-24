@@ -224,7 +224,7 @@ const Dashboard = () => {
                         Response rate
                       </p>
                       <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                        {userInfo?.response || userInfo?.response}
+                        {userInfo?.response}
                       </p>
                     </div>
                   )}

@@ -92,6 +92,7 @@ export const serviceOfferSchema = z
       }, {} as Record<OfferedService["id"], z.ZodOptional<z.ZodObject<any>>>)
     ),
   })
+  .passthrough()
   .refine(
     (data) => {
       // Has to have at least one service selected
@@ -106,4 +107,6 @@ export const serviceOfferSchema = z
     }
   );
 
-export type serviceOffer = z.infer<typeof serviceOfferSchema>;
+export type serviceOffer = z.infer<typeof serviceOfferSchema> & {
+  [key: string]: any;
+};
