@@ -35,7 +35,7 @@ const PaymentHandler = () => {
 							paymentPending: false,
 						});
 						showSuccessToast();
-						router.push(lastPath);
+						lastPath ? router.push(lastPath) : router.push("/");
 					} else {
 						setError("Payment was not completed successfully.");
 					}

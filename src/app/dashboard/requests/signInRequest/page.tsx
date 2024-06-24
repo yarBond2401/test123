@@ -141,7 +141,7 @@ const Requests = () => {
             <p className="text-sm text-muted-foreground pt-2">
               {`Available Requests: ${availablePosts}`}
             </p>
-            {availablePosts < 3 && <AddPostsModal userEmail={user?.email} userInfo={userInfo} userId={user?.uid} />}
+            {availablePosts < 3 && <AddPostsModal userEmail={user?.email as string} userInfo={userInfo} userId={user?.uid as string} />}
           </div>
           <Button
             onClick={() => router.push("/dashboard/requests")}

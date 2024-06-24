@@ -13,12 +13,12 @@ const PaymentLoadingBanner = () => {
 };
 
 type PaymentLoadingContextType = {
-  isPaymentPaymentLoading: boolean;
-  setPaymentLoading: (paymentLoading: boolean) => void;
+  isPaymentLoading: boolean;
+  setPaymentLoading: (isPaymentLoading: boolean) => void;
 };
 
 const defaultState: PaymentLoadingContextType = {
-  isPaymentPaymentLoading: false,
+  isPaymentLoading: false,
   setPaymentLoading: () => { }
 };
 

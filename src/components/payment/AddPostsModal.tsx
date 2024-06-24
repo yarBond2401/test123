@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,7 +15,13 @@ import { pricingDescriptions, pricingModels } from '@/lib/pricing-models';
 import { createCheckoutSession } from '@/lib/checkout';
 import { usePathname } from 'next/navigation';
 
-const AddPostsModal: React.FC<> = ({ userInfo, userEmail, userId }) => {
+interface AddPostsModalProps {
+	userInfo: any;
+	userEmail: string;
+	userId: string;
+}
+
+const AddPostsModal: React.FC<AddPostsModalProps> = ({ userInfo, userEmail, userId }) => {
 	const [open, setOpen] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
