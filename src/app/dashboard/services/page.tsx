@@ -203,21 +203,31 @@ const Services = () => {
 
   // This effect update the selected service in order to display the service details
   useEffect(() => {
-    const subcription = form.watch((value, { name, type }) => {
+    const subscription = form.watch((value, { name, type }) => {
       if (!name) return;
       if (name.startsWith("serviceSelect")) {
         const selected = Object.entries(value.serviceSelect || {})
           .filter(([_, value]) => value)
           .map(([key, _]) => key);
-        const selectedServices = OFFERED_SERVICES.filter((service): boolean =>
+        const updatedSelectedServices = OFFERED_SERVICES.filter((service) =>
           selected.includes(service.id)
         );
-        setSelectedServices(selectedServices);
+        setSelectedServices(updatedSelectedServices);
+
+        // Remove service details for unselected services
+        const currentServiceDetails = form.getValues("serviceDetails");
+        const updatedServiceDetails = { ...currentServiceDetails };
+        Object.keys(updatedServiceDetails).forEach((serviceId) => {
+          if (!selected.includes(serviceId)) {
+            // @ts-ignore
+            delete updatedServiceDetails[serviceId];
+          }
+        });
+        form.setValue("serviceDetails", updatedServiceDetails);
       }
     });
-    return () => subcription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.watch]);
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -82,7 +82,7 @@ export const serviceOfferSchema = z
             curr.fields.reduce((prev, curr) => {
               prev[curr.id] = curr?.parse
                 ? getZodParse(curr.parse as string)
-                : z.string();
+                : z.string().optional();
               return prev;
             }, {} as any)
           )
@@ -109,7 +109,8 @@ export const serviceOfferSchema = z
             });
           } else {
             service.fields.forEach(field => {
-               if (field.id === 'portfolio') return;
+              console.log(field);
+               if (field.id === 'portfolio' && field.type === "file") return;
 
               // @ts-ignore
               const fieldValue = data.serviceDetails[serviceId]?.[field.id];
