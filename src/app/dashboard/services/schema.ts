@@ -100,6 +100,7 @@ export const serviceOfferSchema = z
         const service = OFFERED_SERVICES.find(s => s.id === serviceId);
         console.log(serviceId);
         if (service) {
+          // @ts-ignore
           if (!data.serviceDetails || !data.serviceDetails[serviceId]) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -108,6 +109,7 @@ export const serviceOfferSchema = z
             });
           } else {
             service.fields.forEach(field => {
+              // @ts-ignore
               const fieldValue = data.serviceDetails[serviceId]?.[field.id];
               if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
                 ctx.addIssue({

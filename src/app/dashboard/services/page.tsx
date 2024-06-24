@@ -167,7 +167,7 @@ const Services = () => {
     mode: "all",
   });
 
-  const onSubmitError = (errors) => {
+  const onSubmitError = (errors: any) => {
     console.log(errors);
 
     // Force validation to show errors on the form
@@ -277,7 +277,7 @@ const Services = () => {
                     <FormDescription>
                       Add details to your services
                     </FormDescription>
-                    <Accordion type="multiple" collapsible>
+                    <Accordion type="multiple">
                       {selectedServices.map((service) => (
                         <AccordionItem value={service.id} key={`accord-${service.id}`}>
                           <AccordionTrigger
