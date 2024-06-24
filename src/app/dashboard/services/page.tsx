@@ -167,15 +167,22 @@ const Services = () => {
     mode: "all",
   });
 
-  const onSubmitError = () => {
+  const onSubmitError = (errors) => {
+    console.log(errors);
+
+    // Force validation to show errors on the form
+    Object.keys(errors).forEach(field => {
+      form.trigger(field);
+    });
+
     if (form.formState.errors) {
       toast({
         toastType: "error",
         title: "Error submitting form",
         description: "Please check the form for errors",
-      })
+      });
     }
-  }
+  };
 
   const onSubmit = (data: serviceOffer) => {
     if (!user) return;
