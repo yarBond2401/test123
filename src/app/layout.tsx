@@ -7,6 +7,7 @@ import AppCheckProvider from "@/components/AppCheckProvider";
 import "@/app/globals.css";
 import { RequestProvider } from "@/components/RequestContext";
 import { OfferDetailsProvider } from "@/hooks/useOfferDetails";
+import { PaymentLoadingProvider } from "@/hooks/usePaymentLoading";
 
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -30,14 +31,16 @@ export default function RootLayout({
       <SWRCustomConfig>
         <AppCheckProvider>
           <RequestProvider>
-            <OfferDetailsProvider>
-              <body
-                className={`min-h-screen bg-psecondary font-sans antialiased ${fontSans.variable}`}
-              >
-                {children}
-                <Toaster />
-              </body>
-            </OfferDetailsProvider>
+            <PaymentLoadingProvider>
+              <OfferDetailsProvider>
+                <body
+                  className={`min-h-screen bg-psecondary font-sans antialiased ${fontSans.variable}`}
+                >
+                  {children}
+                  <Toaster />
+                </body>
+              </OfferDetailsProvider>
+            </PaymentLoadingProvider>
           </RequestProvider>
         </AppCheckProvider>
       </SWRCustomConfig>

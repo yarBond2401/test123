@@ -13,8 +13,6 @@ interface Props {
 }
 
 export const DealItem: FC<Props> = ({ deal, isVendor }) => {
-  console.log(deal);
-
   const costs = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",

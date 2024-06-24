@@ -39,6 +39,7 @@
     "emoji-picker-react": "^4.10.0",
     "firebase": "^10.6.0",
     "firebase-admin": "^12.1.0",
+    "framer-motion": "^11.2.10",
     "geofire-common": "^6.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.331.0",

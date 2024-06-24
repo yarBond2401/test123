@@ -26,6 +26,8 @@ import { capitalize } from "@/lib/utils";
 import { format } from "date-fns";
 import { InboxCard } from "./Inbox";
 import OffersDashboard from "./offers-dash";
+import { ExtendedButton } from "@/components/ui/extended-button";
+import AddPostsModal from "@/components/payment/AddPostsModal";
 
 const Dashboard = () => {
   const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
@@ -164,7 +166,7 @@ const Dashboard = () => {
                         My Level
                       </p>
                       <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm text-end md:text-base">
-                        {userInfo?.level || userInfo?.level}
+                        {capitalize(userInfo?.level)}
                       </p>
                     </div>
                   )}
@@ -180,6 +182,9 @@ const Dashboard = () => {
                         : userInfo?.availablePosts}
                     </p>
                   </div>
+                  {!isVendor && userInfo?.availablePosts <= 3 && (
+                    <AddPostsModal userEmail={user?.email} userInfo={userInfo} userId={user?.uid} />
+                  )}
                   {!isVendor && (
                     <>
                       <div className="flex flex-row justify-between w-full gap-1">
@@ -195,27 +200,24 @@ const Dashboard = () => {
                           My Level
                         </p>
                         <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                          {userInfo?.postsInstalled <= 50
-                            ? "Bronze"
-                            : userInfo?.postsInstalled > 50 &&
-                              userInfo?.postsInstalled <= 150
-                              ? "Gold"
-                              : "Platinum"}
+                          {capitalize(userInfo?.level)}
                         </p>
                       </div>
                     </>
                   )}
-                  <div className="flex flex-row justify-between w-full gap-1">
-                    <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      Rating
-                    </p>
-                    <div className="flex flex-row gap-1">
-                      <Image src={iconStar} alt="star" height={16} width={16} />
-                      <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                        {userInfo?.rating || userInfo?.rating}
+                  {userInfo?.totalRating && userInfo?.totalReviews && userInfo.totalReviews !== 0 ? (
+                    <div className="flex flex-row justify-between w-full gap-1">
+                      <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                        Rating
                       </p>
+                      <div className="flex flex-row gap-1">
+                        <Image src={iconStar} alt="star" height={16} width={16} />
+                        <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                          {userInfo.totalRating / userInfo.totalReviews}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
                   {isVendor && (
                     <div className="flex flex-row justify-between w-full gap-1">
                       <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
@@ -346,7 +348,7 @@ const Dashboard = () => {
           </div>
         </CardContent>}
       </Card>
-    </div>
+    </div >
   );
 };
 

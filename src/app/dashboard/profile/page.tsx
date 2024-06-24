@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -25,12 +26,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PublicProfile, publicProfileSchema } from "./schema";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ImageInput from "@/components/ImageInput";
 
 import { updateProfile } from "firebase/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import useUserInfo from "@/hooks/useUserInfo";
+import { capitalize, cn } from "@/lib/utils";
+import { AnimatedNumber } from "@/components/ui/animated-numbers";
+import { pricingDescriptions, pricingModels } from "@/lib/pricing-models";
+import { Badge } from "@/components/ui/badge";
+import { CheckIcon } from "lucide-react";
 
 const Profile = () => {
   const router = useRouter();

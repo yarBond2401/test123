@@ -8,6 +8,8 @@ export const signUpSchemaPrimitive = z
     password: z.string().min(8),
     passwordConfirmation: z.string().min(8),
     acceptTerms: z.boolean().default(false),
+    pricingRegion: z.string().optional(),
+    pricingModel: z.string().optional(),
   }).refine((data) => data.acceptTerms, {
     message: "You must accept the terms and conditions",
     path: ["acceptTerms"],

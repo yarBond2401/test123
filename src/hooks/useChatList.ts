@@ -21,8 +21,6 @@ export const useChatList = (user: User | null, maxChats?: number) => {
       q = query(q, limit(maxChats));
     }
 
-    console.log("user", user.uid, isVendor, maxChats ? `Limit: ${maxChats}` : "No limit");
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const chats = snapshot.docs.map((doc) => ({
         id: doc.id,
