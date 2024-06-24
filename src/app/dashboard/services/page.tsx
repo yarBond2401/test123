@@ -56,6 +56,7 @@ import { httpsCallable } from "firebase/functions";
 import { functions } from "@/app/firebase";
 import { FileField } from "./components/file-field";
 import { ServiceRequestCreate } from "../requests/schema";
+import { useToast } from "@/components/ui/use-toast";
 
 const DynamicGeoPicker = dynamic(() => import("./components/geo-picker").then(module => module.GeoPicker),
   { ssr: false }
@@ -84,6 +85,8 @@ const Services = () => {
     user?.uid ? `vendors/${user.uid}` : null,
     ["services"]
   );
+
+  const { toast } = useToast();
 
   const checkAndSet24Hours = (availability: any) => {
     Object.keys(availability).forEach(day => {
@@ -164,6 +167,16 @@ const Services = () => {
     mode: "all",
   });
 
+  const onSubmitError = () => {
+    if (form.formState.errors) {
+      toast({
+        toastType: "error",
+        title: "Error submitting form",
+        description: "Please check the form for errors",
+      })
+    }
+  }
+
   const onSubmit = (data: serviceOffer) => {
     if (!user) return;
     console.log("submitting", JSON.stringify(data));
@@ -207,7 +220,7 @@ const Services = () => {
         <CardContent className="max-w-xl">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
               className="flex flex-col gap-4"
             >
               <FormField
@@ -257,14 +270,14 @@ const Services = () => {
                     <FormDescription>
                       Add details to your services
                     </FormDescription>
-                    <Accordion type="single" collapsible>
+                    <Accordion type="multiple" collapsible>
                       {selectedServices.map((service) => (
                         <AccordionItem value={service.id} key={`accord-${service.id}`}>
                           <AccordionTrigger
                             className="flex justify-start items-center gap-2"
                           >
                             {service.name}
-                            <small className="font-normal">
+                            <small className="font-normal text-destructive">
                               {
                                 form.formState.errors?.serviceDetails?.[
                                 service.id
@@ -425,7 +438,7 @@ const Services = () => {
                         </AccordionItem>
                       ))}
                     </Accordion>
-                    <FormMessage />
+                    {/* <FormMessage /> */}
                   </FormItem>
                 )}
               />

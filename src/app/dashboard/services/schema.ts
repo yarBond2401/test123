@@ -31,7 +31,7 @@ const getZodParse = (parse: string) => {
         required_error: "required",
       });
     case "file":
-      return z.string().min(4, "Please upload a file")
+      return z.string().min(4, "Please upload a file");
     default:
       return z.string();
   }
@@ -70,7 +70,6 @@ export const serviceOfferSchema = z
       su: zodMorningAndAfternoon,
     }),
     serviceSelect: z.object(
-      // Black magic to create a zod schema from the SERVICES_OFFERED array
       OFFERED_SERVICES.map((s) => s.id).reduce((prev, curr) => {
         prev[curr] = z.boolean().default(false);
         return prev;
@@ -83,7 +82,7 @@ export const serviceOfferSchema = z
             curr.fields.reduce((prev, curr) => {
               prev[curr.id] = curr?.parse
                 ? getZodParse(curr.parse as string)
-                : z.string().optional();
+                : z.string();
               return prev;
             }, {} as any)
           )
@@ -92,10 +91,61 @@ export const serviceOfferSchema = z
       }, {} as Record<OfferedService["id"], z.ZodOptional<z.ZodObject<any>>>)
     ),
   })
-  .passthrough()
+  .superRefine((data, ctx) => {
+    console.log(data);
+    console.log("OFFERED_SERVICES", OFFERED_SERVICES);
+
+    Object.entries(data.serviceSelect).forEach(([serviceId, isSelected]) => {
+      if (isSelected) {
+        const service = OFFERED_SERVICES.find(s => s.id === serviceId);
+        console.log(serviceId);
+        if (service) {
+          if (!data.serviceDetails || !data.serviceDetails[serviceId]) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Details for ${service.name} are required`,
+              path: ["serviceDetails", serviceId],
+            });
+          } else {
+            service.fields.forEach(field => {
+              const fieldValue = data.serviceDetails[serviceId]?.[field.id];
+              if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required for ${service.name}`,
+                  path: ["serviceDetails", serviceId, field.id],
+                });
+              } else if (field.id === 'experience' || field.id === "pricing") {
+                if (fieldValue == 0) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `${field.label} is required for ${service.name}`,
+                    path: ["serviceDetails", serviceId, field.id],
+                  });
+                } else {
+                  const zodParse = getZodParse(field.parse as string);
+                  try {
+                    zodParse.parse(fieldValue);
+                  } catch (error) {
+                    if (error instanceof z.ZodError) {
+                      error.issues.forEach(issue => {
+                        ctx.addIssue({
+                          ...issue,
+                          path: ["serviceDetails", serviceId, field.id, ...issue.path],
+                        });
+                      });
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+      }
+    });
+  })
   .refine(
     (data) => {
-      // Has to have at least one service selected
       if (!Object.values(data.serviceSelect).some((v) => v === true)) {
         return false;
       }
