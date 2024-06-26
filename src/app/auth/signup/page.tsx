@@ -129,14 +129,14 @@ const Signup = () => {
       email: "",
       password: "",
       passwordConfirmation: "",
-      pricingRegion: "northwest",
+      pricingRegion: "florida",
       pricingModel: "silver",
     },
   });
 
   const [error, setError] = useState<string | null>(null);
   const [formScreen, setFormScreen] = useState<FormScreen>("user-type");
-  const [region, setRegion] = useState("northwest");
+  const [region, setRegion] = useState("florida");
 
   const { setPaymentLoading } = usePaymentLoading();
 
@@ -470,7 +470,7 @@ const Signup = () => {
                     name="pricingRegion"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-baseline gap-2">
-                        <FormLabel className="text-md font-medium">Region</FormLabel>
+                        <FormLabel className="text-md font-medium">State</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={(value) => {
