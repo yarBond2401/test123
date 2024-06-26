@@ -5,10 +5,8 @@ import { useForm } from "react-hook-form";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  CardDescription, CardHeader,
+  CardTitle
 } from "@/components/ui/card";
 import {
   Form,
@@ -32,12 +30,7 @@ import ImageInput from "@/components/ImageInput";
 import { updateProfile } from "firebase/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import useUserInfo from "@/hooks/useUserInfo";
-import { capitalize, cn } from "@/lib/utils";
-import { AnimatedNumber } from "@/components/ui/animated-numbers";
-import { pricingDescriptions, pricingModels } from "@/lib/pricing-models";
-import { Badge } from "@/components/ui/badge";
-import { CheckIcon } from "lucide-react";
+import StripeAccountCard from "./components/StripeAccountCard";
 
 const Profile = () => {
   const router = useRouter();
@@ -46,6 +39,8 @@ const Profile = () => {
       router.push("/auth/signin");
     },
   });
+
+  const [stripeAccountStatus, setStripeAccountStatus] = useState("not_created")
 
   const form = useForm<PublicProfile>({
     resolver: zodResolver(publicProfileSchema),
@@ -172,8 +167,10 @@ const Profile = () => {
           </Form>
         </CardContent>
       </Card>
+      <StripeAccountCard />
     </div>
   );
 };
+
 
 export default Profile;
