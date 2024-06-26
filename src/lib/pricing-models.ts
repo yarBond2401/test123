@@ -1,81 +1,69 @@
 export const pricingModels = {
-  northwest: {
-    regionName: "Northwest",
-    bronze: { price: 445, postPrice: 89, maxPosts: 5 },
-    silver: { price: 490, postPrice: 50, maxPosts: 10 },
-    gold: { price: 510, postPrice: 34, maxPosts: 15 },
-  },
-  northcalifornia: {
-    regionName: "North California",
-    bronze: { price: 175, postPrice: 35, maxPosts: 5 },
-    silver: { price: 370, postPrice: 32, maxPosts: 10 },
-    gold: { price: 450, postPrice: 30, maxPosts: 15 },
-  },
-  southcalifornia: {
-    regionName: "South California",
-    bronze: { price: 350, postPrice: 70, maxPosts: 5 },
-    silver: { price: 525, postPrice: 45, maxPosts: 10 },
-    gold: { price: 600, postPrice: 40, maxPosts: 15 },
-  },
-  westcentral: {
-    regionName: "West Central",
-    bronze: { price: 370, postPrice: 74, maxPosts: 5 },
-    silver: { price: 425, postPrice: 35, maxPosts: 10 },
-    gold: { price: 450, postPrice: 30, maxPosts: 15 },
-  },
-  southcentral: {
-    regionName: "South Central",
+  florida: {
+    regionName: "Florida",
     bronze: { price: 325, postPrice: 65, maxPosts: 5 },
-    silver: { price: 520, postPrice: 45, maxPosts: 10 },
-    gold: { price: 600, postPrice: 40, maxPosts: 15 },
+    silver: { price: 550, postPrice: 55, maxPosts: 10 },
+    gold: { price: 1125, postPrice: 45, maxPosts: 25 },
   },
-  central: {
-    regionName: "Central",
+  georgia: {
+    regionName: "Georgia",
+    bronze: { price: 325, postPrice: 65, maxPosts: 5 },
+    silver: { price: 550, postPrice: 55, maxPosts: 10 },
+    gold: { price: 1125, postPrice: 45, maxPosts: 25 },
+  },
+  newyork: {
+    regionName: "New York",
     bronze: { price: 300, postPrice: 60, maxPosts: 5 },
-    silver: { price: 460, postPrice: 40, maxPosts: 10 },
-    gold: { price: 525, postPrice: 35, maxPosts: 15 },
+    silver: { price: 550, postPrice: 55, maxPosts: 10 },
+    gold: { price: 1250, postPrice: 50, maxPosts: 25 },
   },
-  northcentral: {
-    regionName: "North Central",
+  newjersey: {
+    regionName: "New Jersey",
+    bronze: { price: 300, postPrice: 60, maxPosts: 5 },
+    silver: { price: 550, postPrice: 55, maxPosts: 10 },
+    gold: { price: 1250, postPrice: 50, maxPosts: 25 },
+  },
+  washington: {
+    regionName: "Washington",
     bronze: { price: 400, postPrice: 80, maxPosts: 5 },
-    silver: { price: 530, postPrice: 45, maxPosts: 10 },
-    gold: { price: 585, postPrice: 39, maxPosts: 15 },
+    silver: { price: 700, postPrice: 70, maxPosts: 10 },
+    gold: { price: 1500, postPrice: 60, maxPosts: 25 },
   },
-  gulfstates: {
-    regionName: "Gulf States",
-    bronze: { price: 400, postPrice: 80, maxPosts: 5 },
-    silver: { price: 595, postPrice: 50, maxPosts: 10 },
-    gold: { price: 675, postPrice: 45, maxPosts: 15 },
+  illinois: {
+    regionName: "Illinois",
+    bronze: { price: 300, postPrice: 60, maxPosts: 5 },
+    silver: { price: 550, postPrice: 55, maxPosts: 10 },
+    gold: { price: 1250, postPrice: 50, maxPosts: 25 },
   },
-  erieregion: {
-    regionName: "Erie Region",
+  tennessee: {
+    regionName: "Tennessee",
+    bronze: { price: 300, postPrice: 60, maxPosts: 5 },
+    silver: { price: 550, postPrice: 55, maxPosts: 10 },
+    gold: { price: 1250, postPrice: 50, maxPosts: 25 },
+  },
+  texas: {
+    regionName: "Texas",
+    bronze: { price: 325, postPrice: 65, maxPosts: 5 },
+    silver: { price: 600, postPrice: 60, maxPosts: 10 },
+    gold: { price: 1375, postPrice: 55, maxPosts: 25 },
+  },
+  colorado: {
+    regionName: "Colorado",
     bronze: { price: 375, postPrice: 75, maxPosts: 5 },
-    silver: { price: 425, postPrice: 35, maxPosts: 10 },
-    gold: { price: 450, postPrice: 30, maxPosts: 15 },
+    silver: { price: 700, postPrice: 70, maxPosts: 10 },
+    gold: { price: 1500, postPrice: 60, maxPosts: 25 },
   },
-  southeast: {
-    regionName: "South East",
+  northcarolina: {
+    regionName: "North Carolina",
     bronze: { price: 325, postPrice: 65, maxPosts: 5 },
-    silver: { price: 415, postPrice: 35, maxPosts: 10 },
-    gold: { price: 450, postPrice: 30, maxPosts: 15 },
+    silver: { price: 600, postPrice: 60, maxPosts: 10 },
+    gold: { price: 1375, postPrice: 55, maxPosts: 25 },
   },
-  centralandsouthflorida: {
-    regionName: "Central and South Florida",
-    bronze: { price: 325, postPrice: 65, maxPosts: 5 },
-    silver: { price: 415, postPrice: 35, maxPosts: 10 },
-    gold: { price: 450, postPrice: 30, maxPosts: 15 },
-  },
-  midatlantic: {
-    regionName: "Mid Atlantic",
-    bronze: { price: 310, postPrice: 62, maxPosts: 5 },
-    silver: { price: 405, postPrice: 35, maxPosts: 10 },
-    gold: { price: 450, postPrice: 30, maxPosts: 15 },
-  },
-  northeast: {
-    regionName: "North East",
-    bronze: { price: 425, postPrice: 85, maxPosts: 5 },
-    silver: { price: 495, postPrice: 45, maxPosts: 10 },
-    gold: { price: 525, postPrice: 35, maxPosts: 15 },
+  california: {
+    regionName: "California",
+    bronze: { price: 350, postPrice: 70, maxPosts: 5 },
+    silver: { price: 600, postPrice: 60, maxPosts: 10 },
+    gold: { price: 1250, postPrice: 50, maxPosts: 25 },
   },
 };
 
