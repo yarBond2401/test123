@@ -48,7 +48,7 @@ export const DealsDataTable: React.FC<DealsProps> = ({ rows, setDeals }) => {
 	const columns: ColumnDef<any>[] = [
 		{
 			id: "vendor",
-			header: () => <>Vendor</>,
+			header: () => <>Agent</>,
 			cell: ({ row }) => (
 				<>
 					<div className="flex items-center gap-1">
@@ -232,19 +232,19 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				<DropdownMenuItem
+				{/* <DropdownMenuItem
 					onClick={() => handleAccept()}
 					disabled={row.original.status === "accepted"}
 				>
 					Accept
-				</DropdownMenuItem>
+				</DropdownMenuItem> */}
 				<DropdownMenuItem
 					onClick={() => openDialog(row.original.id)}
 				>
 					View Details
 				</DropdownMenuItem>
 
-				<DropdownMenuItem
+				{/* <DropdownMenuItem
 					onClick={handleReject}
 					disabled={row.original.status === "accepted"}
 				>
@@ -255,7 +255,7 @@ export const DealsActions: React.FC<DealsActionsProps> = ({ row, deleteElement, 
 					disabled={row.original.status === "accepted"}
 				>
 					Delete
-				</DropdownMenuItem>
+				</DropdownMenuItem> */}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

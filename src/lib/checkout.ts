@@ -1,3 +1,6 @@
+import { API_BASE_URL } from '@/app/constants';
+import axios from 'axios';
+
 interface CheckoutSessionInput {
   id: string;
   userId: string;
@@ -7,15 +10,42 @@ interface CheckoutSessionInput {
   isNewUser?: boolean;
 }
 
+interface ConnectCheckoutSessionInput {
+    amount: number;
+    currency: string;
+    vendorStripeAccountId: string;
+    customerEmail: string;
+    metadata: {
+        offerId: string;
+        vendorId: string;
+        customerId: string;
+    };
+}
+
+export const createConnectCheckoutSession = async (input: ConnectCheckoutSessionInput) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/create-connect-checkout-session`, input);
+
+        const data = response.data;
+
+        localStorage.setItem("checkoutSessionId", data.session.id);
+        localStorage.setItem("offerId", input.metadata.offerId);
+        localStorage.setItem("vendorId", input.metadata.vendorId);
+        localStorage.setItem("amount", input.amount.toString());
+        localStorage.setItem("currency", input.currency);
+        localStorage.setItem("vendorStripeAccountId", input.vendorStripeAccountId);
+        localStorage.setItem("isConnectPayment", "true");
+
+        return data;
+    } catch (error) {
+        console.error('Error creating connect checkout session:', error);
+        throw error;
+    }
+};
+
 export const createCheckoutSession = async (input: CheckoutSessionInput) => {
   try {
-    const response = await fetch('https://us-central1-mkr-it.cloudfunctions.net/api/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-     body: JSON.stringify({ ...input }),
-    });
+    const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, input);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -41,7 +71,9 @@ export const checkPaymentStatus = async (sessionId: string) => {
   try {
     console.log(`Checking payment status for session id: ${sessionId}`);
     
-    const response = await fetch(`https://us-central1-mkr-it.cloudfunctions.net/api/session-status?session_id=${sessionId}`);
+    const response = await axios.get(`${API_BASE_URL}/session-status`, {
+      params: { session_id: sessionId }
+    });
     
     console.log(`Response status: ${response.status}`);
     

@@ -17,6 +17,7 @@ import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { Spinner } from "@/components/ui/spinner";
 import { DealsDataTable } from "./components/deals-table";
 import { BrokerType } from "@/app/firestoreTypes";
+import { useFirestoreSnapshot } from "@/hooks/useFirestoreSnapshot";
 
 const offerSchema = z.object({
 	id: z.string().optional(),
@@ -40,15 +41,15 @@ const VendorOffers = () => {
 		},
 	});
 
-	const { data: brokerData, isLoading: isBrokerLoading } = useFirestoreQuery(
+	const { data: brokerData, loading: isBrokerLoading, error: brokerError } = useFirestoreSnapshot<BrokerType[]>(
 		"brokers",
 		"users",
 		"array-contains",
 		user?.uid
 	);
-	const broker: BrokerType | undefined = (brokerData as BrokerType[] | [])?.[0]
+	const broker: BrokerType | undefined = brokerData?.[0];
 
-	const { data: offersData, isLoading: isOffersLoading } = useFirestoreQuery<any[]>(
+	const { data: offersData, loading: isOffersLoading, error: offersError } = useFirestoreSnapshot<any[]>(
 		"offers",
 		"vendorId",
 		"==",
@@ -91,6 +92,14 @@ const VendorOffers = () => {
 	}, [offersData, agentDetails, user]);
 
 	const isLoading = isBrokerLoading || isOffersLoading || isAgentDetailsLoading;
+
+	if (brokerError) {
+		return <div>Error loading broker data: {brokerError.message}</div>;
+	}
+
+	if (offersError) {
+		return <div>Error loading offers: {offersError.message}</div>;
+	}
 
 	return (
 		<div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

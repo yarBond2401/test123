@@ -1,24 +1,26 @@
 import DEFAULT_USER_IMAGE from "@/images/default-user-picture.jpg";
 
+export const API_BASE_URL = 'https://us-central1-mkr-it.cloudfunctions.net/api';
+
 export interface OfferedService {
   id:
-    | "photographer"
-    | "videographer"
-    | "drone_photographer"
-    | "home_stager"
-    | "inspector"
-    | "appraiser"
-    | "title_company"
-    | "mortgage_lender"
-    | "real_state_attorney"
-    | "insurance_agent"
-    | "moving_company"
-    | "landscaper"
-    | "contractor"
-    | "cleaning_service"
-    | "marketing_agency"
-    | "signsetter"
-    | "handyman";
+  | "photographer"
+  | "videographer"
+  | "drone_photographer"
+  | "home_stager"
+  | "inspector"
+  | "appraiser"
+  | "title_company"
+  | "mortgage_lender"
+  | "real_state_attorney"
+  | "insurance_agent"
+  | "moving_company"
+  | "landscaper"
+  | "contractor"
+  | "cleaning_service"
+  | "marketing_agency"
+  | "signsetter"
+  | "handyman";
   name: string;
   fields: Record<string, any>[];
 }

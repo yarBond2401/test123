@@ -78,7 +78,7 @@ const Profile = () => {
   }, [user]);
 
   return (
-    <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col sm:flex-col md:flex-col lg:flex-row px-6 pt-6 2xl:container gap-4">
       <Card className="w-full md:col-span-2 lg:col-span-4">
         <CardHeader className="max-w-xl">
           <CardTitle>Your Profile</CardTitle>
