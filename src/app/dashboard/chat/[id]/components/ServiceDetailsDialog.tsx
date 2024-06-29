@@ -33,6 +33,8 @@ import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useRouter } from "next/navigation";
 import useUserInfo from "@/hooks/useUserInfo";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import axios from "axios";
+import { API_BASE_URL } from "@/app/constants";
 
 interface ServiceDetailsDialogProps {
 	id: string;
@@ -115,9 +117,23 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	const handlePay = async () => {
 		setLoadingPay(true);
 		try {
+			console.log("Payment data:", {
+				amount: data.withoutTax * 100,
+				currency: 'usd',
+				vendorId: data.vendorId,
+				vendorStripeAccountId: data.vendorStripeAccountId,
+				customerEmail: user.email,
+				metadata: {
+					offerId: id,
+					vendorId: data.vendorId,
+					customerId: user.uid,
+				}
+			});
+
 			const response = await axios.post(`${API_BASE_URL}/create-connect-checkout-session`, {
 				amount: data.withoutTax * 100,
 				currency: 'usd',
+				vendorId: data.vendorId,
 				vendorStripeAccountId: data.vendorStripeAccountId,
 				customerEmail: user.email,
 				metadata: {
@@ -134,6 +150,9 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 			}
 		} catch (error) {
 			console.error('Error creating checkout session:', error);
+			if (error.response) {
+				console.error('Error response:', error.response.data);
+			}
 			toast({
 				title: "Error",
 				description: "Failed to initiate payment. Please try again.",
@@ -243,7 +262,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 			getDoc(doc(db, "offers", id)).then((doc) => {
 				const offerData = doc.data();
 				setData(offerData);
-				if (offerData?.status === 'pending_capture' || offerData?.status === 'payment_failed') {
+				if (offerData?.status === 'in-progress' || offerData?.status === 'payment_failed') {
 					fetchTransactionDetails(offerData.paymentIntentId);
 				}
 			});
@@ -252,7 +271,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 
 	const fetchTransactionDetails = async (paymentIntentId: string) => {
 		try {
-			const response = await axios.get(`${API_BASE_URL}/transaction-details`, {
+			const response = await axios.get(`${API_BASE_URL}/stripe-transaction-details`, {
 				params: { paymentIntentId }
 			});
 			setTransactionDetails(response.data);
@@ -280,7 +299,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 						{loadingPay ? <Spinner /> : "Proceed to Pay"}
 					</Button>
 				);
-			case "pending_capture":
+			case "in-progress":
 				return (
 					<Button onClick={() => handleComplete()}>
 						{loadingComplete ? <Spinner /> : "Complete Order"}
@@ -346,7 +365,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 								<div className="grid grid-cols-[120px_1fr] items-start gap-x-6">
 									<p className="text-gray-500 dark:text-gray-400">Costs:</p>
 									<div className="grid gap-1">
-										{!isVendor && (
+										{/* {!isVendor && (
 											<>
 												<div className="flex items-center justify-between">
 													<p>Without tax</p>
@@ -367,7 +386,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 													</p>
 												</div>
 											</>
-										)}
+										)} */}
 										<div className="flex items-center justify-between font-medium">
 											<p>Total</p>
 											<p>
@@ -403,7 +422,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 							)}
 						</div>
 						<div className="flex flex-row justify-center w-full mt-6">
-							{!userInfo?.stripeAccountId && userInfo && (
+							{!userInfo?.stripeAccountId && userInfo && isVendor && (
 								<p className="text-sm text-red-500 dark:text-red-400">
 									Please connect your Stripe account in Profile to accept the offer
 								</p>
@@ -467,28 +486,33 @@ interface TransactionReceiptProps {
 		net: number;
 		paymentIntentId: string;
 		receiptUrl: string;
+		status: string;
 	};
 }
 
 const TransactionReceipt: React.FC<TransactionReceiptProps> = ({ details }) => {
 	return (
 		<div className="space-y-4">
-			<h3 className="text-lg font-semibold">Transaction Details</h3>
+			<h3 className="text-md font-semibold">Transaction Details</h3>
 			<div className="grid grid-cols-2 gap-2">
 				<div>Total Amount:</div>
-				<div>{(details.amount / 100).toFixed(2)} {details.currency.toUpperCase()}</div>
+				<div>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.amount / 100)}</div>
 				<div>Platform Fee:</div>
-				<div>{(details.fees / 100).toFixed(2)} {details.currency.toUpperCase()}</div>
+				<div>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.fees / 100)}</div>
 				<div>Net Amount (Vendor Receives):</div>
-				<div>{(details.net / 100).toFixed(2)} {details.currency.toUpperCase()}</div>
+				<div>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.net / 100)}</div>
 				<div>Payment ID:</div>
 				<div>{details.paymentIntentId}</div>
+				<div>Status:</div>
+				<div>{details.status}</div>
 			</div>
-			<a href={details.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+			<Button
+				variant="link"
+				onClick={() => window.open(details.receiptUrl, '_blank')}
+				className="text-blue-500 hover:underline p-0"
+			>
 				View Full Receipt
-			</a>
+			</Button>
 		</div>
 	);
 };
-
-export default TransactionReceipt;
