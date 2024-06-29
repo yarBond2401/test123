@@ -168,14 +168,18 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		try {
 			const response = await axios.post(`${API_BASE_URL}/complete-transaction`, {
 				paymentIntentId: data.paymentIntentId,
+				offerId: id,
+				vendorStripeAccountId: data.vendorStripeAccountId,
 			});
 
+			console.log("Complete transaction response:", response.data);
+
 			if (response.data.status === 'success') {
-				let docRef = doc(db, "offers", id);
-				await updateDoc(docRef, {
-					status: "completed",
-					completedAt: serverTimestamp(),
-				});
+				// let docRef = doc(db, "offers", id);
+				// await updateDoc(docRef, {
+				// 	status: "completed",
+				// 	completedAt: serverTimestamp(),
+				// });
 				onClose();
 				toast({
 					title: "Success",
@@ -495,16 +499,21 @@ const TransactionReceipt: React.FC<TransactionReceiptProps> = ({ details }) => {
 		<div className="space-y-4">
 			<h3 className="text-md font-semibold">Transaction Details</h3>
 			<div className="grid grid-cols-2 gap-2">
-				<div>Total Amount:</div>
-				<div>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.amount / 100)}</div>
-				<div>Platform Fee:</div>
-				<div>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.fees / 100)}</div>
-				<div>Net Amount (Vendor Receives):</div>
-				<div>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.net / 100)}</div>
-				<div>Payment ID:</div>
-				<div>{details.paymentIntentId}</div>
-				<div>Status:</div>
-				<div>{details.status}</div>
+				<p>Total Amount:</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.amount / 100)}</p>
+				<p>Platform Fee:</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.fees / 100)}</p>
+				<p>Net Amount (Vendor Receives):</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.net / 100)}</p>
+
+				{details.status !== "requires_capture" && (
+					<>
+						<p>Status:</p>
+						<p>{details.status}</p>
+					</>
+				)}
+				<p className="text-sm text-gray-400">Payment ID:</p>
+				<p className="text-sm text-gray-400">{details.paymentIntentId}</p>
 			</div>
 			<Button
 				variant="link"
