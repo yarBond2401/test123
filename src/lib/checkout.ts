@@ -55,11 +55,7 @@ export const createCheckoutSession = async (input: CheckoutSessionInput) => {
       input,
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = response.data;
 
     localStorage.setItem("checkoutSessionId", data.session.id);
     localStorage.setItem("userId", input.userId);

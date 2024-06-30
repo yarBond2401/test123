@@ -125,11 +125,11 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 				currency: 'usd',
 				vendorId: data.vendorId,
 				vendorStripeAccountId: data.vendorStripeAccountId,
-				customerEmail: user.email,
+				customerEmail: user?.email,
 				metadata: {
 					offerId: id,
 					vendorId: data.vendorId,
-					customerId: user.uid,
+					customerId: user?.uid,
 				}
 			});
 
@@ -138,11 +138,11 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 				currency: 'usd',
 				vendorId: data.vendorId,
 				vendorStripeAccountId: data.vendorStripeAccountId,
-				customerEmail: user.email,
+				customerEmail: user?.email,
 				metadata: {
 					offerId: id,
 					vendorId: data.vendorId,
-					customerId: user.uid,
+					customerId: user?.uid,
 				}
 			});
 
@@ -153,8 +153,8 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 			}
 		} catch (error) {
 			console.error('Error creating checkout session:', error);
-			if (error.response) {
-				console.error('Error response:', error.response.data);
+			if ((error as any).response) {
+				console.error('Error response:', (error as any).response.data);
 			}
 			toast({
 				title: "Error",
@@ -212,7 +212,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 				status: status,
 				completedAt: serverTimestamp(),
 			});
-			setData((prevData) => ({ ...prevData, status: status }));
+			setData((prevData: any) => ({ ...prevData, status: status }));
 		} catch (error) {
 			console.error('Error updating offer status:', error);
 			toast({
@@ -257,11 +257,11 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 				amount: data.withoutTax * 100,
 				currency: 'usd',
 				vendorStripeAccountId: data.vendorStripeAccountId,
-				customerEmail: user.email,
+				customerEmail: user?.email,
 				metadata: {
 					offerId: id,
 					vendorId: data.vendorId,
-					customerId: user.uid,
+					customerId: user?.uid,
 				}
 			});
 

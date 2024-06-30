@@ -182,7 +182,7 @@ const PaymentHandler = () => {
 			const offerDoc = await getDoc(doc(db, "offers", offerId));
 			if (offerDoc.exists()) {
 				const offerData = offerDoc.data();
-				setPaymentData(prevData => ({ ...prevData, transactionDetails: offerData }));
+				setPaymentData((prevData: any) => ({ ...prevData, transactionDetails: offerData }));
 			}
 		} catch (error) {
 			console.error('Error fetching transaction details:', error);

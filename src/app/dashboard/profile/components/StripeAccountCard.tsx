@@ -39,7 +39,7 @@ const StripeAccountCard = () => {
 		}
 	}, [userInfo]);
 
-	const checkAccountStatus = async (accountId) => {
+	const checkAccountStatus = async (accountId: string) => {
 		setAccountStatusLoading(true);
 		setError(false);
 		try {
@@ -61,8 +61,8 @@ const StripeAccountCard = () => {
 		setError(false);
 		try {
 			const response = await axios.post(`${API_BASE_URL}/create-connect-account`, {
-				email: user.email,
-				vendorId: user.uid,
+				email: user?.email,
+				vendorId: user?.uid,
 			});
 			console.log(response.data);
 			const { url } = response.data;
@@ -86,7 +86,7 @@ const StripeAccountCard = () => {
 		setError(false);
 		try {
 			const response = await axios.post(`${API_BASE_URL}/link-connect-account`, {
-				account: userInfo.stripeAccountId,
+				account: userInfo?.stripeAccountId,
 			});
 			const { url } = response.data;
 
