@@ -32,7 +32,6 @@ const StripeAccountCard = () => {
 	const [accountStatusLoading, setAccountStatusLoading] = useState(false);
 
 	useEffect(() => {
-		setAccountStatusLoading(true);
 		if (userInfo && userInfo.stripeAccountId) {
 			setStripeAccountStatus('created');
 			checkAccountStatus(userInfo.stripeAccountId);
@@ -108,7 +107,7 @@ const StripeAccountCard = () => {
 				<CardDescription>Connect your Stripe account to start accepting payments.</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4 max-w-xl">
-				{accountStatusLoading ? (
+				{accountStatusLoading || !userInfo ? (
 					<div className="flex flex-col items-center gap-4">
 						<Spinner className="h-12 w-12 text-primary" />
 						<div className="text-center space-y-2">
