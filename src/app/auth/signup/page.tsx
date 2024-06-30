@@ -209,7 +209,7 @@ const Signup = () => {
     if (success && checkoutSessionId) {
       checkPaymentStatus(checkoutSessionId)
         .then(async (status) => {
-          if (status === 'complete' || status === 'paid') {
+          if (status.status === 'complete' || status.status === 'paid') {
             showSuccessToast();
             setPaymentLoading(false);
             router.push("/auth/signin");
@@ -219,15 +219,12 @@ const Signup = () => {
           }
         })
         .catch(() => console.error("Error checking payment status"))
-        .finally(() => {
-          localStorage.removeItem("checkoutSessionId");
-        });
     } else if (canceled) {
       console.error("Payment was canceled");
+      setPaymentLoading(false);
       showErrorToast("Payment was canceled. Please try again.");
-      localStorage.removeItem("checkoutSessionId");
     }
-  }, [router, searchParams]);
+  }, [router, searchParams, setPaymentLoading]);
 
   useEffect(() => {
     const role = searchParams.get("role");
