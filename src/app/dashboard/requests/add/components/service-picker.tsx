@@ -27,11 +27,11 @@ interface ServicePickerProps {
 
 const QUERIABLE_SERVICES = [
   ...OFFERED_SERVICES,
-  {
-    id: "marketing",
-    name: "Marketing",
-    fields: []
-  }
+  // {
+  //   id: "marketing",
+  //   name: "Marketing",
+  //   fields: []
+  // }
 ]
 
 export const ServicePicker: React.FC<ServicePickerProps> = ({ form }) => {
@@ -53,7 +53,7 @@ export const ServicePicker: React.FC<ServicePickerProps> = ({ form }) => {
   //   console.log(form.formState.errors)
   // }, [form.formState.errors])
 
-    const selectedServiceIds = new Set(fields.map(service => service.serviceName));
+  const selectedServiceIds = new Set(fields.map(service => service.serviceName));
 
   return (
     <FormField
@@ -118,15 +118,15 @@ export const ServicePicker: React.FC<ServicePickerProps> = ({ form }) => {
                                 </FormControl>
                                 <SelectContent>
                                   {
-                                      QUERIABLE_SERVICES.filter(service => !selectedServiceIds.has(service.id))
-                                          .map((service) => (
-                                              <SelectItem
-                                                  key={service.id}
-                                                  value={service.id}
-                                              >
-                                                  {service.name}
-                                              </SelectItem>
-                                          ))
+                                    QUERIABLE_SERVICES.filter(service => !selectedServiceIds.has(service.id))
+                                      .map((service) => (
+                                        <SelectItem
+                                          key={service.id}
+                                          value={service.id}
+                                        >
+                                          {service.name}
+                                        </SelectItem>
+                                      ))
 
                                   }
                                 </SelectContent>
