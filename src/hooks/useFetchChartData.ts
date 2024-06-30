@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { format, eachDayOfInterval, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, endOfYear } from 'date-fns';
-import { db } from '@/app/firebase';
+// @ts-nocheck
+
+import { useState, useEffect } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  format,
+  eachDayOfInterval,
+  startOfMonth,
+  endOfMonth,
+  eachMonthOfInterval,
+  startOfYear,
+  endOfYear,
+} from "date-fns";
+import { db } from "@/app/firebase";
 
 const useFetchChartData = (isVendor: boolean, userId: string) => {
   const [monthlyData, setMonthlyData] = useState([]);
@@ -11,11 +21,20 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const q = query(
-        collection(db, 'offers'),
-        where('status', 'in', ['accepted', 'completed', 'in progress']),
-        where(isVendor ? 'vendorId' : 'agentId', '==', userId)
-      );
+      let q;
+      if (isVendor) {
+        q = query(
+          collection(db, "offers"),
+          where("status", "==", "completed"),
+          where(isVendor ? "vendorId" : "agentId", "==", userId),
+        );
+      } else {
+        q = query(
+          collection(db, "offers"),
+          where("status", "in", ["accepted", "completed", "in progress"]),
+          where(isVendor ? "vendorId" : "agentId", "==", userId),
+        );
+      }
 
       const querySnapshot = await getDocs(q);
       const transactions = [];
@@ -24,32 +43,36 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
       });
 
       const monthlyGroupedData = transactions.reduce((acc, transaction) => {
-        const month = format(new Date(transaction.acceptedAt.toDate()), 'MMMM');
+        const month = format(new Date(transaction.acceptedAt.toDate()), "MMMM");
         if (!acc[month]) {
           acc[month] = { value: 0, count: 0 };
         }
-        acc[month].value += isVendor ? transaction.vendorCosts : transaction.withoutTax;
+        acc[month].value += isVendor
+          ? transaction.vendorСosts
+          : transaction.withoutTax;
         acc[month].count += 1;
         return acc;
       }, {});
 
-      const formattedMonthlyData = Object.keys(monthlyGroupedData).map((month) => ({
-        month,
-        value: monthlyGroupedData[month].value,
-        offers: monthlyGroupedData[month].count,
-      }));
+      const formattedMonthlyData = Object.keys(monthlyGroupedData).map(
+        (month) => ({
+          month,
+          value: monthlyGroupedData[month].value,
+          offers: monthlyGroupedData[month].count,
+        }),
+      );
 
       const yearStart = startOfYear(new Date());
       const yearEnd = endOfYear(new Date());
 
       const annualGroupedData = transactions.reduce((acc, transaction) => {
-        const month = format(new Date(transaction.acceptedAt.toDate()), 'MMM');
+        const month = format(new Date(transaction.acceptedAt.toDate()), "MMM");
         if (!acc[month]) {
           acc[month] = [];
         }
         acc[month].push({
           date: new Date(transaction.acceptedAt.toDate()),
-          value: isVendor ? transaction.vendorCosts : transaction.withoutTax
+          value: isVendor ? transaction.vendorСosts : transaction.withoutTax,
         });
         return acc;
       }, {});
@@ -60,7 +83,7 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
       let annualOfferCount = 0;
 
       const formattedAnnualData = allMonths.map((monthDate) => {
-        const month = format(monthDate, 'MMM');
+        const month = format(monthDate, "MMM");
         const monthTransactions = annualGroupedData[month] || [];
 
         if (monthTransactions.length === 0) {
@@ -69,7 +92,7 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
             value1: 0,
             value2: 0,
             value3: 0,
-            offers: 0
+            offers: 0,
           };
         }
 
@@ -77,7 +100,10 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
 
         const startOfMonthDate = startOfMonth(monthTransactions[0].date);
         const endOfMonthDate = endOfMonth(monthTransactions[0].date);
-        const interval = eachDayOfInterval({ start: startOfMonthDate, end: endOfMonthDate });
+        const interval = eachDayOfInterval({
+          start: startOfMonthDate,
+          end: endOfMonthDate,
+        });
         const daysInMonth = interval.length;
         const splitDays = Math.floor(daysInMonth / 3);
         const remainderDays = daysInMonth % 3;
@@ -86,7 +112,9 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
         let part2End = part1End + splitDays + (remainderDays > 0 ? 1 : 0);
         let part3End = daysInMonth;
 
-        let part1Sum = 0, part2Sum = 0, part3Sum = 0;
+        let part1Sum = 0,
+          part2Sum = 0,
+          part3Sum = 0;
 
         for (let i = 0; i < monthTransactions.length; i++) {
           let transactionDate = monthTransactions[i].date.getDate();
@@ -99,7 +127,7 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
           }
         }
 
-        annualSum += (part1Sum + part2Sum + part3Sum);
+        annualSum += part1Sum + part2Sum + part3Sum;
         annualOfferCount += monthTransactions.length;
 
         return {
@@ -107,7 +135,7 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
           value1: part1Sum,
           value2: part2Sum,
           value3: part3Sum,
-          offers: monthTransactions.length
+          offers: monthTransactions.length,
         };
       });
 
@@ -116,12 +144,10 @@ const useFetchChartData = (isVendor: boolean, userId: string) => {
       setAnnualTotal(annualSum);
       setLoading(false);
     };
-    
-    if (userId)
-      fetchData();
+
+    if (userId) fetchData();
   }, [isVendor, userId]);
 
-  console.log({ monthlyData, annualData, annualTotal, loading });
 
   return { monthlyData, annualData, annualTotal, loading };
 };

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/app/firebase';
 
-const useFetchTotalOffers = (isVendor, userId) => {
+const useFetchTotalOffers = (isVendor: boolean, userId: string) => {
   const [totalOffers, setTotalOffers] = useState(0);
   const [loading, setLoading] = useState(true);
 

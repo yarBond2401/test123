@@ -31,6 +31,7 @@ import AddPostsModal from "@/components/payment/AddPostsModal";
 import useFetchChartData from "@/hooks/useFetchChartData";
 import useFetchCurrentMonthData from "@/hooks/useFetchCurrentMonthData";
 import useFetchTotalOffers from "@/hooks/useFetchTotalOffers";
+import { elements } from "chart.js/auto";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -178,6 +179,28 @@ const Dashboard = () => {
     },
   };
 
+  const getLineChartData = () => {
+    if (currentMonthLoading) {
+      return [];
+    }
+    if (currentMonthData && currentMonthData.length > 0 && totalOffers) {
+      // Using map to remove duplicates and make line smoother
+      const uniqueValuesMap = new Map();
+      currentMonthData.forEach(item => {
+        if (!uniqueValuesMap.has(item.value)) {
+          uniqueValuesMap.set(item.value, item.date);
+        }
+      });
+
+      const array = Array.from(uniqueValuesMap.keys())
+
+      return isVendor ? array.sort((a, b) => new Date(uniqueValuesMap.get(a)).getTime() - new Date(uniqueValuesMap.get(b)).getTime()) : array;
+    }
+    // Fallback mock data
+    return isVendor ? [0, 55, 50, 100] : [100, 42, 45, 0];
+  };
+
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       <Card className="w-full md:col-span-2 lg:col-span-4">
@@ -317,11 +340,10 @@ const Dashboard = () => {
                     <div className="xl:w-1/2 w-full xl:h-16">
                       <Line
                         data={{
-                          labels: ["", "", "", ""],
+                          labels: totalOffers ? getLineChartData().map((_) => "") : ["", "", "", ""],
                           datasets: [
                             {
-                              data:
-                                currentMonthLoading ? [] : currentMonthData?.map((item) => item.value).sort((a, b) => b - a),
+                              data: getLineChartData(),
                               borderColor:
                                 isVendor
                                   ? "#A652BF"
@@ -350,12 +372,12 @@ const Dashboard = () => {
                     <div className="xl:w-3/4 w-full h-[90px]">
                       <Bar
                         data={{
-                          labels: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
+                          labels: (totalOffers ? annualData : annualEarnedChartData).map(
                             (item) => item.label
                           ),
                           datasets: [
                             {
-                              data: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
+                              data: (totalOffers ? annualData : annualEarnedChartData).map(
                                 (item) => item.value1
                               ),
                               backgroundColor: "#3758F9",
@@ -363,7 +385,7 @@ const Dashboard = () => {
                               barPercentage: 0.5,
                             },
                             {
-                              data: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
+                              data: (totalOffers ? annualData : annualEarnedChartData).map(
                                 (item) => item.value2
                               ),
                               backgroundColor: "#13C296",
@@ -371,7 +393,7 @@ const Dashboard = () => {
                               barPercentage: 0.5,
                             },
                             {
-                              data: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
+                              data: (totalOffers ? annualData : annualEarnedChartData).map(
                                 (item) => item.value3
                               ),
                               backgroundColor: "#F2994A",
