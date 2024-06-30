@@ -303,7 +303,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
                                       </small>
                                     </div>
                                     <Badge>
-                                      ${candidate.pricing}/hr
+                                      {candidate.pricing === 0 ? 'By quote' : `${candidate.pricing}/hr`}
                                     </Badge>
                                   </div>
                                 </div>

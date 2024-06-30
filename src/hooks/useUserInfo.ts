@@ -25,6 +25,7 @@ interface UserInfo {
     monthlyAmount?: number,
     annualAmount?: number,
     success?: number,
+    stripeAccountId?: string;
 }
 
 const useUserInfo = (user: User | null) => {

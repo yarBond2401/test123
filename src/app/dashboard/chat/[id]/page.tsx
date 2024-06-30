@@ -232,7 +232,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
         </div>
         <div className="flex flex-row gap-3 items-center">
           {(chatDetails?.userDetails?.email !== "info@mrkit.io") &&
-            !isVendor && chatDetails && (
+            !isVendor && chatDetails && chatDetails?.userDetails && (
               <SendOfferDialog vendorId={chatDetails?.vendor} agentId={chatDetails?.agent} />
             )
           }

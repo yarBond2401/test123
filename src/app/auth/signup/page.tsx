@@ -83,6 +83,9 @@ const defaultAgentData = {
   postsInstalled: 0,
 };
 
+const logoRef =
+  "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
+
 const showSuccessToast = () => {
   toast({
     toastType: "success",
@@ -139,9 +142,6 @@ const Signup = () => {
   const [region, setRegion] = useState("florida");
 
   const { setPaymentLoading } = usePaymentLoading();
-
-  const logoRef =
-    "https://firebasestorage.googleapis.com/v0/b/mkr-it.appspot.com/o/public%2Flogo.png?alt=media&token=d9c0e8ab-d005-4347-b8ec-c612385ebc24";
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     try {

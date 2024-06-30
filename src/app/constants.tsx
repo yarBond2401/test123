@@ -1,24 +1,29 @@
 import DEFAULT_USER_IMAGE from "@/images/default-user-picture.jpg";
 
+export const API_BASE_URL = 'https://us-central1-mkr-it.cloudfunctions.net/api';
+
 export interface OfferedService {
   id:
-    | "photographer"
-    | "videographer"
-    | "drone_photographer"
-    | "home_stager"
-    | "inspector"
-    | "appraiser"
-    | "title_company"
-    | "mortgage_lender"
-    | "real_state_attorney"
-    | "insurance_agent"
-    | "moving_company"
-    | "landscaper"
-    | "contractor"
-    | "cleaning_service"
-    | "marketing_agency"
-    | "signsetter"
-    | "handyman";
+  | "photographer"
+  | "videographer"
+  | "drone_photographer"
+  | "home_stager"
+  | "inspector"
+  | "appraiser"
+  | "title_company"
+  | "mortgage_lender"
+  | "real_state_attorney"
+  | "insurance_agent"
+  | "moving_company"
+  | "landscaper"
+  | "contractor" // do we need this?
+  | "interior_designer"
+  | "cleaning_service"
+  | "marketing_agency"
+  | "signsetter"
+  | "handyman"
+  | "marketing"
+  | "online_course";
   name: string;
   fields: Record<string, any>[];
 }
@@ -331,92 +336,92 @@ export const OFFERED_SERVICES: OfferedService[] = [
       },
     ],
   },
-  // {
-  //   id: "mortgage_lender",
-  //   name: "Mortgage Lender",
-  //   fields: [
-  //     {
-  //       id: "certifications",
-  //       type: "text",
-  //       label: "Certifications",
-  //       description: "Which certifications do you have?",
-  //       placeholder: "ALTA, NALTEA",
-  //     },
-  //     {
-  //       id: "experience",
-  //       type: "text",
-  //       label: "Experience",
-  //       description: "How long have you been a mortgage lender? (years)",
-  //       placeholder: "4",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "sample_report",
-  //       type: "text",
-  //       label: "Sample Report",
-  //       description: "Provide a link to a sample report",
-  //       placeholder: "https://www.example.com",
-  //     },
-  //     {
-  //       id: "pricing",
-  //       type: "text",
-  //       label: "Pricing",
-  //       placeholder: "100",
-  //       description: "What is your pricing for your services? (value per hour)",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "insurance",
-  //       type: "checkbox",
-  //       label: "Insurance",
-  //       description: "Do you have insurance?",
-  //       parse: "boolean",
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: "real_state_attorney",
-  //   name: "Real State Attorney",
-  //   fields: [
-  //     {
-  //       id: "certifications",
-  //       type: "text",
-  //       label: "Certifications",
-  //       description: "Which certifications do you have?",
-  //       placeholder: "ALTA, NALTEA",
-  //     },
-  //     {
-  //       id: "experience",
-  //       type: "text",
-  //       label: "Experience",
-  //       description: "How long have you been a real state attorney? (years)",
-  //       placeholder: "4",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "sample_report",
-  //       type: "text",
-  //       label: "Sample Report",
-  //       description: "Provide a link to a sample report",
-  //       placeholder: "https://www.example.com",
-  //     },
-  //     {
-  //       id: "pricing",
-  //       type: "text",
-  //       label: "Pricing",
-  //       placeholder: "100",
-  //       description: "What is your pricing for your services? (value per hour)",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "insurance",
-  //       type: "checkbox",
-  //       label: "Insurance",
-  //       description: "Do you have insurance?",
-  //       parse: "boolean",
-  //     },
-  //   ],
-  // },
+  {
+    id: "mortgage_lender",
+    name: "Mortgage Lender",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a mortgage lender? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "sample_report",
+        type: "text",
+        label: "Sample Report",
+        description: "Provide a link to a sample report",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
+  {
+    id: "real_state_attorney",
+    name: "Real State Attorney",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a real state attorney? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "sample_report",
+        type: "text",
+        label: "Sample Report",
+        description: "Provide a link to a sample report",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
   {
     id: "insurance_agent",
     name: "Insurance Agent",
@@ -545,50 +550,50 @@ export const OFFERED_SERVICES: OfferedService[] = [
         parse: "boolean",
       },
     ],
-  }
-  // {
-  //   id: "landscaper",
-  //   name: "Landscaper",
-  //   fields: [
-  //     {
-  //       id: "certifications",
-  //       type: "text",
-  //       label: "Certifications",
-  //       description: "Which certifications do you have?",
-  //       placeholder: "ALTA, NALTEA",
-  //     },
-  //     {
-  //       id: "experience",
-  //       type: "text",
-  //       label: "Experience",
-  //       description: "How long have you been a landscaper? (years)",
-  //       placeholder: "4",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "sample_report",
-  //       type: "text",
-  //       label: "Sample Report",
-  //       description: "Provide a link to a sample report",
-  //       placeholder: "https://www.example.com",
-  //     },
-  //     {
-  //       id: "pricing",
-  //       type: "text",
-  //       label: "Pricing",
-  //       placeholder: "100",
-  //       description: "What is your pricing for your services? (value per hour)",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "insurance",
-  //       type: "checkbox",
-  //       label: "Insurance",
-  //       description: "Do you have insurance?",
-  //       parse: "boolean",
-  //     },
-  //   ],
-  // },
+  },
+  {
+    id: "landscaper",
+    name: "Landscaper",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a landscaper? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "sample_report",
+        type: "text",
+        label: "Sample Report",
+        description: "Provide a link to a sample report",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
   // {
   //   id: "contractor",
   //   name: "Contractor",
@@ -632,135 +637,253 @@ export const OFFERED_SERVICES: OfferedService[] = [
   //     },
   //   ],
   // },
-  // {
-  //   id: "cleaning_service",
-  //   name: "Cleaning Service",
-  //   fields: [
-  //     {
-  //       id: "certifications",
-  //       type: "text",
-  //       label: "Certifications",
-  //       description: "Which certifications do you have?",
-  //       placeholder: "ALTA, NALTEA",
-  //     },
-  //     {
-  //       id: "experience",
-  //       type: "text",
-  //       label: "Experience",
-  //       description: "How long have you been a cleaning service? (years)",
-  //       placeholder: "4",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "sample_report",
-  //       type: "text",
-  //       label: "Sample Report",
-  //       description: "Provide a link to a sample report",
-  //       placeholder: "https://www.example.com",
-  //     },
-  //     {
-  //       id: "pricing",
-  //       type: "text",
-  //       label: "Pricing",
-  //       placeholder: "100",
-  //       description: "What is your pricing for your services? (value per hour)",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "insurance",
-  //       type: "checkbox",
-  //       label: "Insurance",
-  //       description: "Do you have insurance?",
-  //       parse: "boolean",
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: "marketing_agency",
-  //   name: "Marketing Agency",
-  //   fields: [
-  //     {
-  //       id: "certifications",
-  //       type: "text",
-  //       label: "Certifications",
-  //       description: "Which certifications do you have?",
-  //       placeholder: "ALTA, NALTEA",
-  //     },
-  //     {
-  //       id: "experience",
-  //       type: "text",
-  //       label: "Experience",
-  //       description: "How long have you been a marketing agency? (years)",
-  //       placeholder: "4",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "sample_report",
-  //       type: "text",
-  //       label: "Sample Report",
-  //       description: "Provide a link to a sample report",
-  //       placeholder: "https://www.example.com",
-  //     },
-  //     {
-  //       id: "pricing",
-  //       type: "text",
-  //       label: "Pricing",
-  //       placeholder: "100",
-  //       description: "What is your pricing for your services? (value per hour)",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "insurance",
-  //       type: "checkbox",
-  //       label: "Insurance",
-  //       description: "Do you have insurance?",
-  //       parse: "boolean",
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: "signsetter",
-  //   name: "Sign setter",
-  //   fields: [
-  //     {
-  //       id: "certifications",
-  //       type: "text",
-  //       label: "Certifications",
-  //       description: "Which certifications do you have?",
-  //       placeholder: "ALTA, NALTEA",
-  //     },
-  //     {
-  //       id: "experience",
-  //       type: "text",
-  //       label: "Experience",
-  //       description: "How long have you been a sign setter? (years)",
-  //       placeholder: "4",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "sample_report",
-  //       type: "text",
-  //       label: "Sample Report",
-  //       description: "Provide a link to a sample report",
-  //       placeholder: "https://www.example.com",
-  //     },
-  //     {
-  //       id: "pricing",
-  //       type: "text",
-  //       label: "Pricing",
-  //       placeholder: "100",
-  //       description: "What is your pricing for your services? (value per hour)",
-  //       parse: "number",
-  //     },
-  //     {
-  //       id: "insurance",
-  //       type: "checkbox",
-  //       label: "Insurance",
-  //       description: "Do you have insurance?",
-  //       parse: "boolean",
-  //     },
-  //   ],
-  // },
+  {
+    name: "Online Course",
+    id: "online_course",
+    fields: [
+      {
+        id: "portfolio",
+        type: "file",
+        label: "Portfolio",
+        description:
+          "Provide a portfolio in PDF format",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "course_qualifications",
+        type: "text",
+        label: "Qualifications",
+        description: "What are your qualifications?",
+        placeholder: "Qualified in ...",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+    ],
+  },
+  {
+    id: "interior_designer",
+    name: "Interior designer",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a interior designer? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "portfolio",
+        type: "file",
+        label: "Portfolio",
+        description:
+          "Provide a portfolio in PDF format",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "design_skills",
+        type: "select",
+        label: "Design Skills",
+        description: "What is your level of expertise in interior design?",
+        options: [
+          {
+            value: "none",
+            label: "None",
+          },
+          {
+            value: "basic",
+            label: "Basic",
+          },
+          {
+            value: "intermediate",
+            label: "Intermediate",
+          },
+          {
+            value: "advanced",
+            label: "Advanced",
+          },
+        ],
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
+  {
+    id: "cleaning_service",
+    name: "Cleaning Service",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a cleaning service? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "sample_report",
+        type: "text",
+        label: "Sample Report",
+        description: "Provide a link to a sample report",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
+  {
+    id: "marketing_agency",
+    name: "Marketing Agency",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a marketing agency? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "sample_report",
+        type: "text",
+        label: "Sample Report",
+        description: "Provide a link to a sample report",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
+  {
+    id: "signsetter",
+    name: "Sign setter",
+    fields: [
+      {
+        id: "certifications",
+        type: "text",
+        label: "Certifications",
+        description: "Which certifications do you have?",
+        placeholder: "ALTA, NALTEA",
+      },
+      {
+        id: "experience",
+        type: "text",
+        label: "Experience",
+        description: "How long have you been a sign setter? (years)",
+        placeholder: "4",
+        parse: "number",
+      },
+      {
+        id: "sample_report",
+        type: "text",
+        label: "Sample Report",
+        description: "Provide a link to a sample report",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
+  {
+    id: "marketing",
+    name: "Marketing",
+    fields: [
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+      {
+        id: "insurance",
+        type: "checkbox",
+        label: "Insurance",
+        description: "Do you have insurance?",
+        parse: "boolean",
+      },
+    ],
+  },
 ];
 
 export { DEFAULT_USER_IMAGE };

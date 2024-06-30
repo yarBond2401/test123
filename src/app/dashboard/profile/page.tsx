@@ -5,10 +5,8 @@ import { useForm } from "react-hook-form";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  CardDescription, CardHeader,
+  CardTitle
 } from "@/components/ui/card";
 import {
   Form,
@@ -32,12 +30,7 @@ import ImageInput from "@/components/ImageInput";
 import { updateProfile } from "firebase/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import useUserInfo from "@/hooks/useUserInfo";
-import { capitalize, cn } from "@/lib/utils";
-import { AnimatedNumber } from "@/components/ui/animated-numbers";
-import { pricingDescriptions, pricingModels } from "@/lib/pricing-models";
-import { Badge } from "@/components/ui/badge";
-import { CheckIcon } from "lucide-react";
+import StripeAccountCard from "./components/StripeAccountCard";
 
 const Profile = () => {
   const router = useRouter();
@@ -46,6 +39,8 @@ const Profile = () => {
       router.push("/auth/signin");
     },
   });
+
+  const [stripeAccountStatus, setStripeAccountStatus] = useState("not_created")
 
   const form = useForm<PublicProfile>({
     resolver: zodResolver(publicProfileSchema),
@@ -83,7 +78,7 @@ const Profile = () => {
   }, [user]);
 
   return (
-    <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col sm:flex-col md:flex-col lg:flex-row px-6 pt-6 2xl:container gap-4">
       <Card className="w-full md:col-span-2 lg:col-span-4">
         <CardHeader className="max-w-xl">
           <CardTitle>Your Profile</CardTitle>
@@ -172,8 +167,10 @@ const Profile = () => {
           </Form>
         </CardContent>
       </Card>
+      <StripeAccountCard />
     </div>
   );
 };
+
 
 export default Profile;

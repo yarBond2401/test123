@@ -31,6 +31,13 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useRouter } from "next/navigation";
+import useUserInfo from "@/hooks/useUserInfo";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import axios from "axios";
+import { API_BASE_URL } from "@/app/constants";
+import { Loader2 } from "lucide-react";
+
+const loaderStyles = "text-white w-6 h-6 animate-spin";
 
 interface ServiceDetailsDialogProps {
 	id: string;
@@ -55,14 +62,21 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	const [loadingAccept, setLoadingAccept] = useState<boolean>(false);
 	const [loadingReject, setLoadingReject] = useState<boolean>(false);
 	const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
+	const [loadingPay, setLoadingPay] = useState<boolean>(false);
+	const [loadingComplete, setLoadingComplete] = useState<boolean>(false);
+	const [loadingRetry, setLoadingRetry] = useState<boolean>(false);
+	const [transactionDetails, setTransactionDetails] = useState<any | null>(null);
 
 	const isVendor = useIsVendor(user);
+
+	const { userInfo } = useUserInfo(user);
 
 	const handleAccept = async () => {
 		setLoadingAccept(true);
 		let docRef = doc(db, "offers", id);
 		await updateDoc(docRef, {
 			status: "accepted",
+			vendorStripeAccountId: userInfo?.stripeAccountId,
 			acceptedAt: serverTimestamp(),
 		});
 		setLoadingAccept(false);
@@ -103,15 +117,231 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		});
 	};
 
+	const handlePay = async () => {
+		setLoadingPay(true);
+		try {
+			console.log("Payment data:", {
+				amount: data.withoutTax * 100,
+				currency: 'usd',
+				vendorId: data.vendorId,
+				vendorStripeAccountId: data.vendorStripeAccountId,
+				customerEmail: user?.email,
+				metadata: {
+					offerId: id,
+					vendorId: data.vendorId,
+					customerId: user?.uid,
+				}
+			});
+
+			const response = await axios.post(`${API_BASE_URL}/create-connect-checkout-session`, {
+				amount: data.withoutTax * 100,
+				currency: 'usd',
+				vendorId: data.vendorId,
+				vendorStripeAccountId: data.vendorStripeAccountId,
+				customerEmail: user?.email,
+				metadata: {
+					offerId: id,
+					vendorId: data.vendorId,
+					customerId: user?.uid,
+				}
+			});
+
+			if (response.data.url) {
+				window.location.href = response.data.url;
+			} else {
+				throw new Error('No checkout URL received');
+			}
+		} catch (error) {
+			console.error('Error creating checkout session:', error);
+			if ((error as any).response) {
+				console.error('Error response:', (error as any).response.data);
+			}
+			toast({
+				title: "Error",
+				description: "Failed to initiate payment. Please try again.",
+				toastType: "error",
+			});
+		} finally {
+			setLoadingPay(false);
+		}
+	};
+
+	const handleComplete = async () => {
+		setLoadingComplete(true);
+		try {
+			console.log("Complete transaction data:", {
+				paymentIntentId: data.paymentIntentId,
+				offerId: id,
+			});
+
+			await updateOfferStatus(id, 'completed');
+
+			const response = await axios.post(`${API_BASE_URL}/complete-transaction`, {
+				paymentIntentId: data.paymentIntentId,
+				offerId: id,
+			});
+
+			console.log("Complete transaction response:", response.data);
+
+			// if (response.data.status === 'success') {
+			// 	onClose();
+			// 	toast({
+			// 		title: "Success",
+			// 		description: "Order completed and payment transferred to vendor",
+			// 		toastType: "success",
+			// 	});
+			// } else {
+			// 	throw new Error('Failed to complete transaction');
+			// }
+		} catch (error) {
+			console.error('Error completing transaction:', error);
+			// toast({
+			// 	title: "Error",
+			// 	description: "Failed to complete the order. Please try again.",
+			// 	toastType: "error",
+			// });
+		} finally {
+			setLoadingComplete(false);
+		}
+	};
+
+	const updateOfferStatus = async (offerId: string, status: string) => {
+		try {
+			const offerRef = doc(db, "offers", offerId);
+			await updateDoc(offerRef, {
+				status: status,
+				completedAt: serverTimestamp(),
+			});
+			setData((prevData: any) => ({ ...prevData, status: status }));
+		} catch (error) {
+			console.error('Error updating offer status:', error);
+			toast({
+				title: "Error",
+				description: "Failed to update offer status. Please try again.",
+				toastType: "error",
+			});
+		}
+	};
+
+	const handleCancelPayment = async () => {
+		try {
+			const response = await axios.post(`${API_BASE_URL}/cancel-payment`, {
+				paymentIntentId: data.paymentIntentId,
+			});
+
+			if (response.data.success) {
+				toast({
+					title: "Success",
+					description: "Payment has been canceled successfully.",
+					toastType: "success",
+				});
+			}
+		} catch (error) {
+			console.error('Error canceling payment:', error);
+			toast({
+				title: "Error",
+				description: "Failed to cancel payment. Please try again.",
+				toastType: "error",
+			});
+		}
+	};
+
+	const handleRetryPayment = async () => {
+		setLoadingRetry(true);
+		try {
+			await axios.post(`${API_BASE_URL}/cancel-payment`, {
+				paymentIntentId: data.paymentIntentId,
+			});
+
+			const response = await axios.post(`${API_BASE_URL}/create-connect-checkout-session`, {
+				amount: data.withoutTax * 100,
+				currency: 'usd',
+				vendorStripeAccountId: data.vendorStripeAccountId,
+				customerEmail: user?.email,
+				metadata: {
+					offerId: id,
+					vendorId: data.vendorId,
+					customerId: user?.uid,
+				}
+			});
+
+			if (response.data.url) {
+				window.location.href = response.data.url;
+			} else {
+				throw new Error('No checkout URL received');
+			}
+		} catch (error) {
+			console.error('Error retrying payment:', error);
+			toast({
+				title: "Error",
+				description: "Failed to retry payment. Please try again.",
+				toastType: "error",
+			});
+		} finally {
+			setLoadingRetry(false);
+		}
+	};
+
 	useEffect(() => {
 		if (id) {
 			getDoc(doc(db, "offers", id)).then((doc) => {
-				setData(doc.data());
+				const offerData = doc.data();
+				setData(offerData);
+				if (offerData?.status === 'in progress' || offerData?.status === 'payment_failed' || offerData?.status === 'completed') {
+					fetchTransactionDetails(offerData.paymentIntentId);
+				}
 			});
 		}
 	}, [id]);
 
-	console.log("Data: ", data?.status, "User: ", user, "IsVendor: ", isVendor);
+	const fetchTransactionDetails = async (paymentIntentId: string) => {
+		try {
+			const response = await axios.get(`${API_BASE_URL}/stripe-transaction-details`, {
+				params: { paymentIntentId }
+			});
+			setTransactionDetails(response.data);
+		} catch (error) {
+			console.error('Error fetching transaction details:', error);
+			toast({
+				title: "Error",
+				description: "Failed to fetch transaction details.",
+				toastType: "error",
+			});
+		}
+	};
+
+	console.log("Data: ", data?.status, "User: ", user, "IsVendor: ", isVendor, "offerData: ", data);
+
+	const renderActionButton = () => {
+		const buttonStyles = "min-w-[120px] flex justify-center items-center";
+
+		if (isVendor) {
+			return null;
+		}
+
+		switch (data?.status) {
+			case "accepted":
+				return (
+					<Button className={buttonStyles} onClick={() => handlePay()}>
+						{loadingPay ? <Loader2 className={loaderStyles} /> : "Proceed to Pay"}
+					</Button>
+				);
+			case "in progress":
+				return (
+					<Button className={buttonStyles} onClick={() => handleComplete()}>
+						{loadingComplete ? <Loader2 className={loaderStyles} /> : "Complete Order"}
+					</Button>
+				);
+			case "payment_failed":
+				return (
+					<Button className={buttonStyles} onClick={() => handleRetryPayment()} variant="outline">
+						{loadingRetry ? <Loader2 className={loaderStyles} /> : "Retry Payment"}
+					</Button>
+				);
+			default:
+				return null;
+		}
+	};
 
 	return (
 		<Dialog open={true} onOpenChange={onClose}>
@@ -133,7 +363,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 												'bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-400': data?.status === 'pending',
 												'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400': data?.status === 'accepted',
 												'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400': data?.status === 'rejected',
-												'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400': data?.status === 'done',
+												'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400': data?.status === 'paid' || data?.status === 'completed',
 											}
 										)}
 									>
@@ -159,14 +389,10 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 											format(data.offerDate.toDate(), "dd/MM/yyyy 'at' HH:mm")}
 									</p>
 								</div>
-								{/* <div className="grid grid-cols-[120px_1fr] items-start gap-x-6">
-							<p className="text-gray-500 dark:text-gray-400">Location</p>
-							<p>123 Main St, Anytown USA</p>
-						</div> */}
 								<div className="grid grid-cols-[120px_1fr] items-start gap-x-6">
 									<p className="text-gray-500 dark:text-gray-400">Costs:</p>
 									<div className="grid gap-1">
-										{!isVendor && (
+										{/* {!isVendor && (
 											<>
 												<div className="flex items-center justify-between">
 													<p>Without tax</p>
@@ -187,7 +413,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 													</p>
 												</div>
 											</>
-										)}
+										)} */}
 										<div className="flex items-center justify-between font-medium">
 											<p>Total</p>
 											<p>
@@ -214,28 +440,60 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 									</div>
 								)}
 							</div>
+
+							{transactionDetails && (
+								<>
+									<Separator />
+									<TransactionReceipt details={transactionDetails} />
+								</>
+							)}
+						</div>
+						<div className="flex flex-row justify-center w-full mt-6">
+							{!userInfo?.stripeAccountId && userInfo && isVendor && (
+								<p className="text-sm text-red-500 dark:text-red-400">
+									Please connect your Stripe account in Profile to accept the offer
+								</p>
+							)}
 						</div>
 						<DialogFooter className="w-full align-middle flex flex-row justify-between sm:justify-between mt-2">
 							<Button variant="secondary" onClick={onClose}>
 								Close
 							</Button>
-							{data?.status === "pending" && isVendor ? (
+							{data?.status === "pending" && isVendor && (
 								<div className="flex flex-row gap-2">
 									<Button onClick={() => handleReject()} variant="outline">
 										{loadingReject ? <Spinner /> : "Reject"}
 									</Button>
-									<Button className="px-6" onClick={() => handleAccept()}>
-										{loadingAccept ? <Spinner /> : "Accept"}
-									</Button>
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger>
+												<Button
+													className="px-6"
+													onClick={() => handleAccept()}
+													disabled={!userInfo?.stripeAccountId}
+												>
+													{loadingAccept ? <Spinner /> : "Accept"}
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>
+												{!userInfo?.stripeAccountId && (
+													<p className="text-sm text-red-500 dark:text-red-400">
+														Please connect your Stripe account in Profile
+													</p>
+												)}
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
 								</div>
-							) : null}
-							{status === "pending" && !isVendor && (
+							)}
+							{data?.status === "pending" && !isVendor && (
 								<div className="flex flex-row gap-2">
 									<Button onClick={() => handleDelete()} variant="destructive">
 										{loadingDelete ? <Spinner /> : "Delete"}
 									</Button>
 								</div>
 							)}
+							{renderActionButton()}
 						</DialogFooter>
 					</>
 				)}
@@ -245,3 +503,48 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 };
 
 export default ServiceDetailsDialog;
+
+
+interface TransactionReceiptProps {
+	details: {
+		amount: number;
+		currency: string;
+		fees: number;
+		net: number;
+		paymentIntentId: string;
+		receiptUrl: string;
+		status: string;
+	};
+}
+
+const TransactionReceipt: React.FC<TransactionReceiptProps> = ({ details }) => {
+	return (
+		<div className="space-y-4">
+			<h3 className="text-md font-semibold">Transaction Details</h3>
+			<div className="grid grid-cols-2 gap-2">
+				<p>Total Amount:</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.amount / 100)}</p>
+				<p>Platform Fee:</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.fees / 100)}</p>
+				<p>Net Amount (Vendor Receives):</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.net / 100)}</p>
+
+				{details.status !== "requires_capture" && (
+					<>
+						<p>Status:</p>
+						<p>{details.status}</p>
+					</>
+				)}
+				<p className="text-sm text-gray-400">Payment ID:</p>
+				<p className="text-sm text-gray-400">{details.paymentIntentId}</p>
+			</div>
+			<Button
+				variant="link"
+				onClick={() => window.open(details.receiptUrl, '_blank')}
+				className="text-blue-500 hover:underline p-0"
+			>
+				View Full Receipt
+			</Button>
+		</div>
+	);
+};

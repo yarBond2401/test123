@@ -22,9 +22,6 @@ export const DealItem: FC<Props> = ({ deal, isVendor }) => {
   }).format(isVendor ? deal.vendorСosts : deal.withoutTax);
 
   const { openDialog } = useOfferDetails();
-
-  console.log(deal);
-
   const image = deal?.otherUserDetails?.photoURL || DEFAULT_USER_IMAGE;
   const alt = deal?.otherUserDetails?.displayName || "User";
 

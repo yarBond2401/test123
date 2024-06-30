@@ -52,6 +52,7 @@ export interface Vendor {
   totalHours: number,
   totalHoursInt: number,
   monthlyAmount: number,
+  stripeAccountId?: string,
 }
 
 export interface Agent {
