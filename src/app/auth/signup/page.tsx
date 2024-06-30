@@ -197,6 +197,7 @@ const Signup = () => {
     } catch (error) {
       console.error("Error in onSubmit: ", error);
       setError(error.message);
+      setPaymentLoading(false);
     }
   };
 
