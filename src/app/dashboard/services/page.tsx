@@ -255,7 +255,7 @@ const Services = () => {
                       Select all the services you offer
                     </FormDescription>
                     {OFFERED_SERVICES.filter((s) =>
-                      user?.email !== "david.marketing@mrkt.io" ? s.id !== "marketing" : true
+                      user?.email !== "david.marketing@mrkit.io" ? s.id !== "marketing" : true
                     ).map((service) => (
                       <FormField
                         key={`servoce-${service.id}`}
