@@ -22,7 +22,8 @@ export interface OfferedService {
   | "marketing_agency"
   | "signsetter"
   | "handyman"
-  | "marketing";
+  | "marketing"
+  | "online_course";
   name: string;
   fields: Record<string, any>[];
 }
@@ -636,6 +637,35 @@ export const OFFERED_SERVICES: OfferedService[] = [
   //     },
   //   ],
   // },
+  {
+    name: "Online Course",
+    id: "online_course",
+    fields: [
+      {
+        id: "portfolio",
+        type: "file",
+        label: "Portfolio",
+        description:
+          "Provide a portfolio in PDF format",
+        placeholder: "https://www.example.com",
+      },
+      {
+        id: "course_qualifications",
+        type: "text",
+        label: "Qualifications",
+        description: "What are your qualifications?",
+        placeholder: "Qualified in ...",
+      },
+      {
+        id: "pricing",
+        type: "text",
+        label: "Pricing",
+        placeholder: "100",
+        description: "What is your pricing for your services? (value per hour)",
+        parse: "number",
+      },
+    ],
+  },
   {
     id: "interior_designer",
     name: "Interior designer",
