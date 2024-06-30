@@ -35,6 +35,9 @@ import useUserInfo from "@/hooks/useUserInfo";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import axios from "axios";
 import { API_BASE_URL } from "@/app/constants";
+import { Loader2 } from "lucide-react";
+
+const loaderStyles = "text-white w-6 h-6 animate-spin";
 
 interface ServiceDetailsDialogProps {
 	id: string;
@@ -166,38 +169,57 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	const handleComplete = async () => {
 		setLoadingComplete(true);
 		try {
+			console.log("Complete transaction data:", {
+				paymentIntentId: data.paymentIntentId,
+				offerId: id,
+			});
+
+			await updateOfferStatus(id, 'completed');
+
 			const response = await axios.post(`${API_BASE_URL}/complete-transaction`, {
 				paymentIntentId: data.paymentIntentId,
 				offerId: id,
-				vendorStripeAccountId: data.vendorStripeAccountId,
 			});
 
 			console.log("Complete transaction response:", response.data);
 
-			if (response.data.status === 'success') {
-				// let docRef = doc(db, "offers", id);
-				// await updateDoc(docRef, {
-				// 	status: "completed",
-				// 	completedAt: serverTimestamp(),
-				// });
-				onClose();
-				toast({
-					title: "Success",
-					description: "Order completed and payment transferred to vendor",
-					toastType: "success",
-				});
-			} else {
-				throw new Error('Failed to complete transaction');
-			}
+			// if (response.data.status === 'success') {
+			// 	onClose();
+			// 	toast({
+			// 		title: "Success",
+			// 		description: "Order completed and payment transferred to vendor",
+			// 		toastType: "success",
+			// 	});
+			// } else {
+			// 	throw new Error('Failed to complete transaction');
+			// }
 		} catch (error) {
 			console.error('Error completing transaction:', error);
-			toast({
-				title: "Error",
-				description: "Failed to complete the order. Please try again.",
-				toastType: "error",
-			});
+			// toast({
+			// 	title: "Error",
+			// 	description: "Failed to complete the order. Please try again.",
+			// 	toastType: "error",
+			// });
 		} finally {
 			setLoadingComplete(false);
+		}
+	};
+
+	const updateOfferStatus = async (offerId: string, status: string) => {
+		try {
+			const offerRef = doc(db, "offers", offerId);
+			await updateDoc(offerRef, {
+				status: status,
+				completedAt: serverTimestamp(),
+			});
+			setData((prevData) => ({ ...prevData, status: status }));
+		} catch (error) {
+			console.error('Error updating offer status:', error);
+			toast({
+				title: "Error",
+				description: "Failed to update offer status. Please try again.",
+				toastType: "error",
+			});
 		}
 	};
 
@@ -208,7 +230,6 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 			});
 
 			if (response.data.success) {
-				// Update local state or refresh data
 				toast({
 					title: "Success",
 					description: "Payment has been canceled successfully.",
@@ -266,7 +287,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 			getDoc(doc(db, "offers", id)).then((doc) => {
 				const offerData = doc.data();
 				setData(offerData);
-				if (offerData?.status === 'in-progress' || offerData?.status === 'payment_failed') {
+				if (offerData?.status === 'in progress' || offerData?.status === 'payment_failed' || offerData?.status === 'completed') {
 					fetchTransactionDetails(offerData.paymentIntentId);
 				}
 			});
@@ -292,6 +313,8 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	console.log("Data: ", data?.status, "User: ", user, "IsVendor: ", isVendor, "offerData: ", data);
 
 	const renderActionButton = () => {
+		const buttonStyles = "min-w-[120px] flex justify-center items-center";
+
 		if (isVendor) {
 			return null;
 		}
@@ -299,20 +322,20 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		switch (data?.status) {
 			case "accepted":
 				return (
-					<Button onClick={() => handlePay()}>
-						{loadingPay ? <Spinner /> : "Proceed to Pay"}
+					<Button className={buttonStyles} onClick={() => handlePay()}>
+						{loadingPay ? <Loader2 className={loaderStyles} /> : "Proceed to Pay"}
 					</Button>
 				);
-			case "in-progress":
+			case "in progress":
 				return (
-					<Button onClick={() => handleComplete()}>
-						{loadingComplete ? <Spinner /> : "Complete Order"}
+					<Button className={buttonStyles} onClick={() => handleComplete()}>
+						{loadingComplete ? <Loader2 className={loaderStyles} /> : "Complete Order"}
 					</Button>
 				);
 			case "payment_failed":
 				return (
-					<Button onClick={() => handleRetryPayment()} variant="outline">
-						{loadingRetry ? <Spinner /> : "Retry Payment"}
+					<Button className={buttonStyles} onClick={() => handleRetryPayment()} variant="outline">
+						{loadingRetry ? <Loader2 className={loaderStyles} /> : "Retry Payment"}
 					</Button>
 				);
 			default:
