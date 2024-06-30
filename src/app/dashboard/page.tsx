@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Bar, Line } from "react-chartjs-2";
@@ -23,15 +23,16 @@ import { useIsVendor } from "@/hooks/useIsVendor";
 import Loading from "../loading";
 import useUserInfo from "@/hooks/useUserInfo";
 import { capitalize } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { InboxCard } from "./Inbox";
 import OffersDashboard from "./offers-dash";
 import { ExtendedButton } from "@/components/ui/extended-button";
 import AddPostsModal from "@/components/payment/AddPostsModal";
+import useFetchChartData from "@/hooks/useFetchChartData";
+import useFetchCurrentMonthData from "@/hooks/useFetchCurrentMonthData";
+import useFetchTotalOffers from "@/hooks/useFetchTotalOffers";
 
 const Dashboard = () => {
-  const dealStatus = ["Completed (54)", "Active (23)", "All (77)"];
-  const [selectedStatus, setSelectedStatus] = useState(dealStatus[0]);
   const router = useRouter();
   const [loadingUserInfo, setLoadingUserInfo] = useState(true);
 
@@ -50,14 +51,62 @@ const Dashboard = () => {
   const { userInfo } = useUserInfo(user);
   const isVendor = useIsVendor(user);
 
+  const { monthlyData, annualData, annualTotal, loading: chartsLoading } = useFetchChartData(isVendor, user?.uid);
+  const { currentMonthData, loading: currentMonthLoading } = useFetchCurrentMonthData(isVendor, user?.uid);
+  const { totalOffers, loading: offersLoading } = useFetchTotalOffers(isVendor, user?.uid);
+
+  const currentMonth = format(new Date(), 'MMMM');
+  const previousMonth = format(subMonths(new Date(), 1), 'MMMM');
+
+  const { totalMoney, totalMoneyGrowth } = useMemo(() => {
+    const currentMonthIndex = new Date().getMonth();
+    const previousMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
+
+    const currentMonthData = annualData[currentMonthIndex];
+    const previousMonthData = annualData[previousMonthIndex];
+
+    const currentTotal = currentMonthData ? currentMonthData.value1 + currentMonthData.value2 + currentMonthData.value3 : 0;
+    const previousTotal = previousMonthData ? previousMonthData.value1 + previousMonthData.value2 + previousMonthData.value3 : 0;
+
+    const totalMoney = annualData.reduce((total, month) => total + month.value1 + month.value2 + month.value3, 0);
+
+    const totalMoneyGrowth = previousTotal === 0
+      ? (currentTotal > 0 ? 100 : 0)
+      : ((currentTotal - previousTotal) / previousTotal) * 100;
+
+    return {
+      totalMoney,
+      totalMoneyGrowth: isNaN(totalMoneyGrowth) ? 0 : totalMoneyGrowth
+    };
+  }, [annualData]);
+
+  const totalOffersGrowth = useMemo(() => {
+    const currentMonthIndex = new Date().getMonth();
+    const previousMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
+
+    const currentMonthOffers = annualData[currentMonthIndex]?.offers || 0;
+    const previousMonthOffers = annualData[previousMonthIndex]?.offers || 0;
+
+    const growth = previousMonthOffers === 0
+      ? (currentMonthOffers > 0 ? 100 : 0)
+      : ((currentMonthOffers - previousMonthOffers) / previousMonthOffers) * 100;
+
+    return isNaN(growth) ? 0 : growth;
+  }, [annualData]);
+
+
+  const dataForCurrentMonth = monthlyData.find(
+    (item) => item.month === currentMonth
+  );
+
+
   useEffect(() => {
     if (userInfo) {
       setLoadingUserInfo(false);
-      console.log("info", userInfo);
     }
   }, [userInfo]);
 
-  if (!user || loadingUserInfo) {
+  if (!user || loadingUserInfo || chartsLoading || currentMonthLoading || offersLoading) {
     return <Loading />;
   }
 
@@ -65,27 +114,27 @@ const Dashboard = () => {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
-  }).format(userInfo?.totalMoney);
+  }).format(totalMoney || 0);
 
   const totalWorkFormatted = new Intl.NumberFormat("en-US", {
     style: "decimal",
-  }).format(userInfo?.totalWork);
+  }).format(totalOffers || 0);
 
   const totalHoursFormatted = new Intl.NumberFormat("en-US", {
     style: "decimal",
-  }).format(userInfo?.totalHours);
+  }).format(totalOffers || 0);
 
   const monthlyAmountFormatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
-  }).format(userInfo?.monthlyAmount);
+  }).format(dataForCurrentMonth?.value || 0);
 
   const annualAmountFormatted = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
-  }).format(userInfo?.annualAmount);
+  }).format(annualTotal || 0);
 
 
   const optionsBar = {
@@ -237,19 +286,19 @@ const Dashboard = () => {
                     icon={iconDollar}
                     result={totalMoneyFormatted}
                     total={isVendor ? "Earnings" : "Spent"}
-                    grow={userInfo?.totalMoneyInt}
+                    grow={totalMoneyGrowth}
                   />
                   <Statistics
                     icon={iconWork}
                     result={totalWorkFormatted}
                     total={isVendor ? "Jobs" : "Hires"}
-                    grow={userInfo?.totalWorkInt}
+                    grow={totalOffersGrowth}
                   />
                   <Statistics
                     icon={iconWatch}
                     result={totalHoursFormatted}
                     total="Hours"
-                    grow={userInfo?.totalHoursInt}
+                    grow={totalOffersGrowth}
                   />
                 </div>
 
@@ -272,9 +321,7 @@ const Dashboard = () => {
                           datasets: [
                             {
                               data:
-                                isVendor
-                                  ? [0, 55, 50, 100]
-                                  : [100, 42, 45, 0],
+                                currentMonthLoading ? [] : currentMonthData?.map((item) => item.value).sort((a, b) => b - a),
                               borderColor:
                                 isVendor
                                   ? "#A652BF"
@@ -303,12 +350,12 @@ const Dashboard = () => {
                     <div className="xl:w-3/4 w-full h-[90px]">
                       <Bar
                         data={{
-                          labels: annualEarnedChartData.map(
+                          labels: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
                             (item) => item.label
                           ),
                           datasets: [
                             {
-                              data: annualEarnedChartData.map(
+                              data: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
                                 (item) => item.value1
                               ),
                               backgroundColor: "#3758F9",
@@ -316,7 +363,7 @@ const Dashboard = () => {
                               barPercentage: 0.5,
                             },
                             {
-                              data: annualEarnedChartData.map(
+                              data: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
                                 (item) => item.value2
                               ),
                               backgroundColor: "#13C296",
@@ -324,7 +371,7 @@ const Dashboard = () => {
                               barPercentage: 0.5,
                             },
                             {
-                              data: annualEarnedChartData.map(
+                              data: (annualData.length > 0 ? annualData : annualEarnedChartData).map(
                                 (item) => item.value3
                               ),
                               backgroundColor: "#F2994A",
