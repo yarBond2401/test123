@@ -196,7 +196,7 @@ export const OffersActions: React.FC<OffersActionsProps> = ({ row, deleteElement
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>
-				<DropdownMenuItem onClick={() => openDialog(row.original.id)}>View Detail</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => openDialog(row.original.id)}>View Details</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

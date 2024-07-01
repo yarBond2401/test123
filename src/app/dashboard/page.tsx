@@ -73,7 +73,7 @@ const Dashboard = () => {
 
     const totalMoneyGrowth = previousTotal === 0
       ? (currentTotal > 0 ? 100 : 0)
-      : ((currentTotal - previousTotal) / previousTotal) * 100;
+      : ((previousTotal - currentTotal) / previousTotal) * 100;
 
     return {
       totalMoney,
@@ -90,7 +90,7 @@ const Dashboard = () => {
 
     const growth = previousMonthOffers === 0
       ? (currentMonthOffers > 0 ? 100 : 0)
-      : ((currentMonthOffers - previousMonthOffers) / previousMonthOffers) * 100;
+      : ((previousMonthOffers - currentMonthOffers) / previousMonthOffers) * 100;
 
     return isNaN(growth) ? 0 : growth;
   }, [annualData]);
