@@ -3,7 +3,7 @@
 import { useIsVendor } from "@/hooks/useIsVendor";
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { db } from "../firebase";
 import { LoadingMessagesPopover } from "@/components/LoadingMessagesPopover";
@@ -11,6 +11,7 @@ import { InboxItem } from "@/components/chatItem/InboxItem";
 import { Separator } from "@/components/ui/separator";
 import { useFirestoreFunction } from "@/hooks/useFirestoreFunction";
 import { useChatList } from "@/hooks/useChatList";
+import { subscribeUserStatus } from "@/hooks/useUsersStatuses";
 
 import { User } from "firebase/auth";
 
@@ -21,6 +22,18 @@ interface Props {
 export const InboxCard: React.FC<Props> = ({ user }) => {
 	const isVendor = useIsVendor(user);
 	const chatList = useChatList(user, 4);
+	const [userStatuses, setUserStatuses] = useState([]);
+
+	useEffect(() => {
+		let unsubscribe: any;
+		if (chatList.length) {
+			const list = isVendor ? chatList?.map((chat: any) => chat.agent) : chatList?.map((chat: any) => chat.vendor);
+			unsubscribe = subscribeUserStatus(list, isVendor, setUserStatuses);
+		}
+		return () => {
+			if (unsubscribe) unsubscribe();
+		};
+	}, [user, chatList, isVendor]);
 
 	const otherRole = isVendor ? "agent" : "vendor";
 	const { data: usersDetails } = useFirestoreFunction({
@@ -41,13 +54,14 @@ export const InboxCard: React.FC<Props> = ({ user }) => {
 		return chatList.map((chat, idx) => {
 			// @ts-ignore
 			const userDetails = usersDetails[idx];
+			const status = (userStatuses.find((obj: any) => obj.id === userDetails.uid) as any)?.online;
 			return {
 				...chat,
 				userDetails,
+				status,
 			};
 		});
-	}, [chatList, usersDetails]);
-
+	}, [chatList, userStatuses, usersDetails]);
 
 	return (
 		<div className="flex shadow flex-col bg-white border border-[#DFE4EA] rounded-10 lg:col-span-1">

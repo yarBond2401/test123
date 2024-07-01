@@ -19,6 +19,7 @@ import defaultAvatar from "@/images/default-user-picture.jpg";
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
 import { InboxItem } from "@/components/chatItem/InboxItem";
+import { subscribeUserStatus } from "@/hooks/useUsersStatuses";
 
 interface Props {
   children: React.ReactNode;
@@ -32,10 +33,7 @@ const Layout: React.FC<Props> = ({ children }) => {
   const chatList = useChatList(user);
   const isVendor = useIsVendor(user);
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    console.log("chatList", chatList)
-  }, [chatList])
+  const [userStatuses, setUserStatuses] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -55,27 +53,37 @@ const Layout: React.FC<Props> = ({ children }) => {
       : null,
   });
 
+  useEffect(() => {
+    let unsubscribe: any;
+    if (chatList.length) {
+      const list = isVendor ? chatList?.map((chat: any) => chat.agent) : chatList?.map((chat: any) => chat.vendor);
+      unsubscribe = subscribeUserStatus(list, isVendor, setUserStatuses);
+    }
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [user, chatList, isVendor]);
+
   const chats = useMemo(() => {
-    // compare shapes if mismatched do not update
     if (!chatList || !usersDetails) return chatList;
-    // else, merge userDetails into the chatList
 
     // @ts-ignore
     return chatList.map((chat, idx) => {
       // @ts-ignore
       const userDetails = usersDetails[idx];
+      const status = (userStatuses.find((obj: any) => obj.id === userDetails.uid) as any)?.online;
       return {
         ...chat,
         userDetails,
+        status,
       };
     });
-  }, [chatList, usersDetails]);
+  }, [chatList, userStatuses, usersDetails]);
 
   let filteredChats = chats;
 
   if (chats) {
-    // @ts-ignore
-    filteredChats = chats.filter(chat => chat.userDetails?.displayName.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    filteredChats = chats.filter((chat: any) => chat.userDetails?.displayName.toLowerCase().includes(searchQuery.trim().toLowerCase()));
   }
 
   const currentChatDetails = useMemo(() => {
@@ -104,8 +112,7 @@ const Layout: React.FC<Props> = ({ children }) => {
             <SearchBar searchQuery={searchQuery} onChange={setSearchQuery} />
             <div className="mt-7">
               {filteredChats.length ?
-                // @ts-ignore
-                filteredChats.map((chat) => (
+                filteredChats.map((chat: any) => (
                   <InboxItem
                     item={chat}
                     key={chat.id}

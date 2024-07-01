@@ -6,7 +6,7 @@ import { useIsVendor } from "@/hooks/useIsVendor";
 import { User } from "firebase/auth";
 import { Agent, Vendor } from "@/lib/types";
 
-interface UserInfo {
+export interface UserInfo {
     name: string;
     level: string;
     pricingRegion?: string;
@@ -26,6 +26,7 @@ interface UserInfo {
     annualAmount?: number,
     success?: number,
     stripeAccountId?: string;
+    online?: boolean;
 }
 
 const useUserInfo = (user: User | null) => {
