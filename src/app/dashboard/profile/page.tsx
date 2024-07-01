@@ -31,6 +31,7 @@ import { updateProfile } from "firebase/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import StripeAccountCard from "./components/StripeAccountCard";
+import { useIsVendor } from "@/hooks/useIsVendor";
 
 const Profile = () => {
   const router = useRouter();
@@ -39,6 +40,8 @@ const Profile = () => {
       router.push("/auth/signin");
     },
   });
+
+  const isVendor = useIsVendor(user);
 
   const [stripeAccountStatus, setStripeAccountStatus] = useState("not_created")
 
@@ -167,7 +170,9 @@ const Profile = () => {
           </Form>
         </CardContent>
       </Card>
-      <StripeAccountCard />
+      {isVendor && (
+        <StripeAccountCard />
+      )}
     </div>
   );
 };

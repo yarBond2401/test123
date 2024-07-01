@@ -211,7 +211,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
                 />
                 <div
                   className={cn(
-                    chatDetails.userDetails.online ? "bg-green-400" : "bg-red-500",
+                    chatDetails?.status ? "bg-green-400" : "bg-red-500",
                     "2xl:w-3 2xl:h-3 md:w-2 md:h-2 w-3 h-3 rounded-full 2xl:border-[2px] md:border border-[2px] border-white absolute bottom-0 right-0 box-border"
                   )}
                 />

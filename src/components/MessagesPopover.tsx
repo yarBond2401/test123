@@ -12,6 +12,9 @@ import Link from 'next/link';
 import { LoadingMessagesPopover } from './LoadingMessagesPopover';
 import defaultAvatar from "@/images/default-user-picture.jpg";
 import { Avatar } from './ui/avatar';
+import Image from 'next/image';
+
+import DEFAULT_USER_IMAGE from "@/images/default-user-picture.jpg";
 
 interface Props {
   user: User
@@ -61,16 +64,18 @@ export const MessagesPopover: React.FC<Props> = ({ user }) => {
               {
                 usersData ?
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     // @ts-ignore
-                    src={usersData[item[otherRole]]?.photoURL}
+                    src={usersData[item[otherRole]]?.photoURL || DEFAULT_USER_IMAGE}
                     alt="user"
                     className="w-10 h-10 rounded-full"
+                    width={40}
+                    height={40}
                   />
                   : <Skeleton className="w-10 h-10 rounded-full flex-none" />
 
               }
-              <div className="flex flex-col gap-1 w-full">
+              <div className="flex flex-col w-full">
                 {
                   usersData ?
                     <h3 className="font-semibold">

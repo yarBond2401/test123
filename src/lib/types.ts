@@ -16,6 +16,7 @@ export interface ChatItem {
   last_text: string,
   last_sender: string,
   last_time: string,
+  status?: boolean,
 }
 
 export interface DealPartner {
@@ -53,6 +54,7 @@ export interface Vendor {
   totalHoursInt: number,
   monthlyAmount: number,
   stripeAccountId?: string,
+  online?: boolean,
 }
 
 export interface Agent {
@@ -74,6 +76,7 @@ export interface Agent {
   totalHoursInt: number,
   monthlyAmount: number,
   annualAmount: number,
+  online?: boolean,
 }
 
 interface Service {

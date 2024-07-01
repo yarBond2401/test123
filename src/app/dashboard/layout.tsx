@@ -28,6 +28,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { LoadingMessagesPopover } from "@/components/LoadingMessagesPopover";
 import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { BrokerType } from "../firestoreTypes";
+import useOnlineStatus from "@/hooks/useOnlineStatus";
 
 const DynamicMessagesBadge = dynamic(() => import("@/components/MessagesPopover").then(module => module.MessagesPopover), {
   ssr: false,
@@ -51,6 +52,8 @@ const Layout: React.FC<Props> = ({ children }) => {
   });
 
   const isVendor = useIsVendor(user);
+
+  const online = useOnlineStatus(user, isVendor);
 
   const { data: brokerData } = useFirestoreQuery<BrokerType[]>(
     "brokers",

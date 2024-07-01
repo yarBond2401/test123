@@ -43,7 +43,6 @@ export const DealsDataTable: React.FC<DealsProps> = ({ rows, setDeals }) => {
 	const deleteElement = (id: string) => {
 		setDeals((currentData) => currentData.filter((item) => item.id !== id));
 	};
-	console.log(rows);
 
 	const columns: ColumnDef<any>[] = [
 		{
