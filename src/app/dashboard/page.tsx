@@ -192,9 +192,17 @@ const Dashboard = () => {
         }
       });
 
-      const array = Array.from(uniqueValuesMap.keys())
+      let array = Array.from(uniqueValuesMap.keys())
 
-      return isVendor ? array.sort((a, b) => new Date(uniqueValuesMap.get(a)).getTime() - new Date(uniqueValuesMap.get(b)).getTime()) : array;
+      if (isVendor) {
+        array = array.sort((a, b) => new Date(uniqueValuesMap.get(a)).getTime() - new Date(uniqueValuesMap.get(b)).getTime());
+      }
+
+      if (array.length === 1) {
+        array.push(array[0]);
+      }
+
+      return array;
     }
     // Fallback mock data
     return isVendor ? [0, 55, 50, 100] : [100, 42, 45, 0];
