@@ -26,14 +26,18 @@ const useOnlineStatus = (user: any | null, isVendor: boolean) => {
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const handleBeforeUnload = () => {
+      setOnlineStatus(false);
+    };
 
-    // Set initial online status
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     setOnlineStatus(true);
 
-    // Cleanup on component unmount
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       setOnlineStatus(false);
     };
   }, [user, isVendor]);
