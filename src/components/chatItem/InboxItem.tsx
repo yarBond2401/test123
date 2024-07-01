@@ -14,8 +14,6 @@ interface Props {
 }
 
 export const InboxItem: FC<Props> = ({ item, chatId, messageStyles }) => {
-  console.log("item", item);
-
   return (
     <Link href={`/dashboard/chat/${item.id}`}>
       <div

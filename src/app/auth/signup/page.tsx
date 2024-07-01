@@ -152,11 +152,8 @@ const Signup = () => {
         data.email,
         data.password
       );
-      console.log("userCredential", userCredential);
 
       if (!userCredential) throw new Error("Failed to create user");
-
-      console.log("userCredential.user", userCredential.user);
 
       await signOut(auth);
 
