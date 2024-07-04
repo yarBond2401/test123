@@ -31,6 +31,12 @@ import { toast } from "@/components/ui/use-toast";
 import { useOfferDetails } from "@/hooks/useOfferDetails";
 import EmojiPicker from 'emoji-picker-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import axios from "axios";
+import { API_BASE_URL } from "@/app/constants";
+import { Loader2 } from "lucide-react";
+import useUserInfo from "@/hooks/useUserInfo";
+
 
 interface Props {
   params: {
@@ -55,6 +61,12 @@ const ChatItem = ({ data, chatDetails }) => {
   const user = useContext(UserContext);
   const [status, setStatus] = useState("");
   const [loadingAccept, setLoadingAccept] = useState(false);
+  const [stripeAccountStatus, setStripeAccountStatus] = useState('');
+  const [accountStatusLoading, setAccountStatusLoading] = useState(false);
+  const { userInfo } = useUserInfo(user);
+
+  const loaderStyles = "text-white w-4 h-4 animate-spin";
+
   let id = null;
 
   const isSender = useMemo(
@@ -62,7 +74,27 @@ const ChatItem = ({ data, chatDetails }) => {
     [user, data.sender]
   );
 
+  useEffect(() => {
+    if (!isSender && userInfo?.stripeAccountId) {
+      checkAccountStatus(userInfo.stripeAccountId);
+    }
+  }, [isSender, userInfo]);
+
   const { openDialog } = useOfferDetails();
+
+  const checkAccountStatus = async (accountId) => {
+    setAccountStatusLoading(true);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/account_status/${accountId}`);
+      const { status } = response.data;
+      setStripeAccountStatus(status);
+    } catch (err) {
+      console.error("Error checking account status:", err);
+      setStripeAccountStatus('error');
+    } finally {
+      setAccountStatusLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (data?.offerId) {
@@ -79,17 +111,28 @@ const ChatItem = ({ data, chatDetails }) => {
 
   const handleAccept = async () => {
     setLoadingAccept(true);
-    let docRef = doc(db, "offers", data?.offerId);
-    await updateDoc(docRef, {
-      status: "accepted",
-      acceptedAt: serverTimestamp(),
-    });
-    setLoadingAccept(false);
-    toast({
-      title: "Success",
-      description: "Offer accepted",
-      toastType: "success",
-    });
+    try {
+      let docRef = doc(db, "offers", data?.offerId);
+      await updateDoc(docRef, {
+        status: "accepted",
+        vendorStripeAccountId: userInfo?.stripeAccountId,
+        acceptedAt: serverTimestamp(),
+      });
+      toast({
+        title: "Success",
+        description: "Offer accepted",
+        toastType: "success",
+      });
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept offer. Please try again.",
+        toastType: "error",
+      });
+    } finally {
+      setLoadingAccept(false);
+    }
   };
 
   return (
@@ -108,15 +151,37 @@ const ChatItem = ({ data, chatDetails }) => {
         <p className="text-lg font-normal">{data.text}</p>
         <div className="flex flex-row gap-2">
           {data?.offerId && status === "pending" && !isSender && (
-
-            <Button
-              type="button"
-              className="bg-[#52BF56] hover:bg-green-600 text-white"
-              onClick={handleAccept}
-            >
-              Accept offer
-            </Button>
-
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    type="button"
+                    className="bg-[#52BF56] hover:bg-green-600 text-white"
+                    onClick={() => handleAccept()}
+                    disabled={!userInfo?.stripeAccountId || stripeAccountStatus !== 'active' || accountStatusLoading}
+                  >
+                    {loadingAccept ? <Loader2 className={loaderStyles} /> : "Accept offer"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {!userInfo?.stripeAccountId && (
+                    <p className="text-sm text-red-500 dark:text-red-400">
+                      Please connect your Stripe account in Profile to accept the offer
+                    </p>
+                  )}
+                  {accountStatusLoading && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Checking account status...
+                    </p>
+                  )}
+                  {stripeAccountStatus !== 'active' && !accountStatusLoading && (
+                    <p className="text-sm text-red-500 dark:text-red-400">
+                      Your Stripe account is not active. Please complete the onboarding process in Profile
+                    </p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           {data?.offerId && (
             <Button
