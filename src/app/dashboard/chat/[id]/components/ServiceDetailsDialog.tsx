@@ -58,7 +58,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 
 
 	const [data, setData] = useState<any | null>(null);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<string | boolean | null>(null);
 	const [loadingAccept, setLoadingAccept] = useState<boolean>(false);
 	const [loadingReject, setLoadingReject] = useState<boolean>(false);
 	const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
