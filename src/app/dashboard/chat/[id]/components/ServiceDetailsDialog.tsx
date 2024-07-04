@@ -58,7 +58,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 
 
 	const [data, setData] = useState<any | null>(null);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<string | boolean | null>(null);
 	const [loadingAccept, setLoadingAccept] = useState<boolean>(false);
 	const [loadingReject, setLoadingReject] = useState<boolean>(false);
 	const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
@@ -67,9 +67,39 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	const [loadingRetry, setLoadingRetry] = useState<boolean>(false);
 	const [transactionDetails, setTransactionDetails] = useState<any | null>(null);
 
+	const [stripeAccountStatus, setStripeAccountStatus] = useState<string>('');
+	const [accountStatusLoading, setAccountStatusLoading] = useState<boolean>(false);
+
 	const isVendor = useIsVendor(user);
 
 	const { userInfo } = useUserInfo(user);
+
+	const checkAccountStatus = async (accountId: string) => {
+		setAccountStatusLoading(true);
+		setError(false);
+		try {
+			const response = await axios.get(`${API_BASE_URL}/account_status/${accountId}`);
+			const { status } = response.data;
+
+			console.log("Account status:", status);
+			setStripeAccountStatus(status);
+		} catch (err) {
+			console.error("Error checking account status:", err);
+			setError(true);
+		} finally {
+			setAccountStatusLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		if (isVendor && userInfo && userInfo.stripeAccountId) {
+			checkAccountStatus(userInfo.stripeAccountId);
+		} else if (data?.vendorStripeAccountId) {
+			checkAccountStatus(data.vendorStripeAccountId)
+		} else {
+			setStripeAccountStatus('not_created');
+		}
+	}, [userInfo, data?.vendorStripeAccountId, isVendor]);
 
 	const handleAccept = async () => {
 		setLoadingAccept(true);
@@ -322,9 +352,28 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		switch (data?.status) {
 			case "accepted":
 				return (
-					<Button className={buttonStyles} onClick={() => handlePay()}>
-						{loadingPay ? <Loader2 className={loaderStyles} /> : "Proceed to Pay"}
-					</Button>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<span>
+									<Button
+										className={buttonStyles}
+										onClick={() => handlePay()}
+										disabled={stripeAccountStatus !== 'active'}
+									>
+										{loadingPay ? <Loader2 className={loaderStyles} /> : "Proceed to Pay"}
+									</Button>
+								</span>
+							</TooltipTrigger>
+							<TooltipContent>
+								{stripeAccountStatus !== 'active' && (
+									<p className="text-sm text-red-500 dark:text-red-400">
+										The vendor hasn&apos;t completed their payment setup. Please contact them to resolve this issue.
+									</p>
+								)}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				);
 			case "in progress":
 				return (
@@ -470,15 +519,25 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 												<Button
 													className="px-6"
 													onClick={() => handleAccept()}
-													disabled={!userInfo?.stripeAccountId}
+													disabled={!userInfo?.stripeAccountId || stripeAccountStatus !== 'active' || accountStatusLoading}
 												>
 													{loadingAccept ? <Spinner /> : "Accept"}
 												</Button>
 											</TooltipTrigger>
 											<TooltipContent>
-												{!userInfo?.stripeAccountId && (
+												{!userInfo?.stripeAccountId && !accountStatusLoading && (
 													<p className="text-sm text-red-500 dark:text-red-400">
 														Please connect your Stripe account in Profile
+													</p>
+												)}
+												{accountStatusLoading && (
+													<p className="text-sm text-gray-500 dark:text-gray-400">
+														Checking account status to accept the offer
+													</p>
+												)}
+												{stripeAccountStatus !== 'active' && !accountStatusLoading && (
+													<p className="text-sm text-red-500 dark:text-red-400">
+														Your Stripe account is not active. Please complete the onboarding process in Profile
 													</p>
 												)}
 											</TooltipContent>
