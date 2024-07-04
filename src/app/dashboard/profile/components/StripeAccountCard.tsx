@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useRequireLogin } from '@/hooks/useRequireLogin';
 import { Spinner } from '@/components/ui/spinner';
 import { API_BASE_URL } from '@/app/constants';
-import { AlertTriangle, CheckCircle, CreditCard } from 'lucide-react';
+import { AlertTriangle, CheckCircle, CreditCard, InfoIcon } from 'lucide-react';
 
 const StripeAccountCard = () => {
 	const router = useRouter();
@@ -130,11 +130,11 @@ const StripeAccountCard = () => {
 						)}
 						{stripeAccountStatus === 'created' && !accountCreatePending && !error && (
 							<div className="flex flex-col items-center gap-4">
-								<CheckCircle className="h-12 w-12 text-green-500" />
+								<InfoIcon className="h-12 w-12 text-orange-400" />
 								<div className="text-center space-y-2">
 									<h3 className="font-semibold">Stripe Account Created</h3>
 									<p className="text-muted-foreground">
-										Your Stripe account is created. Please complete the onboarding process to start accepting payments.
+										Please complete the onboarding process to start accepting payments.
 									</p>
 								</div>
 							</div>
@@ -185,7 +185,7 @@ const StripeAccountCard = () => {
 							</Button>
 						)}
 						{stripeAccountStatus === 'created' && !accountLinkCreatePending && (
-							<Button onClick={() => createAccountLink()} className="w-full">
+							<Button onClick={() => createAccountLink()} className="w-full bg-orange-500 hover:bg-orange-400">
 								Complete Onboarding
 							</Button>
 						)}

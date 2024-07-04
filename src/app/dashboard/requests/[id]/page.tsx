@@ -275,7 +275,7 @@ const RequestDetailsPage: React.FC<Props> = ({ params }) => {
                             const Stars = starsRender(rating?.[candidate.vendorId]?.totalRating || 0)
 
                             return (
-                              <Card key={candidateIndex} className="flex flex-col min-w-80 aspect-video shadow-none p-2 justify-between">
+                              <Card key={candidateIndex} className="flex flex-col min-w-60 max-w-80 w-full aspect-video shadow-none p-2 justify-between">
                                 <div className="flex items-center gap-2 mb-2">
                                   {
                                     usersData && usersData[candidate.vendorId]

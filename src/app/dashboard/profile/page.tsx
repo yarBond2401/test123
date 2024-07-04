@@ -43,8 +43,6 @@ const Profile = () => {
 
   const isVendor = useIsVendor(user);
 
-  const [stripeAccountStatus, setStripeAccountStatus] = useState("not_created")
-
   const form = useForm<PublicProfile>({
     resolver: zodResolver(publicProfileSchema),
     mode: "all",
