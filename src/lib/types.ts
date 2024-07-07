@@ -63,7 +63,7 @@ export interface Agent {
   photo: StaticImageData,
   level: string,
   pricingRegion?: string,
-  availablePosts: number,
+  availablePosts?: number,
   postsInstalled: number,
   totalRating: number,
   totalReviews: number,
