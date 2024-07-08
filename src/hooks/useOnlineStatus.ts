@@ -2,9 +2,12 @@ import { useEffect } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/firebase";
 
-const useOnlineStatus = (user: any | null, isVendor: boolean) => {
+const useOnlineStatus = (user: any | null, isVendor: boolean, loading?: boolean) => {
   useEffect(() => {
-    if (!user) return;
+    console.log("loading: ", loading);
+    if (!user || loading) return;
+
+    console.log("User: ", user, "isVendor: ", isVendor);
 
     const collection = isVendor ? "vendors" : "userInfo";
     const userDocRef = doc(db, collection, user.uid);
@@ -38,9 +41,10 @@ const useOnlineStatus = (user: any | null, isVendor: boolean) => {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      setOnlineStatus(false);
+      if (!loading)
+        setOnlineStatus(false);
     };
-  }, [user, isVendor]);
+  }, [user, isVendor, loading]);
 };
 
 export default useOnlineStatus;

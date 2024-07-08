@@ -10,7 +10,7 @@ export interface UserInfo {
     name: string;
     level: string;
     pricingRegion?: string;
-    availablePosts: number;
+    availablePosts?: number;
     postsInstalled: number;
     totalContracts: string;
     totalHires: number;

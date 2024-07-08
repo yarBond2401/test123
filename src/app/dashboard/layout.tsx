@@ -51,9 +51,10 @@ const Layout: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const isVendor = useIsVendor(user);
+  const [loading, setLoading] = useState(true);
+  const isVendor = useIsVendor(user, setLoading);
 
-  const online = useOnlineStatus(user, isVendor);
+  const online = useOnlineStatus(user, isVendor, loading);
 
   const { data: brokerData } = useFirestoreQuery<BrokerType[]>(
     "brokers",

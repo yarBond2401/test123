@@ -26,6 +26,7 @@ import {
   serviceRequestSchema,
   ServiceSignInRequestSchema,
 } from "./schema";
+import { useFirestoreSnapshot } from "@/hooks/useFirestoreSnapshot";
 
 const Requests = () => {
   const router = useRouter();
@@ -43,7 +44,7 @@ const Requests = () => {
   );
   const broker: BrokerType | undefined = brokerData?.[0];
 
-  const { data: requestsData } = useFirestoreQuery<any[]>(
+  const { data: requestsData } = useFirestoreSnapshot<any[]>(
     "requests",
     "brokerId",
     "==",
@@ -63,13 +64,13 @@ const Requests = () => {
     }));
 
     parsed = parsed.map((request) => ({
-         ...request,
-        // @ts-ignore
-        userDetails: {displayName: user?.displayName || '', photoURL: user?.photoURL || '', email: user?.email || ''} as {
-          displayName: string;
-          photoURL: string;
-          email: string;
-        },
+      ...request,
+      // @ts-ignore
+      userDetails: { displayName: user?.displayName || '', photoURL: user?.photoURL || '', email: user?.email || '' } as {
+        displayName: string;
+        photoURL: string;
+        email: string;
+      },
     }));
 
     return parsed;
@@ -82,7 +83,7 @@ const Requests = () => {
     const currentRequests: ServiceSignInRequestSchema[] = [];
 
     for (const docItem of data.docs) {
-      currentRequests.push({...docItem.data(), id: docItem.id} as ServiceSignInRequestSchema)
+      currentRequests.push({ ...docItem.data(), id: docItem.id } as ServiceSignInRequestSchema)
     };
 
     setRequests(currentRequests);
@@ -90,7 +91,7 @@ const Requests = () => {
 
   useEffect(() => {
     getSignInRequest();
-},[]);
+  }, []);
 
   return (
     <div className="grid px-6 pt-6 2xl:container grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -101,9 +102,9 @@ const Requests = () => {
               <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab1">
                 <CardTitle >Service Requests</CardTitle>
               </Tabs.Trigger>
-              <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab2">
+              {/* <Tabs.Trigger className="duration-100 data-[state=active]:border data-[state=active]:border-b-0 data-[state=active]:rounded-t-lg data-[state=active]:z-10 data-[state=active]:translate-y-px data-[state=active]:bg-white p-3" value="tab2">
                 <CardTitle >Sign Installation Requests</CardTitle>
-              </Tabs.Trigger>
+              </Tabs.Trigger> */}
             </Tabs.List>
           </CardHeader>
           <Tabs.Content className="" value="tab1">

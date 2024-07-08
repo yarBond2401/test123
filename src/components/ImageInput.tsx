@@ -118,7 +118,8 @@ const ImageInput: React.FC<Props> = (props) => {
       quality
     })
 
-    if (blob.size > 1 * 1024 * 1024) {
+    if (blob.size > 3 * 1024 * 1024) {
+      console.error('Image too large', blob.size)
       toast({
         title: 'Image too large',
         description: 'Please upload an image below 1MB',

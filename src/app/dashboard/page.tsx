@@ -32,6 +32,7 @@ import useFetchChartData from "@/hooks/useFetchChartData";
 import useFetchCurrentMonthData from "@/hooks/useFetchCurrentMonthData";
 import useFetchTotalOffers from "@/hooks/useFetchTotalOffers";
 import { elements } from "chart.js/auto";
+import useFetchTotalRequests from "@/hooks/useFetchTotalRequests";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -55,6 +56,7 @@ const Dashboard = () => {
   const { monthlyData, annualData, annualTotal, loading: chartsLoading } = useFetchChartData(isVendor, user?.uid);
   const { currentMonthData, loading: currentMonthLoading } = useFetchCurrentMonthData(isVendor, user?.uid);
   const { totalOffers, loading: offersLoading } = useFetchTotalOffers(isVendor, user?.uid);
+  const { totalRequests, loading: requestsLoading } = useFetchTotalRequests(user?.uid);
 
   const currentMonth = format(new Date(), 'MMMM');
   const previousMonth = format(subMonths(new Date(), 1), 'MMMM');
@@ -107,7 +109,7 @@ const Dashboard = () => {
     }
   }, [userInfo]);
 
-  if (!user || loadingUserInfo || chartsLoading || currentMonthLoading || offersLoading) {
+  if (!user || loadingUserInfo || chartsLoading || currentMonthLoading || offersLoading || requestsLoading) {
     return <Loading />;
   }
 
@@ -230,14 +232,13 @@ const Dashboard = () => {
                   />
                   <div className="flex flex-col gap-1">
                     <p className="text-dashboard-main 2xl:text-xl leading-[22px] font-medium lg:text-base md:text-xl">
-                      {user.name || userInfo?.name}
+                      {user?.displayName || userInfo?.name || "Your name"}
                     </p>
                     <p className="text-dashboard-secondary 2xl:text-base leading-[22px] font-medium lg:text-sm md:text-base">
-                      {userInfo?.role ? capitalize(userInfo?.role) : null}
+                      {userInfo?.role ? capitalize(userInfo?.role) : isVendor ? "Vendor" : "Agent"}
                     </p>
                   </div>
                 </div>
-
                 <Separator className="md:hidden lg:block" />
                 <div className="xl:p-22 p-4 flex flex-col xl:gap-5 w-full md:w-1/2 lg:w-full gap-2">
                   {isVendor && (
@@ -250,22 +251,41 @@ const Dashboard = () => {
                       </p>
                     </div>
                   )}
-                  <div className="flex flex-row justify-between w-full gap-1">
-                    <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
-                      {isVendor
-                        ? "Success score"
-                        : "Available posts"}
-                    </p>
-                    <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                      {isVendor
-                        ? userInfo?.success + "%"
-                        : userInfo?.availablePosts}
-                    </p>
-                  </div>
-                  {!isVendor && userInfo?.availablePosts <= 3 && (
-                    <AddPostsModal userEmail={user?.email} userInfo={userInfo} userId={user?.uid} />
+                  {isVendor && (
+                    <div className="flex flex-row justify-between w-full gap-1">
+                      <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                        Success score
+                      </p>
+                      <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                        {userInfo?.success + "%"}
+                      </p>
+                    </div>
                   )}
                   {!isVendor && (
+                    <div className="flex flex-row justify-between w-full gap-1">
+                      <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                        Offers
+                      </p>
+                      <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                        {totalOffers || 0}
+                      </p>
+                    </div>
+                  )}
+                  {!isVendor && (
+                    <div className="flex flex-row justify-between w-full gap-1">
+                      <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
+                        Requests
+                      </p>
+                      <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
+                        {totalRequests || 0}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* {!isVendor && userInfo?.availablePosts <= 3 && (
+                    <AddPostsModal userEmail={user?.email} userInfo={userInfo} userId={user?.uid} />
+                  )} */}
+                  {/* {!isVendor && (
                     <>
                       <div className="flex flex-row justify-between w-full gap-1">
                         <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">
@@ -284,7 +304,7 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </>
-                  )}
+                  )} */}
                   {userInfo?.totalRating && userInfo?.totalReviews && userInfo.totalReviews !== 0 ? (
                     <div className="flex flex-row justify-between w-full gap-1">
                       <p className="text-dashboard-main xl:text-base leading-[22px] lg:text-sm md:text-base">

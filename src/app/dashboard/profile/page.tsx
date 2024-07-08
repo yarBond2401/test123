@@ -55,6 +55,7 @@ const Profile = () => {
 
   const onSubmit = async (data: PublicProfile) => {
     if (!user) return;
+    console.log(data);
     try {
       await updateProfile(user, {
         displayName: data.displayName,
