@@ -778,49 +778,6 @@ export const OFFERED_SERVICES: OfferedService[] = [
     ],
   },
   {
-    id: "marketing_agency",
-    name: "Marketing Agency",
-    fields: [
-      {
-        id: "certifications",
-        type: "text",
-        label: "Certifications",
-        description: "Which certifications do you have?",
-        placeholder: "ALTA, NALTEA",
-      },
-      {
-        id: "experience",
-        type: "text",
-        label: "Experience",
-        description: "How long have you been a marketing agency? (years)",
-        placeholder: "4",
-        parse: "number",
-      },
-      {
-        id: "sample_report",
-        type: "text",
-        label: "Sample Report",
-        description: "Provide a link to a sample report",
-        placeholder: "https://www.example.com",
-      },
-      {
-        id: "pricing",
-        type: "text",
-        label: "Pricing",
-        placeholder: "100",
-        description: "What is your pricing for your services? (value per hour)",
-        parse: "number",
-      },
-      {
-        id: "insurance",
-        type: "checkbox",
-        label: "Insurance",
-        description: "Do you have insurance?",
-        parse: "boolean",
-      },
-    ],
-  },
-  {
     id: "signsetter",
     name: "Sign setter",
     fields: [
@@ -865,7 +822,7 @@ export const OFFERED_SERVICES: OfferedService[] = [
   },
   {
     id: "marketing",
-    name: "Marketing",
+    name: "Marketing Agency",
     fields: [
       {
         id: "pricing",
