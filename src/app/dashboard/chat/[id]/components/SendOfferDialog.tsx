@@ -63,7 +63,7 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 			const withoutTax = costs;
 			// TODO: Calculate withTax and vendorСosts
 			const withTax = costs;
-			const vendorСosts = withTax * 0.95;
+			const vendorСosts = withTax * 0.90;
 
 			await addDoc(collection(db, 'offers'), {
 				vendorId,
