@@ -29,6 +29,7 @@ import { LoadingMessagesPopover } from "@/components/LoadingMessagesPopover";
 import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { BrokerType } from "../firestoreTypes";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
+import { signOut } from "firebase/auth";
 
 const DynamicMessagesBadge = dynamic(() => import("@/components/MessagesPopover").then(module => module.MessagesPopover), {
   ssr: false,
@@ -64,9 +65,9 @@ const Layout: React.FC<Props> = ({ children }) => {
   );
   const broker: BrokerType | undefined = brokerData?.[0];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     mutate((_) => true, undefined, { revalidate: false });
-    auth.signOut();
+    await signOut(auth);
   };
 
   return (

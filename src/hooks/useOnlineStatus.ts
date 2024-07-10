@@ -12,6 +12,8 @@ const useOnlineStatus = (user: any | null, isVendor: boolean, loading?: boolean)
     const collection = isVendor ? "vendors" : "userInfo";
     const userDocRef = doc(db, collection, user.uid);
 
+    console.log("User doc ref: ", userDocRef);
+
     const setOnlineStatus = async (isOnline: boolean) => {
       try {
         console.log("Setting online status to: ", isOnline);
