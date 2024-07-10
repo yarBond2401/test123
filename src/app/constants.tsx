@@ -19,7 +19,6 @@ export interface OfferedService {
   | "contractor" // do we need this?
   | "interior_designer"
   | "cleaning_service"
-  | "marketing_agency"
   | "signsetter"
   | "handyman"
   | "marketing"
