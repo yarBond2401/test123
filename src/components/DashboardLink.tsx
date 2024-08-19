@@ -12,7 +12,7 @@ type Props = {
 const DashboardLink: React.FC<Props> = ({ icon, text, link }) => {
 
   const selected = usePathname() === link;
-  
+
   return (
     <li>
       <Link

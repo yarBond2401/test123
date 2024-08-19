@@ -16,7 +16,7 @@ export interface OfferedService {
   | "insurance_agent"
   | "moving_company"
   | "landscaper"
-  | "contractor" // do we need this?
+  | "contractor"
   | "interior_designer"
   | "cleaning_service"
   | "signsetter"

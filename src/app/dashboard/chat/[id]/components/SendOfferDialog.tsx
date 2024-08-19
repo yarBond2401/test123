@@ -61,7 +61,6 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 		try {
 			const { datetime, costs, message } = data;
 			const withoutTax = costs;
-			// TODO: Calculate withTax and vendorСosts
 			const withTax = costs;
 			const vendorСosts = withTax * 0.90;
 

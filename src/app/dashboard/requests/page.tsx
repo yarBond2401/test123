@@ -122,20 +122,6 @@ const Requests = () => {
               />
             </CardContent>
           </Tabs.Content>
-          <Tabs.Content className="TabsContent" value="tab2">
-            <CardContent>
-              <Button
-                onClick={() => router.push("/dashboard/requests/signInRequest")}
-                type="button"
-              >
-                Add a Sign Installation Request
-              </Button>
-              <SingInDataTable
-                setRequests={setRequests}
-                rows={singInRequests}
-              />
-            </CardContent>
-          </Tabs.Content>
         </Tabs.Root>
       </Card>
     </div>
