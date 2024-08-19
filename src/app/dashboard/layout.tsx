@@ -229,7 +229,7 @@ const Layout: React.FC<Props> = ({ children }) => {
                     <BellIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end">
+                <PopoverContent align="end" className="w-96 p-1">
                   <Suspense>
                     <NotificationsList userId={user?.uid} />
                   </Suspense>
