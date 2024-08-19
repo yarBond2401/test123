@@ -30,6 +30,9 @@ import { useFirestoreQuery } from "@/hooks/useFirestoreQuery";
 import { BrokerType } from "../firestoreTypes";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
 import { signOut } from "firebase/auth";
+import { Button } from "@/components/ui/button";
+import { BellIcon } from "lucide-react";
+import NotificationsList from "@/components/NotificationsList";
 
 const DynamicMessagesBadge = dynamic(() => import("@/components/MessagesPopover").then(module => module.MessagesPopover), {
   ssr: false,
@@ -217,19 +220,21 @@ const Layout: React.FC<Props> = ({ children }) => {
               </svg>
             </button>
             <div className="flex space-x-4">
-              {/* <button className="h-10 w-10 rounded-xl border bg-gray-100 active:bg-gray-200 md:hidden dark:bg-gray-700 dark:border-gray-600 dark:active:bg-gray-800">
-                <svg
-                  xmlns="http://ww50w3.org/2000/svg"
-                  className="mx-auto w-4 fill-current text-gray-600 dark:text-gray-300"
-                  viewBox="0 0 35.997 36.004"
-                >
-                  <path
-                    id="Icon_awesome-search"
-                    data-name="search"
-                    d="M35.508,31.127l-7.01-7.01a1.686,1.686,0,0,0-1.2-.492H26.156a14.618,14.618,0,1,0-2.531,2.531V27.3a1.686,1.686,0,0,0,.492,1.2l7.01,7.01a1.681,1.681,0,0,0,2.384,0l1.99-1.99a1.7,1.7,0,0,0,.007-2.391Zm-20.883-7.5a9,9,0,1,1,9-9A8.995,8.995,0,0,1,14.625,23.625Z"
-                  ></path>
-                </svg>
-              </button> */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-10 w-10 rounded-xl border bg-gray-100 active:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:active:bg-gray-800 p-2"
+                  >
+                    <BellIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end">
+                  <Suspense>
+                    <NotificationsList userId={user?.uid} />
+                  </Suspense>
+                </PopoverContent>
+              </Popover>
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="h-10 w-10 rounded-xl border bg-gray-100 active:bg-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:active:bg-gray-800">

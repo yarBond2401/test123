@@ -33,6 +33,7 @@ import useFetchCurrentMonthData from "@/hooks/useFetchCurrentMonthData";
 import useFetchTotalOffers from "@/hooks/useFetchTotalOffers";
 import { elements } from "chart.js/auto";
 import useFetchTotalRequests from "@/hooks/useFetchTotalRequests";
+import usePushNotifications from "@/hooks/usePushNotifications";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -43,6 +44,8 @@ const Dashboard = () => {
       router.push("/auth/signin");
     },
   });
+
+  usePushNotifications(user);
 
   useEffect(() => {
     if (user?.email === 'info@mrkit.io') {
