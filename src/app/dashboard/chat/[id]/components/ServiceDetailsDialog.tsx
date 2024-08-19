@@ -104,11 +104,17 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 	const handleAccept = async () => {
 		setLoadingAccept(true);
 		let docRef = doc(db, "offers", id);
-		await updateDoc(docRef, {
+		const updateData = {
 			status: "accepted",
-			vendorStripeAccountId: userInfo?.stripeAccountId,
 			acceptedAt: serverTimestamp(),
-		});
+		};
+
+		// Add vendorStripeAccountId if it exists in userInfo
+		if (userInfo?.stripeAccountId) {
+			updateData.vendorStripeAccountId = userInfo.stripeAccountId;
+		}
+
+		await updateDoc(docRef, updateData);
 		setLoadingAccept(false);
 		onClose();
 		toast({
@@ -340,6 +346,146 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 		}
 	};
 
+	const renderButtons = () => {
+		const buttonStyles = "min-w-[120px] flex justify-center items-center";
+
+		if (data?.status === "pending") {
+			if ((data?.issuer === "vendor" && !isVendor) || (data?.issuer === "agent" && isVendor)) {
+				return (
+					<div className="flex flex-row gap-2">
+						{renderRejectButton()}
+						{renderAcceptButton()}
+					</div>
+				);
+			} else {
+				return (
+					<Button onClick={handleDelete} variant="destructive">
+						{loadingDelete ? <Spinner /> : "Delete"}
+					</Button>
+				);
+			}
+		}
+
+		if (!isVendor) {
+			switch (data?.status) {
+				case "accepted":
+					return (
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span>
+										<Button
+											className={buttonStyles}
+											onClick={handlePay}
+											disabled={stripeAccountStatus !== 'active'}
+										>
+											{loadingPay ? <Loader2 className={loaderStyles} /> : "Proceed to Pay"}
+										</Button>
+									</span>
+								</TooltipTrigger>
+								<TooltipContent>
+									{stripeAccountStatus !== 'active' && (
+										<p className="text-sm text-red-500 dark:text-red-400">
+											The vendor hasn&apos;t completed their payment setup. Please contact them to resolve this issue.
+										</p>
+									)}
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					);
+				case "in progress":
+					return (
+						<Button className={buttonStyles} onClick={handleComplete}>
+							{loadingComplete ? <Loader2 className={loaderStyles} /> : "Complete Order"}
+						</Button>
+					);
+				case "payment_failed":
+					return (
+						<Button className={buttonStyles} onClick={handleRetryPayment} variant="outline">
+							{loadingRetry ? <Loader2 className={loaderStyles} /> : "Retry Payment"}
+						</Button>
+					);
+			}
+		}
+
+		return null;
+	};
+
+	const renderAcceptButton = () => (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger>
+					<Button
+						className="px-6"
+						onClick={handleAccept}
+						disabled={isVendor ? (!userInfo?.stripeAccountId || stripeAccountStatus !== 'active' || accountStatusLoading) : false}
+					>
+						{loadingAccept ? <Spinner /> : "Accept"}
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>
+					{isVendor && (
+						<>
+							{!userInfo?.stripeAccountId && !accountStatusLoading && (
+								<p className="text-sm text-red-500 dark:text-red-400">
+									Please connect your Stripe account in Profile
+								</p>
+							)}
+							{accountStatusLoading && (
+								<p className="text-sm text-gray-500 dark:text-gray-400">
+									Checking account status to accept the offer
+								</p>
+							)}
+							{stripeAccountStatus !== 'active' && !accountStatusLoading && (
+								<p className="text-sm text-red-500 dark:text-red-400">
+									Your Stripe account is not active. Please complete the onboarding process in Profile
+								</p>
+							)}
+						</>
+					)}
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
+
+	const TotalAmountDisplay = ({ data, isVendor }) => {
+		const formatCurrency = (amount) => {
+			return new Intl.NumberFormat("en-US", {
+				style: "currency",
+				currency: "USD",
+			}).format(amount);
+		};
+
+		console.log("Data: ", data);
+
+		const renderAmount = () => {
+			if (isVendor && data?.vendorCosts) {
+				return formatCurrency(data.vendorCosts);
+			} else if (!isVendor && data?.withoutTax) {
+				return formatCurrency(data.withoutTax);
+			}
+			return null;
+		};
+
+		const amount = renderAmount();
+
+		if (!amount) {
+			return null;
+		}
+
+		return (
+			<div className="flex items-center justify-between font-medium">
+				<p>Total</p>
+				<p>{amount}</p>
+			</div>
+		);
+	};
+
+	const renderRejectButton = () => (
+		<Button onClick={handleReject} variant="outline">
+			{loadingReject ? <Spinner /> : "Reject"}
+		</Button>
+	);
 	console.log("Data: ", data?.status, "User: ", user, "IsVendor: ", isVendor, "offerData: ", data);
 
 	const renderActionButton = () => {
@@ -463,20 +609,7 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 												</div>
 											</>
 										)} */}
-										<div className="flex items-center justify-between font-medium">
-											<p>Total</p>
-											<p>
-												{isVendor
-													? new Intl.NumberFormat("en-US", {
-														style: "currency",
-														currency: "USD",
-													}).format(data?.vendorСosts)
-													: new Intl.NumberFormat("en-US", {
-														style: "currency",
-														currency: "USD",
-													}).format(data?.withoutTax)}
-											</p>
-										</div>
+										<TotalAmountDisplay data={data} isVendor={isVendor} />
 									</div>
 								</div>
 
@@ -508,51 +641,8 @@ const ServiceDetailsDialog: FC<ServiceDetailsDialogProps> = ({
 							<Button variant="secondary" onClick={onClose}>
 								Close
 							</Button>
-							{data?.status === "pending" && isVendor && (
-								<div className="flex flex-row gap-2">
-									<Button onClick={() => handleReject()} variant="outline">
-										{loadingReject ? <Spinner /> : "Reject"}
-									</Button>
-									<TooltipProvider>
-										<Tooltip>
-											<TooltipTrigger>
-												<Button
-													className="px-6"
-													onClick={() => handleAccept()}
-													disabled={!userInfo?.stripeAccountId || stripeAccountStatus !== 'active' || accountStatusLoading}
-												>
-													{loadingAccept ? <Spinner /> : "Accept"}
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent>
-												{!userInfo?.stripeAccountId && !accountStatusLoading && (
-													<p className="text-sm text-red-500 dark:text-red-400">
-														Please connect your Stripe account in Profile
-													</p>
-												)}
-												{accountStatusLoading && (
-													<p className="text-sm text-gray-500 dark:text-gray-400">
-														Checking account status to accept the offer
-													</p>
-												)}
-												{stripeAccountStatus !== 'active' && !accountStatusLoading && (
-													<p className="text-sm text-red-500 dark:text-red-400">
-														Your Stripe account is not active. Please complete the onboarding process in Profile
-													</p>
-												)}
-											</TooltipContent>
-										</Tooltip>
-									</TooltipProvider>
-								</div>
-							)}
-							{data?.status === "pending" && !isVendor && (
-								<div className="flex flex-row gap-2">
-									<Button onClick={() => handleDelete()} variant="destructive">
-										{loadingDelete ? <Spinner /> : "Delete"}
-									</Button>
-								</div>
-							)}
-							{renderActionButton()}
+							{renderButtons()}
+
 						</DialogFooter>
 					</>
 				)}
@@ -582,11 +672,11 @@ const TransactionReceipt: React.FC<TransactionReceiptProps> = ({ details }) => {
 			<h3 className="text-md font-semibold">Transaction Details</h3>
 			<div className="grid grid-cols-2 gap-2">
 				<p>Total Amount:</p>
-				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.amount / 100)}</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details?.amount / 100)}</p>
 				<p>Platform Fee:</p>
-				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.fees / 100)}</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details?.fees / 100)}</p>
 				<p>Net Amount (Vendor Receives):</p>
-				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details.net / 100)}</p>
+				<p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(details?.net / 100)}</p>
 
 				{details.status !== "requires_capture" && (
 					<>

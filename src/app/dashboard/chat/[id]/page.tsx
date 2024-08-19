@@ -64,6 +64,7 @@ const ChatItem = ({ data, chatDetails }) => {
   const [stripeAccountStatus, setStripeAccountStatus] = useState('');
   const [accountStatusLoading, setAccountStatusLoading] = useState(false);
   const { userInfo } = useUserInfo(user);
+  const isVendor = useIsVendor(user);
 
   const loaderStyles = "text-white w-4 h-4 animate-spin";
 
@@ -113,11 +114,17 @@ const ChatItem = ({ data, chatDetails }) => {
     setLoadingAccept(true);
     try {
       let docRef = doc(db, "offers", data?.offerId);
-      await updateDoc(docRef, {
+      const updateData = {
         status: "accepted",
-        vendorStripeAccountId: userInfo?.stripeAccountId,
         acceptedAt: serverTimestamp(),
-      });
+      };
+
+      // Only include vendorStripeAccountId if the user is a vendor
+      if (isVendor && userInfo?.stripeAccountId) {
+        updateData.vendorStripeAccountId = userInfo.stripeAccountId;
+      }
+
+      await updateDoc(docRef, updateData);
       toast({
         title: "Success",
         description: "Offer accepted",
@@ -158,25 +165,15 @@ const ChatItem = ({ data, chatDetails }) => {
                     type="button"
                     className="bg-[#52BF56] hover:bg-green-600 text-white"
                     onClick={() => handleAccept()}
-                    disabled={!userInfo?.stripeAccountId || stripeAccountStatus !== 'active' || accountStatusLoading}
+                    disabled={isVendor ? (!userInfo?.stripeAccountId) : false}
                   >
                     {loadingAccept ? <Loader2 className={loaderStyles} /> : "Accept offer"}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {!userInfo?.stripeAccountId && (
+                  {isVendor && !userInfo?.stripeAccountId && (
                     <p className="text-sm text-red-500 dark:text-red-400">
                       Please connect your Stripe account in Profile to accept the offer
-                    </p>
-                  )}
-                  {accountStatusLoading && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Checking account status...
-                    </p>
-                  )}
-                  {stripeAccountStatus !== 'active' && !accountStatusLoading && (
-                    <p className="text-sm text-red-500 dark:text-red-400">
-                      Your Stripe account is not active. Please complete the onboarding process in Profile
                     </p>
                   )}
                 </TooltipContent>
@@ -209,6 +206,7 @@ const ChatTab: React.FC<Props> = ({ params }) => {
   const [message, setMessage] = useState("");
   const { messages, sendMessage } = useChat({ chatId, user });
   const isVendor = useIsVendor(user);
+  const { userInfo } = useUserInfo(user);
   const { requestId } = useRequest();
   const chatContainerRef = useRef(null);
 
@@ -297,8 +295,8 @@ const ChatTab: React.FC<Props> = ({ params }) => {
         </div>
         <div className="flex flex-row gap-3 items-center">
           {(chatDetails?.userDetails?.email !== "info@mrkit.io") &&
-            !isVendor && chatDetails && chatDetails?.userDetails && (
-              <SendOfferDialog vendorId={chatDetails?.vendor} agentId={chatDetails?.agent} />
+            chatDetails && chatDetails?.userDetails && (
+              <SendOfferDialog vendorId={chatDetails?.vendor} agentId={chatDetails?.agent} isVendor={isVendor} userInfo={userInfo} />
             )
           }
           <Button

@@ -26,6 +26,8 @@ import { format } from 'date-fns';
 import { toast, ToastType } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
+import useUserInfo from '@/hooks/useUserInfo';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const offerSchema = z.object({
 	datetime: z.date(),
@@ -36,9 +38,11 @@ const offerSchema = z.object({
 interface SendOfferDialogProps {
 	vendorId: string;
 	agentId: string;
+	isVendor: boolean;
+	userInfo: ReturnType<typeof useUserInfo>;
 }
 
-const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) => {
+const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId, isVendor, userInfo }) => {
 	const [open, setOpen] = useState<boolean>(false);
 	const formMethods = useForm({
 		resolver: zodResolver(offerSchema),
@@ -57,44 +61,82 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 
 	const onSubmit = async (data: any) => {
 		setLoading(true);
-		console.log("Vendor ID: ", vendorId, "Agent ID: ", agentId);
 		try {
 			const { datetime, costs, message } = data;
-			const withoutTax = costs;
-			const withTax = costs;
-			const vendorСosts = withTax * 0.90;
+			let withoutTax, withTax, vendorCosts;
 
-			await addDoc(collection(db, 'offers'), {
+			if (isVendor) {
+				vendorCosts = costs;
+				withoutTax = withTax = vendorCosts / 0.9;
+			} else {
+				withoutTax = withTax = costs;
+				vendorCosts = withTax * 0.9;
+			}
+
+			const offerData = {
 				vendorId,
 				agentId,
 				offerDate: Timestamp.fromDate(new Date(datetime)),
 				costs,
 				withoutTax,
 				withTax,
-				vendorСosts,
+				vendorCosts,
 				message,
 				createdAt: serverTimestamp(),
 				status: 'pending',
-			});
+				issuer: isVendor ? 'vendor' : 'agent',
+			};
+
+			// Add vendorStripeAccountId only for vendors with a Stripe account
+			if (isVendor && userInfo?.stripeAccountId) {
+				offerData.vendorStripeAccountId = userInfo.stripeAccountId;
+			}
+
+			await addDoc(collection(db, 'offers'), offerData);
 
 			handleClose();
 			reset();
-		} catch (error) {
-			console.error("Error adding document: ", error);
-		} finally {
 			toast({
 				title: "Success",
 				description: "Offer sent successfully",
 				toastType: "success",
 			});
+		} catch (error) {
+			console.error("Error adding document: ", error);
+			toast({
+				title: "Error",
+				description: "Failed to send offer. Please try again.",
+				toastType: "error",
+			});
+		} finally {
 			setLoading(false);
-
 		}
 	};
 
+	const isButtonDisabled = isVendor && !userInfo?.stripeAccountId;
+
 	return (
 		<div>
-			<Button onClick={handleOpen}>Send offer</Button>
+			<TooltipProvider>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							onClick={handleOpen}
+							disabled={isButtonDisabled}
+							className="bg-[#52BF56] hover:bg-green-600 text-white"
+						>
+							Send Offer
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>
+						{isVendor && !userInfo?.stripeAccountId && (
+							<p className="text-sm text-red-500 dark:text-red-400">
+								Please connect your Stripe account in Profile to send an offer
+							</p>
+						)}
+					</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent>
 					<DialogHeader>
@@ -200,7 +242,7 @@ const SendOfferDialog: React.FC<SendOfferDialogProps> = ({ vendorId, agentId }) 
 							/>
 							<DialogFooter className="mt-2">
 								<Button type="button" variant="secondary" onClick={handleClose} disabled={loading}>Close</Button>
-								<Button type="submit" disabled={loading} className="min-w-20">
+								<Button type="submit" disabled={loading || isButtonDisabled} className="min-w-20">
 									{loading ? <Spinner size="small" /> : "Send offer"}
 								</Button>
 							</DialogFooter>
