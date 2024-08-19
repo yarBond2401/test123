@@ -19,7 +19,7 @@ export const DealItem: FC<Props> = ({ deal, isVendor }) => {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
-  }).format(isVendor ? deal.vendorСosts : deal.withoutTax);
+  }).format(isVendor ? deal.vendorCosts : deal.withoutTax);
 
   const { openDialog } = useOfferDetails();
   const image = deal?.otherUserDetails?.photoURL || DEFAULT_USER_IMAGE;

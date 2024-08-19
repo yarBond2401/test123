@@ -76,9 +76,9 @@ const Dashboard = () => {
 
     const totalMoney = annualData.reduce((total, month) => total + month.value1 + month.value2 + month.value3, 0);
 
-    const totalMoneyGrowth = previousTotal === 0
+    const totalMoneyGrowth = Math.floor(previousTotal === 0
       ? (currentTotal > 0 ? 100 : 0)
-      : ((previousTotal - currentTotal) / previousTotal) * 100;
+      : ((previousTotal - currentTotal) / previousTotal) * 100);
 
     return {
       totalMoney,
@@ -93,9 +93,9 @@ const Dashboard = () => {
     const currentMonthOffers = annualData[currentMonthIndex]?.offers || 0;
     const previousMonthOffers = annualData[previousMonthIndex]?.offers || 0;
 
-    const growth = previousMonthOffers === 0
+    const growth = Math.floor(previousMonthOffers === 0
       ? (currentMonthOffers > 0 ? 100 : 0)
-      : ((previousMonthOffers - currentMonthOffers) / previousMonthOffers) * 100;
+      : ((previousMonthOffers - currentMonthOffers) / previousMonthOffers) * 100);
 
     return isNaN(growth) ? 0 : growth;
   }, [annualData]);
@@ -316,7 +316,7 @@ const Dashboard = () => {
                       <div className="flex flex-row gap-1">
                         <Image src={iconStar} alt="star" height={16} width={16} />
                         <p className="text-dashboard-main xl:text-base leading-[22px] font-bold lg:text-sm md:text-base">
-                          {userInfo.totalRating / userInfo.totalReviews}
+                          {Math.floor(userInfo.totalRating / userInfo.totalReviews)}
                         </p>
                       </div>
                     </div>
